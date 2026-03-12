@@ -1,0 +1,49 @@
+import api from './api';
+
+export const authService = {
+  register: (data) => api.post('/auth/register', data),
+  login: (data) => api.post('/auth/login', data),
+  getProfile: () => api.get('/auth/profile'),
+};
+
+export const cropService = {
+  getAll: (params) => api.get('/crops', { params }),
+  getMyCrops: () => api.get('/crops/my'),
+  getById: (id) => api.get(`/crops/${id}`),
+  create: (formData) =>
+    api.post('/crops', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  update: (id, formData) =>
+    api.put(`/crops/${id}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  delete: (id) => api.delete(`/crops/${id}`),
+};
+
+export const orderService = {
+  create: (data) => api.post('/orders', data),
+  getMyOrders: () => api.get('/orders/my'),
+  updateStatus: (id, status) => api.put(`/orders/${id}/status`, { status }),
+};
+
+export const paymentService = {
+  createOrder: (orderId) => api.post('/payments/create-order', { orderId }),
+  verify: (data) => api.post('/payments/verify', data),
+};
+
+export const reviewService = {
+  create: (data) => api.post('/reviews', data),
+  getFarmerReviews: (farmerId) => api.get(`/reviews/farmer/${farmerId}`),
+};
+
+export const profileService = {
+  getFarmerProfile: () => api.get('/profile/farmer'),
+  upsertFarmerProfile: (data) => api.post('/profile/farmer', data),
+  getBuyerProfile: () => api.get('/profile/buyer'),
+  upsertBuyerProfile: (data) => api.post('/profile/buyer', data),
+};
+
+export const adminService = {
+  getAllUsers: (params) => api.get('/admin/users', { params }),
+  getUserById: (id) => api.get(`/admin/users/${id}`),
+  deleteUser: (id) => api.delete(`/admin/users/${id}`),
+  getAllOrders: (params) => api.get('/admin/orders', { params }),
+  getAnalytics: () => api.get('/admin/analytics'),
+};

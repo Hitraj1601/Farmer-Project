@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  FARMER
+  BUYER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  SHIPPED
+  DELIVERED
+}
+
+enum PaymentStatus {
+  INITIATED
+  SUCCESS
+  FAILED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  phone     String   @unique
+  email     String   @unique
+  password  String
+  role      Role     @default(FARMER)
+  createdAt DateTime @default(now())
+
+  farmerProfile   FarmerProfile?
+  buyerProfile    BuyerProfile?
+  crops           Crop[]
+  buyerOrders     Order[]   @relation("BuyerOrders")
+  reviewsGiven    Review[]  @relation("ReviewsGiven")
+  reviewsReceived Review[]  @relation("ReviewsReceived")
+
+  @@map("users")
+}
+
+model FarmerProfile {
+  id           String @id @default(uuid())
+  userId       String @unique
+  farmLocation String
+  bankAccount  String
+  ifscCode     String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("farmer_profiles")
+}
+
+model BuyerProfile {
+  id              String @id @default(uuid())
+  userId          String @unique
+  businessName    String
+  businessAddress String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("buyer_profiles")
+}
+
+model Crop {
+  id         String   @id @default(uuid())
+  cropName   String
+  quantity   Float
+  pricePerKg Float
+  location   String
+  category   String?
+  imageUrl   String?
+  farmerId   String
+  createdAt  DateTime @default(now())
+
+  farmer User    @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  @@map("crops")
+}
+
+model Order {
+  id         String      @id @default(uuid())
+  buyerId    String
+  cropId     String
+  quantity   Float
+  totalPrice Float
+  status     OrderStatus @default(PENDING)
+  createdAt  DateTime    @default(now())
+
+  buyer   User      @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: Cascade)
+  crop    Crop      @relation(fields: [cropId], references: [id], onDelete: Cascade)
+  payment Payment?
+
+  @@map("orders")
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  orderId       String        @unique
+  amount        Float
+  status        PaymentStatus @default(INITIATED)
+  transactionId String?       @unique
+  razorpayOrderId String?     @unique
+  createdAt     DateTime      @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  buyerId   String
+  farmerId  String
+  rating    Int
+  comment   String?  @db.Text
+  createdAt DateTime @default(now())
+
+  buyer  User @relation("ReviewsGiven", fields: [buyerId], references: [id], onDelete: Cascade)
+  farmer User @relation("ReviewsReceived", fields: [farmerId], references: [id], onDelete: Cascade)
+
+  @@unique([buyerId, farmerId])
+  @@map("reviews")
+}

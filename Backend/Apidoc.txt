@@ -1,0 +1,47 @@
+🔐 AUTH MODULE
+
+POST /api/auth/register
+POST /api/auth/login
+GET /api/auth/profile
+
+🌾 CROPS MODULE
+
+POST /api/crops
+GET /api/crops
+GET /api/crops/:id
+PUT /api/crops/:id
+DELETE /api/crops/:id
+
+📦 ORDERS MODULE
+
+POST /api/orders
+GET /api/orders/my
+PUT /api/orders/:id/status
+
+💳 PAYMENTS MODULE
+
+POST /api/payments/create-order
+POST /api/payments/verify
+
+⭐ REVIEW MODULE
+
+POST /api/reviews
+GET /api/reviews/farmer/:farmerId
+
+👤 PROFILE MODULE
+
+POST /api/profile/farmer
+GET /api/profile/farmer
+GET /api/profile/farmer/:userId
+POST /api/profile/buyer
+GET /api/profile/buyer
+GET /api/profile/buyer/:userId
+
+🛠 ADMIN MODULE
+
+GET /api/admin/users
+GET /api/admin/users/:id
+DELETE /api/admin/users/:id
+GET /api/admin/orders
+GET /api/admin/analytics
+
