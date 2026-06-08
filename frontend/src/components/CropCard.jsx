@@ -1,8 +1,16 @@
 import { Link } from 'react-router-dom';
-import { FiMapPin, FiArrowRight } from 'react-icons/fi';
+import { FiMapPin, FiArrowRight, FiHeart } from 'react-icons/fi';
+import { FaHeart } from 'react-icons/fa';
 import { formatPrice, getImageUrl } from '../utils/helpers';
+import { useAuth } from '../context/AuthContext';
+import { useWishlist } from '../hooks/useWishlist';
 
 export default function CropCard({ crop, index = 0 }) {
+  const { user } = useAuth();
+  const { isWishlisted, toggle } = useWishlist();
+  const wishlisted = isWishlisted(crop.id);
+  const isBuyer = user?.role === 'BUYER';
+
   return (
     <div
       className="card card-hover group animate-fade-in-up fill-mode-both"
@@ -27,8 +35,23 @@ export default function CropCard({ crop, index = 0 }) {
           )}
         </div>
 
+        {/* Wishlist heart button */}
+        {isBuyer && (
+          <button
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggle(crop.id); }}
+            className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-all duration-300
+              ${wishlisted
+                ? 'bg-red-500 text-white scale-110'
+                : 'bg-white/90 backdrop-blur-md text-gray-400 hover:text-red-500 hover:scale-110'
+              }`}
+            aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+          >
+            {wishlisted ? <FaHeart size={14} /> : <FiHeart size={14} />}
+          </button>
+        )}
+
         {crop.quantity <= 10 && (
-          <span className="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full animate-pulse">
+          <span className="absolute bottom-3 left-3 bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full animate-pulse">
             Low Stock
           </span>
         )}

@@ -15,6 +15,7 @@ export const cropService = {
   update: (id, formData) =>
     api.put(`/crops/${id}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
   delete: (id) => api.delete(`/crops/${id}`),
+  getStockAlerts: () => api.get('/crops/alerts'),
 };
 
 export const orderService = {
@@ -26,6 +27,7 @@ export const orderService = {
 export const paymentService = {
   createOrder: (orderId) => api.post('/payments/create-order', { orderId }),
   verify: (data) => api.post('/payments/verify', data),
+  processFree: (orderId) => api.post('/payments/free', { orderId }),
 };
 
 export const reviewService = {
@@ -46,4 +48,20 @@ export const adminService = {
   deleteUser: (id) => api.delete(`/admin/users/${id}`),
   getAllOrders: (params) => api.get('/admin/orders', { params }),
   getAnalytics: () => api.get('/admin/analytics'),
+};
+
+export const analyticsService = {
+  getPriceTrend: (params) => api.get('/analytics/price-trend', { params }),
+  getDemandForecast: (params) => api.get('/analytics/demand-forecast', { params }),
+  getSuggestedPrice: (params) => api.get('/analytics/suggested-price', { params }),
+  getOrderTracking: (orderId) => api.get(`/analytics/tracking/${orderId}`),
+  simulateLocation: (orderId) => api.post(`/analytics/tracking/${orderId}/simulate`),
+};
+
+export const wishlistService = {
+  getAll: () => api.get('/wishlist'),
+  getIds: () => api.get('/wishlist/ids'),
+  add: (cropId) => api.post(`/wishlist/${cropId}`),
+  remove: (cropId) => api.delete(`/wishlist/${cropId}`),
+  checkPriceDrops: () => api.get('/wishlist/price-drops'),
 };

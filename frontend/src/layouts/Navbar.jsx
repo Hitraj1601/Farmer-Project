@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
-import { FiMenu, FiX, FiUser, FiLogOut, FiShoppingBag, FiGrid, FiChevronDown, FiSettings, FiSun, FiMoon } from 'react-icons/fi';
+import { FiMenu, FiX, FiUser, FiLogOut, FiShoppingBag, FiGrid, FiChevronDown, FiSettings, FiSun, FiMoon, FiHeart } from 'react-icons/fi';
 import { GiWheat } from 'react-icons/gi';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -77,9 +77,14 @@ export default function Navbar() {
                   Dashboard
                 </Link>
                 {user?.role === 'BUYER' && (
-                  <Link to="/my-orders" className={navLinkClass('/my-orders')}>
-                    My Orders
-                  </Link>
+                  <>
+                    <Link to="/my-orders" className={navLinkClass('/my-orders')}>
+                      My Orders
+                    </Link>
+                    <Link to="/wishlist" className={`${navLinkClass('/wishlist')} flex items-center gap-1`}>
+                      <FiHeart size={15} /> Wishlist
+                    </Link>
+                  </>
                 )}
               </>
             )}
@@ -127,10 +132,16 @@ export default function Navbar() {
                       <FiGrid size={15} /> Dashboard
                     </Link>
                     {user?.role === 'BUYER' && (
-                      <Link to="/my-orders" onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-950 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors">
-                        <FiShoppingBag size={15} /> My Orders
-                      </Link>
+                      <>
+                        <Link to="/my-orders" onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-950 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors">
+                          <FiShoppingBag size={15} /> My Orders
+                        </Link>
+                        <Link to="/wishlist" onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-950 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors">
+                          <FiHeart size={15} /> My Wishlist
+                        </Link>
+                      </>
                     )}
                     <div className="border-t border-gray-100 dark:border-gray-800 mt-1 pt-1">
                       <button onClick={handleLogout}
@@ -169,9 +180,14 @@ export default function Navbar() {
                   <FiGrid size={16} /> Dashboard
                 </Link>
                 {user?.role === 'BUYER' && (
-                  <Link to="/my-orders" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-950 hover:text-emerald-700 dark:hover:text-emerald-400 font-medium transition-colors">
-                    <FiShoppingBag size={16} /> My Orders
-                  </Link>
+                  <>
+                    <Link to="/my-orders" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-950 hover:text-emerald-700 dark:hover:text-emerald-400 font-medium transition-colors">
+                      <FiShoppingBag size={16} /> My Orders
+                    </Link>
+                    <Link to="/wishlist" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-950 hover:text-emerald-700 dark:hover:text-emerald-400 font-medium transition-colors">
+                      <FiHeart size={16} /> My Wishlist
+                    </Link>
+                  </>
                 )}
                 <Link to="/profile" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-950 hover:text-emerald-700 dark:hover:text-emerald-400 font-medium transition-colors">
                   <FiUser size={16} /> Profile

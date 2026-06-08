@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { FiPackage, FiDollarSign, FiTrendingUp, FiShoppingBag, FiArrowUpRight } from 'react-icons/fi';
 import { cropService, orderService } from '../../services';
 import StatsCard from '../../components/StatsCard';
+import StockAlertBanner from '../../components/StockAlertBanner';
 import Loader from '../../components/Loader';
 import { formatPrice } from '../../utils/helpers';
 
@@ -45,6 +46,9 @@ export default function FarmerDashboard() {
         <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">Dashboard</h1>
         <p className="text-gray-500 mt-1">Overview of your farming business</p>
       </div>
+
+      {/* Stock Alert Banner */}
+      <StockAlertBanner />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div className="animate-fade-in-up fill-mode-both delay-100">

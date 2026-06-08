@@ -1,10 +1,13 @@
+require("dotenv").config();
 const bcrypt = require("bcrypt");
 const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const email = "admin@farmconnect.com";
+  const email = process.env.ADMIN_EMAIL || "admin@farmconnect.com";
+  const phone = process.env.ADMIN_PHONE || "9999999999";
+  const plainPassword = process.env.ADMIN_PASSWORD || "Admin@123";
 
   const existing = await prisma.user.findFirst({ where: { email } });
   if (existing) {
@@ -14,12 +17,12 @@ async function main() {
     return;
   }
 
-  const hashedPassword = await bcrypt.hash("Admin@123", 12);
+  const hashedPassword = await bcrypt.hash(plainPassword, 12);
 
   const admin = await prisma.user.create({
     data: {
       name: "Admin",
-      phone: "9999999999",
+      phone,
       email,
       password: hashedPassword,
       role: "ADMIN",
@@ -28,7 +31,7 @@ async function main() {
 
   console.log("Admin user created successfully!");
   console.log(`  Email: ${admin.email}`);
-  console.log(`  Password: Admin@123`);
+  console.log(`  Password: ${plainPassword}`);
   console.log(`  Role: ${admin.role}`);
 }
 

@@ -112,7 +112,38 @@ npm run prisma:migrate
 npm run prisma:generate
 ```
 
-### 5. Start the Server
+For production deployments (CI/CD or hosting providers), prefer:
+
+```bash
+npm run prisma:migrate:deploy
+npm run prisma:generate
+```
+
+### 5. Seed Demo Data (Recommended for Testing)
+
+```bash
+npm run seed
+```
+
+This command runs in safe mode (non-destructive):
+- Adds missing demo users/profiles/crops
+- Updates demo account details/passwords
+- Skips order and history generation if your database already has live records
+
+For a full reset and complete reseed:
+
+```bash
+npm run seed:reset
+```
+
+Reset mode clears existing records, then recreates demo data for users, profiles, crops, orders, payments, tracking, reviews, and price history.
+
+Demo credentials after seeding:
+- Admin: `admin@farmconnect.com` / `Test@1234`
+- Farmer: `rajesh@farmconnect.com` / `Test@1234`
+- Buyer: `amit@freshmart.com` / `Test@1234`
+
+### 6. Start the Server
 
 ```bash
 # Development (with auto-reload)

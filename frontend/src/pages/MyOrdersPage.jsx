@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FiShoppingBag, FiStar } from 'react-icons/fi';
+import { FiShoppingBag, FiStar, FiMapPin, FiDownload } from 'react-icons/fi';
 import { orderService, paymentService, reviewService } from '../services';
+import { generateInvoice } from '../utils/generateInvoice';
 import OrderCard from '../components/OrderCard';
+import OrderTrackingTimeline from '../components/OrderTrackingTimeline';
 import Loader from '../components/Loader';
 import Button from '../components/Button';
 import Modal from '../components/Modal';
@@ -14,6 +16,7 @@ export default function MyOrdersPage() {
   const [reviewModal, setReviewModal] = useState(null);
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
   const [submitting, setSubmitting] = useState(false);
+  const [trackingOrderId, setTrackingOrderId] = useState(null);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -33,8 +36,15 @@ export default function MyOrdersPage() {
     try {
       const res = await paymentService.createOrder(orderId);
       const { razorpayOrderId, amount, currency } = res.data;
+      const publicKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+
+      if (!publicKey) {
+        toast.error('Razorpay public key missing in frontend environment');
+        return;
+      }
+
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        key: publicKey,
         amount,
         currency,
         name: 'FarmConnect',
@@ -55,9 +65,13 @@ export default function MyOrdersPage() {
         },
         theme: { color: '#059669' },
       };
-      if (window.Razorpay) new window.Razorpay(options).open();
-    } catch {
-      toast.error('Could not initiate payment');
+      if (window.Razorpay) {
+        new window.Razorpay(options).open();
+      } else {
+        toast.error('Payment SDK not loaded. Refresh and try again.');
+      }
+    } catch (err) {
+      toast.error(err.message || 'Could not initiate payment');
     }
   };
 
@@ -99,10 +113,31 @@ export default function MyOrdersPage() {
               <OrderCard
                 order={order}
                 actions={
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
+                    {order.status !== 'REJECTED' && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => setTrackingOrderId(order.id)}
+                      >
+                        <FiMapPin size={14} className="mr-1" /> Track
+                      </Button>
+                    )}
                     {order.status === 'PENDING' && order.payment?.status !== 'SUCCESS' && (
                       <Button size="sm" onClick={() => handlePay(order.id, order.crop?.cropName)}>
                         Pay Now
+                      </Button>
+                    )}
+                    {['ACCEPTED', 'SHIPPED', 'DELIVERED'].includes(order.status) && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => {
+                          try { generateInvoice(order); }
+                          catch { toast.error('Could not generate invoice'); }
+                        }}
+                      >
+                        <FiDownload size={14} className="mr-1" /> Invoice
                       </Button>
                     )}
                     {order.status === 'DELIVERED' && (
@@ -121,6 +156,16 @@ export default function MyOrdersPage() {
           ))}
         </div>
       )}
+
+      {/* Order Tracking Modal */}
+      <Modal isOpen={!!trackingOrderId} onClose={() => setTrackingOrderId(null)} title="Order Tracking" size="lg">
+        {trackingOrderId && (
+          <OrderTrackingTimeline
+            orderId={trackingOrderId}
+            onClose={() => setTrackingOrderId(null)}
+          />
+        )}
+      </Modal>
 
       {/* Review Modal */}
       <Modal isOpen={!!reviewModal} onClose={() => setReviewModal(null)} title="Write a Review">

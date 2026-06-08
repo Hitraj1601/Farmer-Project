@@ -4,6 +4,10 @@ const razorpay = require("../config/razorpay");
 const ApiError = require("../utils/apiError");
 
 const createPaymentOrder = async (orderId, userId) => {
+  if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+    throw new ApiError(503, "Payment gateway is not configured. Add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in backend .env.");
+  }
+
   const order = await prisma.order.findUnique({
     where: { id: orderId },
     include: { payment: true },
@@ -14,12 +18,18 @@ const createPaymentOrder = async (orderId, userId) => {
   if (order.payment?.status === "SUCCESS") throw new ApiError(400, "Order is already paid.");
 
   // Create Razorpay order (amount in paise)
-  const razorpayOrder = await razorpay.orders.create({
-    amount: Math.round(order.totalPrice * 100),
-    currency: "INR",
-    receipt: orderId,
-    notes: { orderId, buyerId: userId },
-  });
+  let razorpayOrder;
+  try {
+    razorpayOrder = await razorpay.orders.create({
+      amount: Math.round(order.totalPrice * 100),
+      currency: "INR",
+      receipt: orderId,
+      notes: { orderId, buyerId: userId },
+    });
+  } catch (error) {
+    const gatewayMessage = error?.error?.description || error?.message;
+    throw new ApiError(502, gatewayMessage || "Failed to create payment order with gateway.");
+  }
 
   // Create or update payment record
   const payment = await prisma.payment.upsert({
@@ -28,10 +38,12 @@ const createPaymentOrder = async (orderId, userId) => {
       orderId,
       amount: order.totalPrice,
       status: "INITIATED",
+      method: "RAZORPAY",
       razorpayOrderId: razorpayOrder.id,
     },
     update: {
       status: "INITIATED",
+      method: "RAZORPAY",
       razorpayOrderId: razorpayOrder.id,
     },
   });
@@ -45,6 +57,9 @@ const createPaymentOrder = async (orderId, userId) => {
 };
 
 const verifyPayment = async ({ razorpay_order_id, razorpay_payment_id, razorpay_signature }) => {
+  if (!process.env.RAZORPAY_KEY_SECRET) {
+    throw new ApiError(503, "Payment gateway is not configured. Add RAZORPAY_KEY_SECRET in backend .env.");
+  }
   // Verify signature
   const body = razorpay_order_id + "|" + razorpay_payment_id;
   const expectedSignature = crypto
@@ -79,4 +94,41 @@ const verifyPayment = async ({ razorpay_order_id, razorpay_payment_id, razorpay_
   return payment;
 };
 
-module.exports = { createPaymentOrder, verifyPayment };
+// Free Payment - Process free orders without Razorpay
+const processFreePayment = async (orderId, userId) => {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: { payment: true },
+  });
+
+  if (!order) throw new ApiError(404, "Order not found.");
+  if (order.buyerId !== userId) throw new ApiError(403, "You can only pay for your own orders.");
+  if (order.payment?.status === "SUCCESS") throw new ApiError(400, "Order is already paid.");
+
+  // Create or update payment record with FREE method
+  const payment = await prisma.payment.upsert({
+    where: { orderId },
+    create: {
+      orderId,
+      amount: order.totalPrice,
+      status: "SUCCESS",
+      method: "FREE",
+      transactionId: `FREE-${orderId}-${Date.now()}`,
+    },
+    update: {
+      status: "SUCCESS",
+      method: "FREE",
+      transactionId: `FREE-${orderId}-${Date.now()}`,
+    },
+  });
+
+  // Update order status to ACCEPTED after successful free payment
+  await prisma.order.update({
+    where: { id: orderId },
+    data: { status: "ACCEPTED" },
+  });
+
+  return payment;
+};
+
+module.exports = { createPaymentOrder, verifyPayment, processFreePayment };

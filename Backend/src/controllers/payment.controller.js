@@ -36,4 +36,19 @@ const verifyPayment = async (req, res, next) => {
   }
 };
 
-module.exports = { createPaymentOrder, verifyPayment };
+const processFreePayment = async (req, res, next) => {
+  try {
+    const { orderId } = req.body;
+
+    if (!orderId) {
+      return sendResponse(res, 400, "orderId is required.");
+    }
+
+    const payment = await paymentService.processFreePayment(orderId, req.user.id);
+    return sendResponse(res, 200, "Free payment processed successfully.", payment);
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { createPaymentOrder, verifyPayment, processFreePayment };

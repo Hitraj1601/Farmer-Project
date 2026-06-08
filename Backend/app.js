@@ -12,17 +12,39 @@ const paymentRoutes = require("./src/routes/payment.routes");
 const reviewRoutes = require("./src/routes/review.routes");
 const adminRoutes = require("./src/routes/admin.routes");
 const profileRoutes = require("./src/routes/profile.routes");
+const analyticsRoutes = require("./src/routes/analytics.routes");
+const wishlistRoutes = require("./src/routes/wishlist.routes");
 const errorHandler = require("./src/middleware/error.middleware");
 
 const app = express();
+
+// Fail fast on missing critical configuration
+const requiredEnv = ["DATABASE_URL", "JWT_SECRET"];
+const missingEnv = requiredEnv.filter((key) => !process.env[key]);
+if (missingEnv.length) {
+  console.error("Missing required environment variables:", missingEnv.join(", "));
+  console.error("Create Backend/.env from Backend/.env.example (or set env vars in your hosting provider).");
+  process.exit(1);
+}
+
+// Render/most PaaS run behind a reverse proxy (needed for correct IP + rate limiting)
+app.set("trust proxy", 1);
 
 // Security headers
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 
 // CORS configuration
+const corsOriginEnv = process.env.CORS_ORIGIN;
+const corsOrigins = !corsOriginEnv
+  ? "*"
+  : corsOriginEnv
+      .split(",")
+      .map((o) => o.trim())
+      .filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || "*",
+    origin: corsOrigins,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
@@ -67,6 +89,8 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/analytics", analyticsRoutes);
+app.use("/api/wishlist", wishlistRoutes);
 
 // 404 handler
 app.use((_req, res) => {

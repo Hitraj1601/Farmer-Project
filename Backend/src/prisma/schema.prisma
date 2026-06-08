@@ -40,8 +40,10 @@ model User {
   buyerProfile    BuyerProfile?
   crops           Crop[]
   buyerOrders     Order[]   @relation("BuyerOrders")
-  reviewsGiven    Review[]  @relation("ReviewsGiven")
-  reviewsReceived Review[]  @relation("ReviewsReceived")
+  reviewsGiven    Review[]       @relation("ReviewsGiven")
+  reviewsReceived Review[]       @relation("ReviewsReceived")
+  priceHistory    PriceHistory[]
+  wishlists       Wishlist[]
 
   @@map("users")
 }
@@ -70,18 +72,21 @@ model BuyerProfile {
 }
 
 model Crop {
-  id         String   @id @default(uuid())
-  cropName   String
-  quantity   Float
-  pricePerKg Float
-  location   String
-  category   String?
-  imageUrl   String?
-  farmerId   String
-  createdAt  DateTime @default(now())
+  id                  String   @id @default(uuid())
+  cropName            String
+  quantity            Float
+  pricePerKg          Float
+  location            String
+  category            String?
+  imageUrl            String?
+  farmerId            String
+  stockAlertThreshold Float    @default(0)
+  createdAt           DateTime @default(now())
 
-  farmer User    @relation(fields: [farmerId], references: [id], onDelete: Cascade)
-  orders Order[]
+  farmer       User           @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  orders       Order[]
+  priceHistory PriceHistory[]
+  wishlists    Wishlist[]
 
   @@map("crops")
 }
@@ -95,9 +100,10 @@ model Order {
   status     OrderStatus @default(PENDING)
   createdAt  DateTime    @default(now())
 
-  buyer   User      @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: Cascade)
-  crop    Crop      @relation(fields: [cropId], references: [id], onDelete: Cascade)
-  payment Payment?
+  buyer    User            @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: Cascade)
+  crop     Crop            @relation(fields: [cropId], references: [id], onDelete: Cascade)
+  payment  Payment?
+  tracking OrderTracking[]
 
   @@map("orders")
 }
@@ -107,6 +113,7 @@ model Payment {
   orderId       String        @unique
   amount        Float
   status        PaymentStatus @default(INITIATED)
+  method        String        @default("RAZORPAY")
   transactionId String?       @unique
   razorpayOrderId String?     @unique
   createdAt     DateTime      @default(now())
@@ -129,4 +136,50 @@ model Review {
 
   @@unique([buyerId, farmerId])
   @@map("reviews")
+}
+
+model PriceHistory {
+  id         String   @id @default(uuid())
+  cropId     String
+  cropName   String
+  category   String?
+  pricePerKg Float
+  location   String
+  farmerId   String
+  recordedAt DateTime @default(now())
+
+  crop   Crop @relation(fields: [cropId], references: [id], onDelete: Cascade)
+  farmer User @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+
+  @@index([cropName, recordedAt])
+  @@index([category, recordedAt])
+  @@map("price_history")
+}
+
+model OrderTracking {
+  id        String   @id @default(uuid())
+  orderId   String
+  status    OrderStatus
+  location  String?
+  note      String?
+  timestamp DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId, timestamp])
+  @@map("order_tracking")
+}
+
+model Wishlist {
+  id             String   @id @default(uuid())
+  buyerId        String
+  cropId         String
+  notifiedPrice  Float
+  addedAt        DateTime @default(now())
+
+  buyer User @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  crop  Crop @relation(fields: [cropId], references: [id], onDelete: Cascade)
+
+  @@unique([buyerId, cropId])
+  @@map("wishlists")
 }

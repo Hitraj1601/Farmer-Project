@@ -11,6 +11,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import MyOrdersPage from './pages/MyOrdersPage';
 import ProfilePage from './pages/ProfilePage';
+import WishlistPage from './pages/WishlistPage';
 
 import FarmerDashboard from './pages/farmer/FarmerDashboard';
 import MyCrops from './pages/farmer/MyCrops';
@@ -36,6 +37,7 @@ export default function App() {
 
           <Route element={<ProtectedRoute roles={['BUYER']} />}>
             <Route path="/my-orders" element={<MyOrdersPage />} />
+            <Route path="/wishlist" element={<WishlistPage />} />
           </Route>
 
           <Route element={<ProtectedRoute />}>

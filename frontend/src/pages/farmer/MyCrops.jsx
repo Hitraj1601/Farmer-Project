@@ -70,10 +70,15 @@ export default function MyCrops() {
                 className="w-20 h-20 rounded-xl object-cover flex-shrink-0 ring-1 ring-gray-100"
               />
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <h3 className="font-bold text-gray-900 dark:text-white text-lg">{crop.cropName}</h3>
                   {crop.category && (
                     <span className="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 text-[10px] font-semibold rounded-md uppercase">{crop.category}</span>
+                  )}
+                  {crop.stockAlertThreshold > 0 && crop.quantity <= crop.stockAlertThreshold && (
+                    <span className="px-2 py-0.5 bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-400 text-[10px] font-bold rounded-md uppercase flex items-center gap-1">
+                      ⚠️ Low Stock
+                    </span>
                   )}
                 </div>
                 <p className="text-sm text-gray-500 mt-0.5">{crop.location}</p>
@@ -81,6 +86,9 @@ export default function MyCrops() {
                   <span className="text-sm font-bold text-emerald-600">{formatPrice(crop.pricePerKg)}/kg</span>
                   <span className="text-sm text-gray-400">·</span>
                   <span className="text-sm text-gray-500">{crop.quantity} kg available</span>
+                  {crop.stockAlertThreshold > 0 && (
+                    <span className="text-xs text-gray-400">Alert: ≤{crop.stockAlertThreshold} kg</span>
+                  )}
                 </div>
               </div>
               <div className="flex gap-2 flex-shrink-0">

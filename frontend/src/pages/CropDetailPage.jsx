@@ -46,8 +46,16 @@ export default function CropDetailPage() {
       try {
         const payRes = await paymentService.createOrder(order.id);
         const { razorpayOrderId, amount, currency } = payRes.data;
+        const publicKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+
+        if (!publicKey) {
+          toast.error('Razorpay public key missing in frontend environment. Complete payment from My Orders.');
+          navigate('/my-orders');
+          return;
+        }
+
         const options = {
-          key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+          key: publicKey,
           amount,
           currency,
           name: 'FarmConnect',
@@ -68,10 +76,15 @@ export default function CropDetailPage() {
           prefill: { name: user?.name, email: user?.email },
           theme: { color: '#059669' },
         };
-        if (window.Razorpay) new window.Razorpay(options).open();
-        else toast.success('Order placed! Complete payment from My Orders.');
-      } catch {
-        toast.success('Order placed! Complete payment from My Orders.');
+        if (window.Razorpay) {
+          new window.Razorpay(options).open();
+        } else {
+          toast.error('Payment SDK not loaded. Order placed, complete payment from My Orders.');
+          navigate('/my-orders');
+        }
+      } catch (err) {
+        toast.error((err.message || 'Payment initiation failed') + ' Order is placed. Complete payment from My Orders.');
+        navigate('/my-orders');
       }
     } catch (err) {
       toast.error(err.message);

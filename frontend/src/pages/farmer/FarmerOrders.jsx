@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
-import { FiCheck, FiX, FiTruck, FiPackage, FiShoppingBag } from 'react-icons/fi';
+import { FiCheck, FiX, FiTruck, FiPackage, FiShoppingBag, FiMapPin } from 'react-icons/fi';
 import { orderService } from '../../services/index';
 import { formatPrice } from '../../utils/helpers';
 import Loader from '../../components/Loader';
 import Button from '../../components/Button';
+import Modal from '../../components/Modal';
+import OrderTrackingTimeline from '../../components/OrderTrackingTimeline';
 import toast from 'react-hot-toast';
 
 export default function FarmerOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [trackingOrderId, setTrackingOrderId] = useState(null);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -87,6 +90,11 @@ export default function FarmerOrders() {
                     </p>
                   </div>
                   <div className="flex gap-2 flex-shrink-0">
+                    {order.status !== 'REJECTED' && (
+                      <Button variant="secondary" size="sm" onClick={() => setTrackingOrderId(order.id)} className="gap-1.5">
+                        <FiMapPin size={14} /> Track
+                      </Button>
+                    )}
                     {order.status === 'PENDING' && (
                       <>
                         <Button size="sm" onClick={() => updateStatus(order.id, 'ACCEPTED')} className="gap-1.5">
@@ -114,6 +122,17 @@ export default function FarmerOrders() {
           })}
         </div>
       )}
+
+      {/* Order Tracking Modal */}
+      <Modal isOpen={!!trackingOrderId} onClose={() => setTrackingOrderId(null)} title="Order Tracking" size="lg">
+        {trackingOrderId && (
+          <OrderTrackingTimeline
+            orderId={trackingOrderId}
+            isFarmer={true}
+            onClose={() => setTrackingOrderId(null)}
+          />
+        )}
+      </Modal>
     </div>
   );
 }

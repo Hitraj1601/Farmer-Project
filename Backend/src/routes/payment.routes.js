@@ -7,5 +7,6 @@ const { createPaymentOrderSchema, verifyPaymentSchema } = require("../middleware
 
 router.post("/create-order", authenticate, authorize("BUYER"), validate(createPaymentOrderSchema), paymentController.createPaymentOrder);
 router.post("/verify", authenticate, validate(verifyPaymentSchema), paymentController.verifyPayment);
+router.post("/free", authenticate, authorize("BUYER"), validate(createPaymentOrderSchema), paymentController.processFreePayment);
 
 module.exports = router;

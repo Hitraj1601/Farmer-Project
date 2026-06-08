@@ -53,6 +53,7 @@ const createCropSchema = Joi.object({
     "any.required": "Location is required",
   }),
   category: Joi.string().max(100).optional(),
+  stockAlertThreshold: Joi.number().min(0).optional().default(0),
 });
 
 const updateCropSchema = Joi.object({
@@ -61,6 +62,7 @@ const updateCropSchema = Joi.object({
   pricePerKg: Joi.number().positive(),
   location: Joi.string().min(2).max(200),
   category: Joi.string().max(100).optional(),
+  stockAlertThreshold: Joi.number().min(0).optional(),
 }).min(1);
 
 const createOrderSchema = Joi.object({

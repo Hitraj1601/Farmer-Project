@@ -1,110 +1,208 @@
-import { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
-import { FiBarChart2, FiPieChart } from 'react-icons/fi';
+import { useEffect, useMemo, useState } from 'react';
+import { FiBarChart2, FiDollarSign, FiPackage, FiShoppingBag } from 'react-icons/fi';
 import { cropService, orderService } from '../../services/index';
-import Loader from '../../components/Loader.jsx';
+import Loader from '../../components/Loader';
+import { formatPrice } from '../../utils/helpers';
 
-const COLORS = ['#059669', '#2563eb', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+const ORDER_STATUSES = ['PENDING', 'ACCEPTED', 'SHIPPED', 'DELIVERED', 'REJECTED'];
 
 export default function Analytics() {
-  const [data, setData] = useState({ cropData: [], statusData: [] });
   const [loading, setLoading] = useState(true);
+  const [crops, setCrops] = useState([]);
+  const [orders, setOrders] = useState([]);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchData = async () => {
+      setLoading(true);
       try {
         const [cropsRes, ordersRes] = await Promise.all([
           cropService.getMyCrops(),
           orderService.getMyOrders(),
         ]);
-        const crops = cropsRes.data;
-        const orders = ordersRes.data;
-
-        const cropMap = {};
-        orders.forEach(o => {
-          const name = o.crop?.cropName || 'Unknown';
-          cropMap[name] = (cropMap[name] || 0) + o.totalPrice;
-        });
-        const cropData = Object.entries(cropMap).map(([name, revenue]) => ({ name, revenue }));
-
-        const statusMap = {};
-        orders.forEach(o => { statusMap[o.status] = (statusMap[o.status] || 0) + 1; });
-        const statusData = Object.entries(statusMap).map(([name, value]) => ({ name, value }));
-
-        setData({ cropData, statusData, totalCrops: crops.length, totalOrders: orders.length });
-      } catch { /* silent */ }
-      setLoading(false);
+        setCrops(cropsRes.data || []);
+        setOrders(ordersRes.data || []);
+      } catch {
+        setCrops([]);
+        setOrders([]);
+      } finally {
+        setLoading(false);
+      }
     };
-    fetch();
+
+    fetchData();
   }, []);
+
+  const metrics = useMemo(() => {
+    const totalStockKg = crops.reduce((sum, crop) => sum + (Number(crop.quantity) || 0), 0);
+
+    const successfulRevenue = orders.reduce((sum, order) => {
+      if (order.payment?.status === 'SUCCESS') {
+        return sum + (Number(order.totalPrice) || 0);
+      }
+      return sum;
+    }, 0);
+
+    const pendingPaymentAmount = orders.reduce((sum, order) => {
+      if (order.payment?.status !== 'SUCCESS' && order.status !== 'REJECTED') {
+        return sum + (Number(order.totalPrice) || 0);
+      }
+      return sum;
+    }, 0);
+
+    const deliveredOrders = orders.filter((order) => order.status === 'DELIVERED').length;
+
+    return {
+      totalCrops: crops.length,
+      totalStockKg,
+      totalOrders: orders.length,
+      deliveredOrders,
+      successfulRevenue,
+      pendingPaymentAmount,
+    };
+  }, [crops, orders]);
+
+  const orderStatusBreakdown = useMemo(() => {
+    const base = ORDER_STATUSES.reduce((acc, status) => {
+      acc[status] = 0;
+      return acc;
+    }, {});
+
+    orders.forEach((order) => {
+      base[order.status] = (base[order.status] || 0) + 1;
+    });
+
+    return ORDER_STATUSES.map((status) => ({ status, count: base[status] || 0 }));
+  }, [orders]);
+
+  const categoryBreakdown = useMemo(() => {
+    const map = {};
+    crops.forEach((crop) => {
+      const category = crop.category || 'Uncategorized';
+      map[category] = (map[category] || 0) + 1;
+    });
+
+    return Object.entries(map)
+      .map(([category, count]) => ({ category, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [crops]);
+
+  const topCrops = useMemo(() => {
+    const map = {};
+
+    orders.forEach((order) => {
+      const cropName = order.crop?.cropName || 'Unknown Crop';
+      if (!map[cropName]) {
+        map[cropName] = { cropName, orders: 0, quantity: 0, revenue: 0 };
+      }
+
+      map[cropName].orders += 1;
+      map[cropName].quantity += Number(order.quantity) || 0;
+      if (order.payment?.status === 'SUCCESS') {
+        map[cropName].revenue += Number(order.totalPrice) || 0;
+      }
+    });
+
+    return Object.values(map)
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 5);
+  }, [orders]);
 
   if (loading) return <Loader text="Loading analytics..." />;
 
   return (
     <div className="p-6 lg:p-8">
       <div className="mb-8 animate-fade-in-up fill-mode-both">
-        <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">Analytics</h1>
-        <p className="text-gray-500 mt-1">Insights into your farming business performance</p>
+        <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">Farm Analytics</h1>
+        <p className="text-gray-500 mt-1">Simple view of crops, orders, revenue, and performance</p>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Revenue per crop */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm animate-fade-in-up fill-mode-both delay-100">
-          <div className="px-6 pt-6 pb-2 flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950 flex items-center justify-center">
-              <FiBarChart2 className="text-emerald-600" size={16} />
-            </div>
-            <h2 className="font-bold text-gray-900 dark:text-white">Revenue by Crop</h2>
-          </div>
-          <div className="px-2 pb-6">
-            {data.cropData.length === 0 ? (
-              <div className="py-16 text-center">
-                <FiBarChart2 size={32} className="mx-auto mb-3 text-gray-200" />
-                <p className="text-sm text-gray-400">No revenue data yet</p>
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={data.cropData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-                  <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#6b7280' }} axisLine={false} />
-                  <YAxis tick={{ fontSize: 12, fill: '#6b7280' }} axisLine={false} />
-                  <Tooltip
-                    formatter={(v) => `₹${v.toLocaleString()}`}
-                    contentStyle={{ borderRadius: '12px', border: '1px solid #e5e7eb', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.05)' }}
-                  />
-                  <Bar dataKey="revenue" fill="#059669" radius={[8, 8, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8 animate-fade-in-up fill-mode-both delay-100">
+        <SummaryCard icon={FiPackage} label="Total Crops" value={metrics.totalCrops} />
+        <SummaryCard icon={FiBarChart2} label="Current Stock" value={`${metrics.totalStockKg} kg`} />
+        <SummaryCard icon={FiShoppingBag} label="Total Orders" value={metrics.totalOrders} />
+        <SummaryCard icon={FiDollarSign} label="Revenue (Paid)" value={formatPrice(metrics.successfulRevenue)} />
+      </div>
 
-        {/* Orders by status */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm animate-fade-in-up fill-mode-both delay-200">
-          <div className="px-6 pt-6 pb-2 flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-violet-50 dark:bg-violet-950 flex items-center justify-center">
-              <FiPieChart className="text-violet-600" size={16} />
-            </div>
-            <h2 className="font-bold text-gray-900 dark:text-white">Orders by Status</h2>
-          </div>
-          <div className="px-2 pb-6">
-            {data.statusData.length === 0 ? (
-              <div className="py-16 text-center">
-                <FiPieChart size={32} className="mx-auto mb-3 text-gray-200" />
-                <p className="text-sm text-gray-400">No order data yet</p>
+      <div className="grid lg:grid-cols-2 gap-6 mb-8">
+        <section className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
+          <h2 className="font-bold text-gray-900 dark:text-white mb-4">Order Status</h2>
+          <div className="space-y-3">
+            {orderStatusBreakdown.map((item) => (
+              <div key={item.status} className="flex items-center justify-between text-sm">
+                <span className="text-gray-600 dark:text-gray-300">{item.status}</span>
+                <span className="font-semibold text-gray-900 dark:text-white">{item.count}</span>
               </div>
-            ) : (
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie data={data.statusData} cx="50%" cy="50%" outerRadius={100} innerRadius={50} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                    {data.statusData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                  </Pie>
-                  <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #e5e7eb' }} />
-                  <Legend wrapperStyle={{ fontSize: '12px' }} />
-                </PieChart>
-              </ResponsiveContainer>
-            )}
+            ))}
           </div>
+          <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800 text-sm text-gray-500 dark:text-gray-400">
+            Delivered Orders: <span className="font-semibold text-gray-900 dark:text-white">{metrics.deliveredOrders}</span>
+          </div>
+        </section>
+
+        <section className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
+          <h2 className="font-bold text-gray-900 dark:text-white mb-4">Crop Categories</h2>
+          {categoryBreakdown.length === 0 ? (
+            <p className="text-sm text-gray-400">No crops available.</p>
+          ) : (
+            <div className="space-y-3">
+              {categoryBreakdown.map((item) => (
+                <div key={item.category} className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600 dark:text-gray-300">{item.category}</span>
+                  <span className="font-semibold text-gray-900 dark:text-white">{item.count}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+
+      <section className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
+        <h2 className="font-bold text-gray-900 dark:text-white mb-4">Top Crops by Revenue</h2>
+        {topCrops.length === 0 ? (
+          <p className="text-sm text-gray-400">No orders available yet.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="text-left text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-800">
+                  <th className="py-2 pr-4">Crop</th>
+                  <th className="py-2 pr-4">Orders</th>
+                  <th className="py-2 pr-4">Quantity Sold</th>
+                  <th className="py-2">Revenue (Paid)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {topCrops.map((item) => (
+                  <tr key={item.cropName} className="border-b border-gray-50 dark:border-gray-800/60">
+                    <td className="py-2 pr-4 font-medium text-gray-900 dark:text-white">{item.cropName}</td>
+                    <td className="py-2 pr-4 text-gray-600 dark:text-gray-300">{item.orders}</td>
+                    <td className="py-2 pr-4 text-gray-600 dark:text-gray-300">{item.quantity} kg</td>
+                    <td className="py-2 font-semibold text-emerald-600 dark:text-emerald-400">{formatPrice(item.revenue)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800 text-sm text-gray-500 dark:text-gray-400">
+          Pending Payment Value: <span className="font-semibold text-gray-900 dark:text-white">{formatPrice(metrics.pendingPaymentAmount)}</span>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function SummaryCard({ icon: Icon, label, value }) {
+  return (
+    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-5">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950 flex items-center justify-center">
+          <Icon size={18} className="text-emerald-600 dark:text-emerald-400" />
+        </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">{label}</p>
+          <p className="text-xl font-bold text-gray-900 dark:text-white">{value}</p>
         </div>
       </div>
     </div>

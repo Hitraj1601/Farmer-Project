@@ -1,5 +1,6 @@
 const prisma = require("../config/db");
 const ApiError = require("../utils/apiError");
+const { addTrackingEntry } = require("./tracking.service");
 
 const createOrder = async ({ buyerId, cropId, quantity }) => {
   const crop = await prisma.crop.findUnique({ where: { id: cropId } });
@@ -20,6 +21,14 @@ const createOrder = async ({ buyerId, cropId, quantity }) => {
     include: {
       crop: { select: { cropName: true, pricePerKg: true, location: true } },
     },
+  });
+
+  // Record initial tracking entry
+  await addTrackingEntry({
+    orderId: order.id,
+    status: "PENDING",
+    location: crop.location,
+    note: "Order placed successfully",
   });
 
   return order;
@@ -99,6 +108,21 @@ const updateOrderStatus = async (orderId, status, userId, role) => {
   const updated = await prisma.order.update({
     where: { id: orderId },
     data: { status },
+  });
+
+  // Record tracking entry for status change
+  const trackingNotes = {
+    ACCEPTED: "Order accepted by farmer",
+    REJECTED: "Order rejected by farmer",
+    SHIPPED: "Order shipped - In transit",
+    DELIVERED: "Order delivered successfully",
+  };
+
+  await addTrackingEntry({
+    orderId: updated.id,
+    status,
+    location: order.crop?.location || null,
+    note: trackingNotes[status] || `Status changed to ${status}`,
   });
 
   return updated;
