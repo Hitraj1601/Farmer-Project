@@ -105,8 +105,8 @@ export function generateInvoice(order) {
         '1',
         order.crop?.cropName || 'Crop',
         order.quantity?.toFixed(2) || '0',
-        `₹${(order.crop?.pricePerKg || 0).toFixed(2)}`,
-        `₹${(order.totalPrice || 0).toFixed(2)}`,
+        `Rs. ${(order.crop?.pricePerKg || 0).toFixed(2)}`,
+        `Rs. ${(order.totalPrice || 0).toFixed(2)}`,
       ],
     ],
     headStyles: {
@@ -137,7 +137,7 @@ export function generateInvoice(order) {
   doc.setTextColor(5, 150, 105);
   doc.text('TOTAL AMOUNT', pageWidth / 2 + 5, finalY + 8);
   doc.setFontSize(13);
-  doc.text(`₹${(order.totalPrice || 0).toFixed(2)}`, pageWidth - margin, finalY + 8, { align: 'right' });
+  doc.text(`Rs. ${(order.totalPrice || 0).toFixed(2)}`, pageWidth - margin, finalY + 8, { align: 'right' });
 
   // ─── Transaction ID ──────────────────────────────────────────────────
   if (order.payment?.transactionId) {
@@ -155,7 +155,7 @@ export function generateInvoice(order) {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
   doc.setTextColor(130, 130, 130);
-  doc.text('Thank you for trading on FarmConnect — Empowering Indian Farmers', pageWidth / 2, footerY, { align: 'center' });
+  doc.text('Thank you for trading on FarmConnect - Empowering Indian Farmers', pageWidth / 2, footerY, { align: 'center' });
   doc.text('This is a computer-generated invoice and does not require a signature.', pageWidth / 2, footerY + 5, { align: 'center' });
 
   // ─── Save ─────────────────────────────────────────────────────────────
