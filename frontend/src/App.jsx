@@ -18,6 +18,7 @@ import MyCrops from './pages/farmer/MyCrops';
 import CropForm from './pages/farmer/CropForm';
 import FarmerOrders from './pages/farmer/FarmerOrders';
 import Analytics from './pages/farmer/Analytics';
+import BulkUpload from './pages/farmer/BulkUpload';
 
 import AdminDashboard from './pages/admin/AdminDashboard';
 import UsersPage from './pages/admin/UsersPage';
@@ -53,6 +54,7 @@ export default function App() {
             <Route path="/dashboard/edit-crop/:id" element={<CropForm />} />
             <Route path="/dashboard/orders" element={<FarmerOrders />} />
             <Route path="/dashboard/analytics" element={<Analytics />} />
+            <Route path="/dashboard/bulk-upload" element={<BulkUpload />} />
           </Route>
         </Route>
 

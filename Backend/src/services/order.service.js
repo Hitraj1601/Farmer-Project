@@ -1,6 +1,7 @@
 const prisma = require("../config/db");
 const ApiError = require("../utils/apiError");
 const { addTrackingEntry } = require("./tracking.service");
+const { notifyUser } = require("../config/socket");
 
 const createOrder = async ({ buyerId, cropId, quantity }) => {
   const crop = await prisma.crop.findUnique({ where: { id: cropId } });
@@ -29,6 +30,14 @@ const createOrder = async ({ buyerId, cropId, quantity }) => {
     status: "PENDING",
     location: crop.location,
     note: "Order placed successfully",
+  });
+
+  // Notify the farmer in real-time
+  notifyUser(crop.farmerId, {
+    title: "New Order Received!",
+    message: `A buyer ordered ${order.quantity} kg of ${crop.cropName}.`,
+    type: "success",
+    orderId: order.id,
   });
 
   return order;
@@ -124,6 +133,17 @@ const updateOrderStatus = async (orderId, status, userId, role) => {
     location: order.crop?.location || null,
     note: trackingNotes[status] || `Status changed to ${status}`,
   });
+
+  // Notify the buyer in real-time
+  const buyerMessages = {
+    ACCEPTED: { title: "Order Accepted!", message: `Your order for ${order.crop?.cropName} has been accepted by the farmer.`, type: "success" },
+    REJECTED: { title: "Order Rejected", message: `Your order for ${order.crop?.cropName} was rejected by the farmer.`, type: "error" },
+    SHIPPED: { title: "Order Shipped!", message: `Your order for ${order.crop?.cropName} is on its way!`, type: "info" },
+    DELIVERED: { title: "Order Delivered!", message: `Your order for ${order.crop?.cropName} has been delivered successfully.`, type: "success" },
+  };
+  if (buyerMessages[status]) {
+    notifyUser(order.buyerId, { ...buyerMessages[status], orderId: updated.id });
+  }
 
   return updated;
 };

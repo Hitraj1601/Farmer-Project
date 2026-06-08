@@ -1,5 +1,7 @@
 require("dotenv").config();
 const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
@@ -7,6 +9,7 @@ const path = require("path");
 
 const authRoutes = require("./src/routes/auth.routes");
 const cropRoutes = require("./src/routes/crop.routes");
+const bulkCropRoutes = require("./src/routes/bulkCrop.routes");
 const orderRoutes = require("./src/routes/order.routes");
 const paymentRoutes = require("./src/routes/payment.routes");
 const reviewRoutes = require("./src/routes/review.routes");
@@ -15,8 +18,10 @@ const profileRoutes = require("./src/routes/profile.routes");
 const analyticsRoutes = require("./src/routes/analytics.routes");
 const wishlistRoutes = require("./src/routes/wishlist.routes");
 const errorHandler = require("./src/middleware/error.middleware");
+const { initSocket } = require("./src/config/socket");
 
 const app = express();
+const httpServer = http.createServer(app);
 
 // Fail fast on missing critical configuration
 const requiredEnv = ["DATABASE_URL", "JWT_SECRET"];
@@ -49,6 +54,15 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// Socket.io — shares the same port as Express
+const io = new Server(httpServer, {
+  cors: {
+    origin: corsOrigins === "*" ? "*" : corsOrigins,
+    methods: ["GET", "POST"],
+  },
+});
+initSocket(io);
 
 // Rate limiting
 const limiter = rateLimit({
@@ -83,6 +97,7 @@ app.get("/", (_req, res) => {
 
 // API Routes
 app.use("/api/auth", authLimiter, authRoutes);
+app.use("/api/crops/bulk-upload", bulkCropRoutes);
 app.use("/api/crops", cropRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/payments", paymentRoutes);
@@ -102,7 +117,7 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`API docs: http://localhost:${PORT}`);
-});
+});

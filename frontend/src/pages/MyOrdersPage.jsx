@@ -33,13 +33,43 @@ export default function MyOrdersPage() {
   useEffect(() => { fetchOrders(); }, []);
 
   const handlePay = async (orderId, cropName) => {
-    try {
-      const res = await paymentService.createOrder(orderId);
-      const { razorpayOrderId, amount, currency } = res.data;
-      const publicKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+    const publicKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
 
-      if (!publicKey) {
-        toast.error('Razorpay public key missing in frontend environment');
+    // If Razorpay public key is not configured, go straight to free payment
+    if (!publicKey || publicKey === 'your_razorpay_key_id') {
+      try {
+        await paymentService.processFree(orderId);
+        toast.success('Order confirmed! (Payment gateway not configured — using demo mode)');
+        fetchOrders();
+      } catch (err) {
+        toast.error(err.response?.data?.message || 'Could not process payment');
+      }
+      return;
+    }
+
+    try {
+      let razorpayOrderId, amount, currency;
+
+      try {
+        const res = await paymentService.createOrder(orderId);
+        razorpayOrderId = res.data.razorpayOrderId;
+        amount = res.data.amount;
+        currency = res.data.currency;
+      } catch (err) {
+        const status = err.response?.status;
+        // 502 = gateway error (invalid/missing keys), 503 = not configured
+        if (status === 502 || status === 503) {
+          toast('Razorpay gateway not configured. Using demo payment mode.', { icon: 'ℹ️' });
+          await paymentService.processFree(orderId);
+          toast.success('Order confirmed in demo mode!');
+          fetchOrders();
+          return;
+        }
+        throw err;
+      }
+
+      if (!window.Razorpay) {
+        toast.error('Payment SDK not loaded. Refresh and try again.');
         return;
       }
 
@@ -65,13 +95,10 @@ export default function MyOrdersPage() {
         },
         theme: { color: '#059669' },
       };
-      if (window.Razorpay) {
-        new window.Razorpay(options).open();
-      } else {
-        toast.error('Payment SDK not loaded. Refresh and try again.');
-      }
+
+      new window.Razorpay(options).open();
     } catch (err) {
-      toast.error(err.message || 'Could not initiate payment');
+      toast.error(err.response?.data?.message || err.message || 'Could not initiate payment');
     }
   };
 

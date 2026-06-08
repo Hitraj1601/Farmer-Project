@@ -46,16 +46,35 @@ const createCrop = async (data) => {
 };
 
 const getAllCrops = async (query) => {
-  const { page = 1, limit = 10, location, search, category } = query;
+  const { page = 1, limit = 10, location, search, category, minPrice, maxPrice, farmerName, sortBy } = query;
   const skip = (parseInt(page) - 1) * parseInt(limit);
 
   const where = {};
   if (location) where.location = { contains: location };
   if (search) where.cropName = { contains: search };
+
+  // Price range filter
+  if (minPrice || maxPrice) {
+    where.pricePerKg = {};
+    if (minPrice) where.pricePerKg.gte = parseFloat(minPrice);
+    if (maxPrice) where.pricePerKg.lte = parseFloat(maxPrice);
+  }
+
+  // Farmer name filter (search via relation)
+  if (farmerName) {
+    where.farmer = { name: { contains: farmerName } };
+  }
+
   const categoryVariants = getCategoryVariants(category);
   if (categoryVariants.length > 0) {
     where.category = { in: categoryVariants };
   }
+
+  // Sort order
+  let orderBy = { createdAt: "desc" }; // default: newest
+  if (sortBy === "priceAsc") orderBy = { pricePerKg: "asc" };
+  else if (sortBy === "priceDesc") orderBy = { pricePerKg: "desc" };
+  else if (sortBy === "quantityDesc") orderBy = { quantity: "desc" };
 
   const [crops, total] = await Promise.all([
     prisma.crop.findMany({
@@ -63,7 +82,7 @@ const getAllCrops = async (query) => {
       skip,
       take: parseInt(limit),
       include: { farmer: { select: { id: true, name: true, phone: true, email: true } } },
-      orderBy: { createdAt: "desc" },
+      orderBy,
     }),
     prisma.crop.count({ where }),
   ]);

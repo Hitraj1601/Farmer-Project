@@ -16,6 +16,8 @@ export const cropService = {
     api.put(`/crops/${id}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
   delete: (id) => api.delete(`/crops/${id}`),
   getStockAlerts: () => api.get('/crops/alerts'),
+  bulkUpload: (formData) =>
+    api.post('/crops/bulk-upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
 };
 
 export const orderService = {

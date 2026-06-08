@@ -1,10 +1,11 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { FiGrid, FiPackage, FiPlusCircle, FiShoppingBag, FiBarChart2 } from 'react-icons/fi';
+import { FiGrid, FiPackage, FiPlusCircle, FiShoppingBag, FiBarChart2, FiUploadCloud } from 'react-icons/fi';
 
 const links = [
   { to: '/dashboard', icon: FiGrid, label: 'Overview', end: true },
   { to: '/dashboard/my-crops', icon: FiPackage, label: 'My Crops' },
   { to: '/dashboard/add-crop', icon: FiPlusCircle, label: 'Add Crop' },
+  { to: '/dashboard/bulk-upload', icon: FiUploadCloud, label: 'Bulk Upload' },
   { to: '/dashboard/orders', icon: FiShoppingBag, label: 'Orders' },
   { to: '/dashboard/analytics', icon: FiBarChart2, label: 'Analytics' },
 ];
