@@ -36,7 +36,7 @@ export default function MyCrops() {
   if (loading) return <Loader text="Loading your crops..." />;
 
   return (
-    <div className="p-6 lg:p-8">
+    <div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4 animate-fade-in-up fill-mode-both">
         <div>
           <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">My Crops</h1>

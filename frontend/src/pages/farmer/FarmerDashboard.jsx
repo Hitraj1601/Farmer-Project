@@ -41,7 +41,7 @@ export default function FarmerDashboard() {
   };
 
   return (
-    <div className="p-6 lg:p-8">
+    <div>
       <div className="mb-8 animate-fade-in-up fill-mode-both">
         <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">Dashboard</h1>
         <p className="text-gray-500 mt-1">Overview of your farming business</p>

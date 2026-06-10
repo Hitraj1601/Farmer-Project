@@ -9,19 +9,24 @@ export default function Pagination({ page, totalPages, onPageChange }) {
   for (let i = start; i <= end; i++) pages.push(i);
 
   return (
-    <div className="flex items-center justify-center gap-1.5 mt-10">
+    <div className="flex items-center justify-center gap-2 mt-12">
       <button
         onClick={() => onPageChange(page - 1)}
         disabled={page <= 1}
-        className="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-gray-700 dark:text-gray-300"
+        className="p-3 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300 text-gray-700 dark:text-gray-300 shadow-sm hover:shadow-md hover:-translate-y-0.5 disabled:hover:translate-y-0 disabled:hover:shadow-sm"
       >
         <FiChevronLeft size={18} />
       </button>
 
       {start > 1 && (
         <>
-          <button onClick={() => onPageChange(1)} className="w-10 h-10 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 transition-all">1</button>
-          {start > 2 && <span className="px-1 text-gray-300 dark:text-gray-600">...</span>}
+          <button
+            onClick={() => onPageChange(1)}
+            className="w-11 h-11 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm font-semibold text-gray-700 dark:text-gray-300 transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5"
+          >
+            1
+          </button>
+          {start > 2 && <span className="px-1.5 text-gray-300 dark:text-gray-600 select-none">•••</span>}
         </>
       )}
 
@@ -29,10 +34,10 @@ export default function Pagination({ page, totalPages, onPageChange }) {
         <button
           key={p}
           onClick={() => onPageChange(p)}
-          className={`w-10 h-10 rounded-xl text-sm font-semibold transition-all duration-200 ${
+          className={`w-11 h-11 rounded-2xl text-sm font-bold transition-all duration-300 ${
             p === page
-              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30'
-              : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+              ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg shadow-emerald-500/30 scale-105'
+              : 'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 shadow-sm hover:shadow-md hover:-translate-y-0.5'
           }`}
         >
           {p}
@@ -41,15 +46,20 @@ export default function Pagination({ page, totalPages, onPageChange }) {
 
       {end < totalPages && (
         <>
-          {end < totalPages - 1 && <span className="px-1 text-gray-300">...</span>}
-          <button onClick={() => onPageChange(totalPages)} className="w-10 h-10 rounded-xl hover:bg-gray-100 text-sm font-medium transition-all">{totalPages}</button>
+          {end < totalPages - 1 && <span className="px-1.5 text-gray-300 dark:text-gray-600 select-none">•••</span>}
+          <button
+            onClick={() => onPageChange(totalPages)}
+            className="w-11 h-11 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm font-semibold text-gray-700 dark:text-gray-300 transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5"
+          >
+            {totalPages}
+          </button>
         </>
       )}
 
       <button
         onClick={() => onPageChange(page + 1)}
         disabled={page >= totalPages}
-        className="p-2.5 rounded-xl hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+        className="p-3 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300 text-gray-700 dark:text-gray-300 shadow-sm hover:shadow-md hover:-translate-y-0.5 disabled:hover:translate-y-0 disabled:hover:shadow-sm"
       >
         <FiChevronRight size={18} />
       </button>

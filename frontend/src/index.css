@@ -300,7 +300,8 @@
     @apply flex flex-col items-center justify-center py-20 text-center;
   }
 
-  .empty-state .empty-icon {
+  .empty-state .empty-icon,
+  .empty-state .icon-area {
     @apply w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-400
            dark:bg-gray-800 dark:text-gray-500;
   }
@@ -311,5 +312,10 @@
 
   .empty-state p {
     @apply text-sm text-gray-400 dark:text-gray-500;
+  }
+
+  /* Select dropdown */
+  .input-field option {
+    @apply bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100;
   }
 }

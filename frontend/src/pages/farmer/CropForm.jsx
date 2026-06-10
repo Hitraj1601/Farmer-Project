@@ -110,7 +110,7 @@ export default function CropForm() {
   const categories = CROP_CATEGORIES.filter(c => c !== 'All');
 
   return (
-    <div className="p-6 lg:p-8 max-w-2xl">
+    <div className="max-w-2xl">
       <div className="mb-8 animate-fade-in-up fill-mode-both">
         <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">{isEdit ? 'Edit Crop' : 'Add New Crop'}</h1>
         <p className="text-gray-500 mt-1">{isEdit ? 'Update your crop details' : 'List a new crop on the marketplace'}</p>

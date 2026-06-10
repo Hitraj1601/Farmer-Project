@@ -28,11 +28,12 @@ export function SocketProvider({ children }) {
       return;
     }
 
-    // Create socket connection
+    // Create socket connection — use polling first for a reliable handshake,
+    // then socket.io auto-upgrades to WebSocket once the connection is stable.
     const socket = io(SOCKET_URL, {
-      transports: ['websocket', 'polling'],
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
+      transports: ['polling', 'websocket'],
+      reconnectionAttempts: 3,
+      reconnectionDelay: 2000,
     });
 
     socketRef.current = socket;
