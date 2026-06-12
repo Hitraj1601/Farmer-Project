@@ -4,17 +4,18 @@ import { FiMail, FiPhone, FiMapPin } from 'react-icons/fi';
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 dark:bg-gray-950 text-gray-400 dark:text-gray-500 dark:border-t dark:border-gray-800">
+    <footer className="relative bg-slate-950 text-gray-400 dark:text-gray-500 border-t border-slate-800/70 overflow-hidden">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-emerald-500/10 to-transparent" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main footer */}
         <div className="py-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand */}
           <div className="lg:col-span-1">
             <Link to="/" className="flex items-center gap-2.5">
-              <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl flex items-center justify-center">
+              <div className="w-9 h-9 bg-[radial-gradient(circle_at_top_left,_#34d399,_#059669_62%,_#0f766e)] rounded-[1.1rem_0.5rem_1.1rem_0.5rem] flex items-center justify-center shadow-[0_16px_30px_-18px_rgba(16,185,129,0.9)]">
                 <GiWheat className="text-white" size={20} />
               </div>
-              <span className="text-xl font-extrabold text-white tracking-tight">Farm<span className="text-emerald-400">Connect</span></span>
+              <span className="text-xl font-extrabold text-white tracking-tight font-display">Farm<span className="text-emerald-400">Connect</span></span>
             </Link>
             <p className="mt-4 text-sm leading-relaxed">
               Empowering farmers with direct market access. Fresh from farm to your table with transparency and trust.
@@ -75,7 +76,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom */}
-        <div className="border-t border-gray-800 dark:border-gray-800 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="border-t border-slate-800 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-gray-500">&copy; {new Date().getFullYear()} FarmConnect. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <span className="text-xs text-gray-500 hover:text-gray-400 cursor-pointer transition-colors">Privacy Policy</span>

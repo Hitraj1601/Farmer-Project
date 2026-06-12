@@ -20,7 +20,12 @@ const createReview = async (req, res, next) => {
       comment: comment || null,
     });
 
-    return sendResponse(res, 201, "Review submitted successfully.", review);
+    return sendResponse(
+      res,
+      review.created ? 201 : 200,
+      review.created ? "Review submitted successfully." : "Review updated successfully.",
+      review.review
+    );
   } catch (error) {
     next(error);
   }

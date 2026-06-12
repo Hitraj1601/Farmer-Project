@@ -24,14 +24,20 @@ const createReview = async ({ buyerId, farmerId, rating, comment }) => {
     throw new ApiError(400, "You can only review farmers from whom you have a delivered order.");
   }
 
-  const review = await prisma.review.create({
-    data: { buyerId, farmerId, rating, comment },
+  const existingReview = await prisma.review.findUnique({
+    where: { buyerId_farmerId: { buyerId, farmerId } },
+  });
+
+  const review = await prisma.review.upsert({
+    where: { buyerId_farmerId: { buyerId, farmerId } },
+    update: { rating, comment },
+    create: { buyerId, farmerId, rating, comment },
     include: {
       buyer: { select: { name: true } },
     },
   });
 
-  return review;
+  return { review, created: !existingReview };
 };
 
 const getFarmerReviews = async (farmerId) => {

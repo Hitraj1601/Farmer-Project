@@ -185,7 +185,7 @@ export default function MarketplacePage() {
 
           {/* ─── Search Bar (floating) ─── */}
           <div className="mt-10 max-w-4xl mx-auto animate-fade-in-up fill-mode-both delay-300">
-            <div className="bg-white/10 backdrop-blur-2xl rounded-3xl p-2 border border-white/10 shadow-2xl shadow-black/20">
+            <div className="bg-white/10 backdrop-blur-2xl rounded-[1.8rem] p-2 border border-white/10 shadow-2xl shadow-black/20">
               <div className="flex flex-col sm:flex-row gap-2">
                 <div className="relative flex-1">
                   <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
@@ -194,7 +194,7 @@ export default function MarketplacePage() {
                     placeholder="Search crops, vegetables, fruits..."
                     value={search}
                     onChange={(e) => { setSearch(e.target.value); resetPage(); }}
-                    className="w-full pl-12 pr-4 py-4 bg-white/10 rounded-2xl text-white placeholder:text-gray-500 outline-none focus:bg-white/15 transition-colors border border-transparent focus:border-emerald-500/30"
+                    className="w-full pl-12 pr-4 py-4 bg-white/10 rounded-[1.2rem_0.6rem_1.2rem_0.6rem] text-white placeholder:text-gray-500 outline-none focus:bg-white/15 transition-colors border border-transparent focus:border-emerald-500/30"
                   />
                 </div>
                 <div className="relative sm:w-52">
@@ -204,12 +204,12 @@ export default function MarketplacePage() {
                     placeholder="Location..."
                     value={location}
                     onChange={(e) => { setLocation(e.target.value); resetPage(); }}
-                    className="w-full pl-12 pr-4 py-4 bg-white/10 rounded-2xl text-white placeholder:text-gray-500 outline-none focus:bg-white/15 transition-colors border border-transparent focus:border-emerald-500/30"
+                    className="w-full pl-12 pr-4 py-4 bg-white/10 rounded-[1.2rem_0.6rem_1.2rem_0.6rem] text-white placeholder:text-gray-500 outline-none focus:bg-white/15 transition-colors border border-transparent focus:border-emerald-500/30"
                   />
                 </div>
                 <button
                   onClick={() => {}}
-                  className="bg-gradient-to-r from-emerald-500 to-green-500 text-white font-bold py-4 px-8 rounded-2xl hover:from-emerald-400 hover:to-green-400 transition-all duration-300 shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 hover:-translate-y-0.5"
+                  className="bg-gradient-to-r from-emerald-500 via-emerald-400 to-teal-500 text-white font-bold py-4 px-8 rounded-full hover:from-emerald-400 hover:to-teal-400 transition-all duration-300 shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 hover:-translate-y-0.5"
                 >
                   <FiSearch size={18} />
                   <span className="hidden sm:inline">Search</span>
@@ -232,20 +232,20 @@ export default function MarketplacePage() {
 
         {/* ─── Category Pills with Icons ─── */}
         <ScrollReveal>
-          <div className="bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-xl shadow-gray-200/40 dark:shadow-black/30 p-4 sm:p-6 mb-6">
+          <div className="bg-white/92 dark:bg-slate-900/92 rounded-[1.8rem] border border-slate-200/80 dark:border-slate-700/70 shadow-xl shadow-gray-200/40 dark:shadow-black/30 p-4 sm:p-6 mb-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Categories</h3>
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded-xl transition-all ${viewMode === 'grid' ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+                  className={`p-2 rounded-[0.95rem] transition-all ${viewMode === 'grid' ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
                   title="Grid view"
                 >
                   <FiGrid size={16} />
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-xl transition-all ${viewMode === 'list' ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+                  className={`p-2 rounded-[0.95rem] transition-all ${viewMode === 'list' ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
                   title="List view"
                 >
                   <FiList size={16} />
@@ -261,7 +261,7 @@ export default function MarketplacePage() {
                   <button
                     key={cat}
                     onClick={() => { setCategory(cat); resetPage(); }}
-                    className={`group flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-semibold transition-all duration-300 ${
+                    className={`group flex items-center gap-2 px-4 py-2.5 rounded-[1rem] text-sm font-semibold transition-all duration-300 ${
                       isActive
                         ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg shadow-emerald-500/25 scale-[1.02]'
                         : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:scale-[1.02]'
@@ -278,7 +278,7 @@ export default function MarketplacePage() {
 
         {/* ─── Filters Toolbar ─── */}
         <ScrollReveal delay={100}>
-          <div className="bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-xl shadow-gray-200/40 dark:shadow-black/30 p-4 sm:p-6 mb-6">
+              <div className="bg-white/92 dark:bg-slate-900/92 rounded-[1.8rem] border border-slate-200/80 dark:border-slate-700/70 shadow-xl shadow-gray-200/40 dark:shadow-black/30 p-4 sm:p-6 mb-6">
             <div className="flex flex-col sm:flex-row gap-3 items-center">
               {/* Sort dropdown */}
               <div className="relative w-full sm:w-56">

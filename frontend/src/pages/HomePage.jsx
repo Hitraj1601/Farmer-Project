@@ -160,10 +160,10 @@ function StatCard({ stat, index }) {
       className="group relative animate-fade-in-up fill-mode-both"
       style={{ animationDelay: `${(index + 1) * 150}ms` }}
     >
-      <div className="relative bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-white/20 dark:border-gray-700/30 hover:border-emerald-300/50 dark:hover:border-emerald-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/10 overflow-hidden">
+      <div className="relative bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[1.8rem] p-6 sm:p-8 border border-white/20 dark:border-slate-700/30 hover:border-emerald-300/50 dark:hover:border-emerald-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/10 overflow-hidden">
         {/* Background glow */}
         <div className={`absolute -top-12 -right-12 w-32 h-32 bg-gradient-to-br ${stat.gradient} rounded-full opacity-10 group-hover:opacity-20 blur-2xl transition-opacity duration-500`} />
-        <div className={`w-12 h-12 bg-gradient-to-br ${stat.gradient} rounded-2xl flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+        <div className={`w-12 h-12 bg-gradient-to-br ${stat.gradient} rounded-[1.1rem_0.45rem_1.1rem_0.45rem] flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
           <stat.icon className="text-white" size={22} />
         </div>
         <p className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight">
@@ -269,7 +269,7 @@ export default function HomePage() {
                 Trusted by 500+ farmers across India
               </div>
 
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-white leading-[1.05] tracking-tight">
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-white leading-[1.05] tracking-tight font-display">
                 Farm Fresh
                 <br />
                 <span className="relative">
@@ -290,9 +290,9 @@ export default function HomePage() {
               <div className="mt-10 flex flex-wrap gap-4">
                 <Link
                   to="/marketplace"
-                  className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-emerald-500 to-green-500 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 shadow-2xl shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:-translate-y-1 hover:scale-[1.02]"
+                  className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-emerald-500 via-emerald-400 to-teal-500 text-white font-bold py-4 px-8 rounded-full transition-all duration-300 shadow-2xl shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:-translate-y-1 hover:scale-[1.02]"
                 >
-                  <span className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-green-400 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <span className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <span className="relative flex items-center gap-3">
                     Explore Marketplace
                     <FiArrowRight className="group-hover:translate-x-1.5 transition-transform duration-300" size={20} />
@@ -300,7 +300,7 @@ export default function HomePage() {
                 </Link>
                 <Link
                   to="/register"
-                  className="group inline-flex items-center gap-3 border-2 border-white/20 text-white font-bold py-4 px-8 rounded-2xl hover:bg-white/10 backdrop-blur-sm transition-all duration-300 hover:border-white/40"
+                  className="group inline-flex items-center gap-3 border-2 border-white/20 text-white font-bold py-4 px-8 rounded-full hover:bg-white/10 backdrop-blur-sm transition-all duration-300 hover:border-white/40"
                 >
                   <FiPlay size={16} className="group-hover:scale-110 transition-transform" />
                   Start Selling
@@ -339,7 +339,7 @@ export default function HomePage() {
             <div className="relative hidden lg:block animate-fade-in fill-mode-both delay-300">
               <div className="relative">
                 {/* Main image card */}
-                <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-black/40 border border-white/10 transform rotate-2 hover:rotate-0 transition-transform duration-700">
+                <div className="relative rounded-[2rem] overflow-hidden shadow-2xl shadow-black/40 border border-white/10 transform rotate-2 hover:rotate-0 transition-transform duration-700">
                   <img
                     src={freshVegetables}
                     alt="Fresh organic vegetables"
@@ -347,7 +347,7 @@ export default function HomePage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                   <div className="absolute bottom-6 left-6 right-6">
-                    <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/20">
+                    <div className="bg-white/10 backdrop-blur-xl rounded-[1.5rem] p-4 border border-white/20">
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-white font-bold text-sm">Fresh Harvest Today</p>
@@ -362,9 +362,9 @@ export default function HomePage() {
                 </div>
 
                 {/* Floating badge - top left */}
-                <div className="absolute -top-6 -left-6 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl rounded-2xl p-4 shadow-2xl border border-white/30 dark:border-gray-700/30 animate-float z-10">
+                <div className="absolute -top-6 -left-6 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-[1.4rem] p-4 shadow-2xl border border-white/30 dark:border-slate-700/30 animate-float z-10">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl flex items-center justify-center">
+                    <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-emerald-500 rounded-[1rem_0.45rem_1rem_0.45rem] flex items-center justify-center">
                       <FiTrendingUp className="text-white" size={18} />
                     </div>
                     <div>
@@ -375,9 +375,9 @@ export default function HomePage() {
                 </div>
 
                 {/* Floating badge - bottom right */}
-                <div className="absolute -bottom-4 -right-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl rounded-2xl p-4 shadow-2xl border border-white/30 dark:border-gray-700/30 animate-float z-10" style={{ animationDelay: '1.5s' }}>
+                <div className="absolute -bottom-4 -right-4 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-[1.4rem] p-4 shadow-2xl border border-white/30 dark:border-slate-700/30 animate-float z-10" style={{ animationDelay: '1.5s' }}>
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center">
+                    <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-[1rem_0.45rem_1rem_0.45rem] flex items-center justify-center">
                       <FiHeart className="text-white" size={18} />
                     </div>
                     <div>

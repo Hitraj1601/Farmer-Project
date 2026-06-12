@@ -3,40 +3,57 @@ import toast from 'react-hot-toast';
 import { wishlistService } from '../services';
 import { useAuth } from '../context/AuthContext';
 
+const wishlistCache = new Map();
+const priceDropSeen = new Set();
+
 export function useWishlist() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, loading: authLoading, isAuthenticated } = useAuth();
   const [wishlistIds, setWishlistIds] = useState(new Set());
   const [loading, setLoading] = useState(false);
 
-  // Load wishlist IDs and check price drops on mount (buyer only)
+  // Load wishlist IDs and check price drops once auth has settled.
   useEffect(() => {
-    if (!isAuthenticated || user?.role !== 'BUYER') return;
+    if (authLoading || !isAuthenticated || user?.role !== 'BUYER' || !user?.id) return;
 
     const init = async () => {
+      const cacheKey = user.id;
+      const cached = wishlistCache.get(cacheKey);
+      if (cached) {
+        setWishlistIds(cached.ids);
+        return;
+      }
+
       setLoading(true);
       try {
         const [idsRes, dropsRes] = await Promise.all([
           wishlistService.getIds(),
           wishlistService.checkPriceDrops(),
         ]);
-        setWishlistIds(new Set(idsRes.data || []));
+        const ids = new Set(idsRes.data || []);
+        setWishlistIds(ids);
+        wishlistCache.set(cacheKey, { ids });
 
         const drops = dropsRes.data || [];
         drops.forEach((d) => {
+          if (priceDropSeen.has(d.cropId)) return;
+          priceDropSeen.add(d.cropId);
           toast.success(
             `💰 Price Drop! ${d.cropName} dropped from ₹${d.oldPrice}/kg to ₹${d.newPrice}/kg`,
             { duration: 6000, id: `drop-${d.cropId}` }
           );
         });
-      } catch {
-        // Silent fail — non-critical
+      } catch (err) {
+        if (err?.status !== 401 && err?.status !== 403) {
+          // Silent fail — non-critical, but keep non-auth failures from poisoning the cache.
+        }
+        wishlistCache.delete(cacheKey);
       } finally {
         setLoading(false);
       }
     };
 
     init();
-  }, [isAuthenticated, user?.role]);
+  }, [authLoading, isAuthenticated, user?.role, user?.id]);
 
   const toggle = useCallback(
     async (cropId) => {
@@ -63,6 +80,9 @@ export function useWishlist() {
           await wishlistService.add(cropId);
           toast.success('Added to wishlist ❤️');
         }
+        if (user?.id) {
+          wishlistCache.set(user.id, { ids: new Set(wishlistIds) });
+        }
       } catch (err) {
         // Revert optimistic update on error
         setWishlistIds((prev) => {
@@ -71,7 +91,9 @@ export function useWishlist() {
           else next.delete(cropId);
           return next;
         });
-        toast.error(err.message || 'Failed to update wishlist');
+        if (err?.status !== 403) {
+          toast.error(err.message || 'Failed to update wishlist');
+        }
       }
     },
     [isAuthenticated, user?.role, wishlistIds]

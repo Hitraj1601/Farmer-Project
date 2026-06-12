@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FiMapPin, FiArrowRight, FiHeart, FiShoppingBag, FiUser } from 'react-icons/fi';
 import { FaHeart } from 'react-icons/fa';
 import { formatPrice, getImageUrl } from '../utils/helpers';
@@ -8,14 +8,28 @@ import { useWishlist } from '../hooks/useWishlist';
 export default function CropCard({ crop, index = 0, viewMode = 'grid' }) {
   const { user } = useAuth();
   const { isWishlisted, toggle } = useWishlist();
+  const navigate = useNavigate();
   const wishlisted = isWishlisted(crop.id);
   const isBuyer = user?.role === 'BUYER';
+
+  const openDetails = () => {
+    navigate(`/crops/${crop.id}`);
+  };
 
   if (viewMode === 'list') {
     return (
       <div
         className="group bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-xl hover:shadow-emerald-500/[0.05] transition-all duration-500 hover:-translate-y-0.5 overflow-hidden animate-fade-in-up fill-mode-both"
         style={{ animationDelay: `${index * 0.06}s` }}
+        role="link"
+        tabIndex={0}
+        onClick={openDetails}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openDetails();
+          }
+        }}
       >
         <div className="flex flex-col sm:flex-row">
           {/* Image */}
@@ -76,6 +90,7 @@ export default function CropCard({ crop, index = 0, viewMode = 'grid' }) {
             <div className="flex items-center gap-3 mt-4">
               <Link
                 to={`/crops/${crop.id}`}
+                onClick={(e) => e.stopPropagation()}
                 className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-green-500 text-white font-bold py-2.5 px-6 rounded-xl hover:from-emerald-400 hover:to-green-400 transition-all duration-300 shadow-lg shadow-emerald-500/20 hover:-translate-y-0.5 text-sm group/btn"
               >
                 View Details
@@ -103,8 +118,17 @@ export default function CropCard({ crop, index = 0, viewMode = 'grid' }) {
   // ─── Grid View (default) ───
   return (
     <div
-      className="group bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-2xl hover:shadow-emerald-500/[0.08] transition-all duration-500 hover:-translate-y-2 overflow-hidden animate-fade-in-up fill-mode-both"
+      className="group bg-white/92 dark:bg-slate-900/92 rounded-[1.8rem] border border-slate-200/80 dark:border-slate-700/70 shadow-sm hover:shadow-2xl hover:shadow-emerald-500/[0.08] transition-all duration-500 hover:-translate-y-2 overflow-hidden animate-fade-in-up fill-mode-both"
       style={{ animationDelay: `${index * 0.08}s` }}
+      role="link"
+      tabIndex={0}
+      onClick={openDetails}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openDetails();
+        }
+      }}
     >
       {/* Image */}
       <div className="relative h-56 overflow-hidden bg-gray-100 dark:bg-gray-800">
@@ -180,12 +204,13 @@ export default function CropCard({ crop, index = 0, viewMode = 'grid' }) {
 
         <Link
           to={`/crops/${crop.id}`}
-          className="mt-4 flex items-center justify-center gap-2 w-full py-3 rounded-2xl
-                     bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-950/50 dark:to-green-950/50
+          onClick={(e) => e.stopPropagation()}
+          className="mt-4 flex items-center justify-center gap-2 w-full py-3 rounded-full
+                     bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/50 dark:to-teal-950/50
                      text-emerald-700 dark:text-emerald-400 font-bold text-sm
                      border border-emerald-100 dark:border-emerald-900/50
-                     hover:from-emerald-500 hover:to-green-500 hover:text-white hover:border-transparent
-                     dark:hover:from-emerald-600 dark:hover:to-green-600 dark:hover:text-white
+                     hover:from-emerald-500 hover:to-teal-500 hover:text-white hover:border-transparent
+                     dark:hover:from-emerald-600 dark:hover:to-teal-600 dark:hover:text-white
                      transition-all duration-300 shadow-sm hover:shadow-lg hover:shadow-emerald-500/20 hover:-translate-y-0.5
                      group/btn"
         >

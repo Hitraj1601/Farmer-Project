@@ -53,17 +53,17 @@ export default function Navbar() {
   return (
     <nav className={`sticky top-0 z-50 transition-all duration-300 ${
       scrolled
-        ? 'bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-lg shadow-black/[0.04] border-b border-gray-100/50 dark:border-gray-800/50'
-        : 'bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800'
+        ? 'bg-white/72 dark:bg-slate-950/72 backdrop-blur-2xl shadow-[0_18px_60px_-38px_rgba(15,23,42,0.7)] border-b border-slate-200/70 dark:border-slate-800/60'
+        : 'bg-white/88 dark:bg-slate-950/88 border-b border-slate-200/70 dark:border-slate-800/60'
     }`}>
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:shadow-emerald-500/40 transition-shadow">
+            <div className="w-9 h-9 bg-[radial-gradient(circle_at_top_left,_#34d399,_#059669_62%,_#0f766e)] rounded-[1.1rem_0.5rem_1.1rem_0.5rem] flex items-center justify-center shadow-[0_16px_30px_-18px_rgba(16,185,129,0.95)] group-hover:shadow-[0_22px_40px_-18px_rgba(16,185,129,0.95)] transition-shadow">
               <GiWheat className="text-white" size={20} />
             </div>
-            <span className="text-xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+            <span className="text-xl font-extrabold text-gray-900 dark:text-white tracking-tight font-display">
               Farm<span className="text-gradient">Connect</span>
             </span>
           </Link>
@@ -95,7 +95,7 @@ export default function Navbar() {
             {/* Theme toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all duration-200"
+              className="p-2.5 rounded-full hover:bg-emerald-50 dark:hover:bg-emerald-950/60 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all duration-200 border border-transparent hover:border-emerald-100 dark:hover:border-emerald-900/50"
               aria-label="Toggle dark mode"
             >
               {dark ? <FiSun size={18} /> : <FiMoon size={18} />}
@@ -105,9 +105,9 @@ export default function Navbar() {
               <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800/70 transition-all duration-200 border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
                 >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center text-white font-bold text-sm shadow-inner">
+                  <div className="w-8 h-8 rounded-[0.95rem_0.45rem_0.95rem_0.45rem] bg-[radial-gradient(circle_at_top_left,_#34d399,_#059669_70%,_#0f766e)] flex items-center justify-center text-white font-bold text-sm shadow-[0_14px_24px_-16px_rgba(16,185,129,0.8)]">
                     {user.name?.[0]?.toUpperCase()}
                   </div>
                   <div className="text-left hidden lg:block">
@@ -118,8 +118,8 @@ export default function Navbar() {
                 </button>
 
                 {userMenuOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl shadow-black/10 dark:shadow-black/40 border border-gray-100 dark:border-gray-800 py-2 animate-fade-in-down z-50">
-                    <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl rounded-[1.4rem] shadow-[0_24px_60px_-30px_rgba(15,23,42,0.55)] border border-slate-200/80 dark:border-slate-800/70 py-2 animate-fade-in-down z-50">
+                    <div className="px-4 py-3 border-b border-slate-200/80 dark:border-slate-800/70">
                       <p className="text-sm font-bold text-gray-900 dark:text-white">{user.name}</p>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{user.email}</p>
                     </div>
@@ -169,7 +169,7 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 animate-fade-in-down">
+        <div className="md:hidden bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl border-t border-slate-200/80 dark:border-slate-800/70 animate-fade-in-down">
           <div className="max-w-7xl mx-auto px-4 py-4 space-y-1">
             <Link to="/marketplace" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-950 hover:text-emerald-700 dark:hover:text-emerald-400 font-medium transition-colors">
               Marketplace

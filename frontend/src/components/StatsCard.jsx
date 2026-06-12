@@ -26,7 +26,7 @@ export default function StatsCard({ title, value, icon: Icon, color = 'green', t
           )}
           {subtitle && <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{subtitle}</p>}
         </div>
-        <div className={`p-3.5 rounded-2xl ${theme.bg} ${theme.text} ring-4 ${theme.ring}
+        <div className={`p-3.5 rounded-[1rem_0.45rem_1rem_0.45rem] ${theme.bg} ${theme.text} ring-4 ${theme.ring}
                          group-hover:scale-110 transition-transform duration-300`}>
           <Icon size={22} />
         </div>
