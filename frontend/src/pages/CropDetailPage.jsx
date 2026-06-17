@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { FiMapPin, FiStar, FiShoppingCart, FiChevronRight, FiMinus, FiPlus, FiUser, FiPhone, FiShield, FiTruck, FiCheckCircle } from 'react-icons/fi';
-import { cropService, orderService, reviewService, paymentService } from '../services';
+import { FiMapPin, FiStar, FiShoppingCart, FiChevronRight, FiMinus, FiPlus, FiUser, FiPhone, FiShield, FiTruck, FiCheckCircle, FiMessageSquare, FiCamera } from 'react-icons/fi';
+import { cropService, orderService, reviewService, paymentService, chatService } from '../services';
 import { useAuth } from '../context/AuthContext';
 import { formatPrice, getImageUrl } from '../utils/helpers';
 import Loader from '../components/Loader';
@@ -13,19 +13,48 @@ export default function CropDetailPage() {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [crop, setCrop] = useState(null);
-  const [reviews, setReviews] = useState(null);
+  const [farmerReviews, setFarmerReviews] = useState(null);
+  const [cropReviews, setCropReviews] = useState(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [ordering, setOrdering] = useState(false);
+  const [chatLoading, setChatLoading] = useState(false);
+
+  // Review form state
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
+  const [reviewImage, setReviewImage] = useState(null);
+  const [reviewImagePreview, setReviewImagePreview] = useState(null);
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [canReview, setCanReview] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await cropService.getById(id);
         setCrop(res.data);
+
+        // Fetch farmer reviews
         if (res.data.farmerId) {
           const rev = await reviewService.getFarmerReviews(res.data.farmerId);
-          setReviews(rev.data);
+          setFarmerReviews(rev.data);
+        }
+
+        // Fetch crop-level reviews
+        try {
+          const cropRev = await reviewService.getCropReviews(id);
+          setCropReviews(cropRev.data);
+        } catch { /* no crop reviews yet */ }
+
+        // Check if buyer can review this crop (has delivered order)
+        if (user?.role === 'BUYER') {
+          try {
+            const ordersRes = await orderService.getMyOrders();
+            const delivered = ordersRes.data?.some(
+              (o) => o.cropId === id && o.status === 'DELIVERED'
+            );
+            setCanReview(delivered);
+          } catch { /* silent */ }
         }
       } catch {
         toast.error('Crop not found');
@@ -34,7 +63,7 @@ export default function CropDetailPage() {
       }
     };
     fetchData();
-  }, [id]);
+  }, [id, user]);
 
   const handleOrder = async () => {
     if (!isAuthenticated) return navigate('/login');
@@ -48,8 +77,9 @@ export default function CropDetailPage() {
         const { razorpayOrderId, amount, currency } = payRes.data;
         const publicKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
 
-        if (!publicKey) {
-          toast.error('Razorpay public key missing in frontend environment. Complete payment from My Orders.');
+        if (!publicKey || publicKey === 'your_razorpay_key_id') {
+          await paymentService.processFree(order.id);
+          toast.success('Order confirmed! (Demo mode)');
           navigate('/my-orders');
           return;
         }
@@ -83,13 +113,71 @@ export default function CropDetailPage() {
           navigate('/my-orders');
         }
       } catch (err) {
-        toast.error((err.message || 'Payment initiation failed') + ' Order is placed. Complete payment from My Orders.');
+        const status = err.response?.status;
+        if (status === 502 || status === 503) {
+          await paymentService.processFree(order.id);
+          toast.success('Order confirmed! (Demo mode)');
+          navigate('/my-orders');
+          return;
+        }
+        toast.error((err.message || 'Payment initiation failed') + ' Order placed. Complete payment from My Orders.');
         navigate('/my-orders');
       }
     } catch (err) {
-      toast.error(err.message);
+      toast.error(err.response?.data?.message || err.message);
     } finally {
       setOrdering(false);
+    }
+  };
+
+  const handleMessageFarmer = async () => {
+    if (!isAuthenticated) return navigate('/login');
+    setChatLoading(true);
+    try {
+      const res = await chatService.getOrCreateConversation(crop.farmerId, id);
+      navigate(`/chat/${res.data.id}`);
+    } catch {
+      toast.error('Could not start conversation');
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
+  const handleReviewImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setReviewImage(file);
+      setReviewImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleSubmitReview = async () => {
+    if (!crop?.farmerId) return;
+    setSubmittingReview(true);
+    try {
+      const formData = new FormData();
+      formData.append('farmerId', crop.farmerId);
+      formData.append('cropId', id);
+      formData.append('rating', reviewForm.rating);
+      if (reviewForm.comment) formData.append('comment', reviewForm.comment);
+      if (reviewImage) formData.append('image', reviewImage);
+
+      await reviewService.create(formData);
+      toast.success('Review submitted!');
+      setShowReviewForm(false);
+      setReviewForm({ rating: 5, comment: '' });
+      setReviewImage(null);
+      setReviewImagePreview(null);
+
+      // Refresh reviews
+      const cropRev = await reviewService.getCropReviews(id);
+      setCropReviews(cropRev.data);
+      const farmerRev = await reviewService.getFarmerReviews(crop.farmerId);
+      setFarmerReviews(farmerRev.data);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to submit review');
+    } finally {
+      setSubmittingReview(false);
     }
   };
 
@@ -108,6 +196,7 @@ export default function CropDetailPage() {
 
   const totalPrice = quantity * crop.pricePerKg;
   const stockPercent = Math.min(100, (crop.quantity / 100) * 100);
+  const allReviews = cropReviews?.reviews || farmerReviews?.reviews || [];
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
@@ -154,11 +243,11 @@ export default function CropDetailPage() {
                 <FiMapPin size={16} className="text-emerald-500" />
                 <span className="text-sm font-medium">{crop.location}</span>
               </div>
-              {reviews && (
+              {farmerReviews && (
                 <div className="flex items-center gap-1.5 bg-amber-50 dark:bg-amber-950/30 px-3 py-1 rounded-xl">
                   <FiStar className="text-amber-400 fill-amber-400" size={14} />
-                  <span className="text-sm font-bold text-amber-700 dark:text-amber-400">{reviews.averageRating}</span>
-                  <span className="text-xs text-amber-500/70">({reviews.totalReviews})</span>
+                  <span className="text-sm font-bold text-amber-700 dark:text-amber-400">{farmerReviews.averageRating}</span>
+                  <span className="text-xs text-amber-500/70">({farmerReviews.totalReviews})</span>
                 </div>
               )}
             </div>
@@ -183,13 +272,13 @@ export default function CropDetailPage() {
               </div>
             </div>
 
-            {/* Farmer Card */}
+            {/* Farmer Card + Message Button */}
             {crop.farmer && (
-              <div className="mt-5 flex items-center gap-4 p-5 bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-lg transition-shadow duration-300">
+              <div className="mt-5 flex items-center gap-3 p-5 bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-lg transition-shadow duration-300">
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center text-white font-black text-xl flex-shrink-0 shadow-lg shadow-emerald-500/20">
                   {crop.farmer.name?.[0]?.toUpperCase()}
                 </div>
-                <div className="min-w-0">
+                <div className="flex-1 min-w-0">
                   <p className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
                     <FiUser size={14} className="text-gray-400" /> {crop.farmer.name}
                   </p>
@@ -199,6 +288,16 @@ export default function CropDetailPage() {
                     </p>
                   )}
                 </div>
+                {user?.role === 'BUYER' && (
+                  <button
+                    onClick={handleMessageFarmer}
+                    disabled={chatLoading}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 font-semibold text-sm hover:bg-blue-100 dark:hover:bg-blue-950 transition-colors disabled:opacity-50 flex-shrink-0"
+                  >
+                    <FiMessageSquare size={15} />
+                    {chatLoading ? 'Opening...' : 'Message'}
+                  </button>
+                )}
               </div>
             )}
 
@@ -253,23 +352,115 @@ export default function CropDetailPage() {
           </div>
         </div>
 
-        {/* Reviews */}
-        {reviews && reviews.reviews?.length > 0 && (
-          <div className="mt-20 animate-fade-in-up fill-mode-both delay-200">
-            <div className="flex items-center gap-3 mb-8">
+        {/* Reviews Section */}
+        <div className="mt-20 animate-fade-in-up fill-mode-both delay-200">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-500/20">
                 <FiStar className="text-white" size={18} />
               </div>
-              <h2 className="text-2xl font-black text-gray-900 dark:text-white">Farmer Reviews</h2>
+              <div>
+                <h2 className="text-2xl font-black text-gray-900 dark:text-white">
+                  {cropReviews?.totalReviews ? 'Crop Reviews' : 'Farmer Reviews'}
+                </h2>
+                {(cropReviews?.totalReviews || farmerReviews?.totalReviews) ? (
+                  <p className="text-sm text-gray-500">
+                    {cropReviews?.totalReviews || farmerReviews?.totalReviews} reviews · Average {cropReviews?.averageRating || farmerReviews?.averageRating} ⭐
+                  </p>
+                ) : null}
+              </div>
             </div>
+            {canReview && !showReviewForm && (
+              <button
+                onClick={() => setShowReviewForm(true)}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 font-semibold text-sm hover:bg-amber-100 dark:hover:bg-amber-950 transition-colors"
+              >
+                <FiStar size={15} /> Write a Review
+              </button>
+            )}
+          </div>
+
+          {/* Review Form */}
+          {showReviewForm && (
+            <div className="mb-8 bg-white dark:bg-gray-900 rounded-3xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm animate-fade-in-up fill-mode-both">
+              <h3 className="font-bold text-gray-900 dark:text-white mb-4">Write a Review for {crop.cropName}</h3>
+              <div className="space-y-4">
+                {/* Rating */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Rating</label>
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onClick={() => setReviewForm({ ...reviewForm, rating: star })}
+                        className={`text-3xl transition-all duration-200 hover:scale-110 ${star <= reviewForm.rating ? 'text-amber-400' : 'text-gray-200 dark:text-gray-700'}`}
+                      >
+                        ★
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Comment */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Comment</label>
+                  <textarea
+                    value={reviewForm.comment}
+                    onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
+                    className="input-field h-24 resize-none"
+                    placeholder="Share your experience with this crop..."
+                  />
+                </div>
+
+                {/* Photo upload */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Photo (optional)</label>
+                  <div className="flex items-center gap-3">
+                    <label className="flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700 text-gray-500 cursor-pointer hover:border-emerald-400 hover:text-emerald-600 transition-colors">
+                      <FiCamera size={16} />
+                      <span className="text-sm font-medium">Upload Photo</span>
+                      <input type="file" accept="image/*" className="hidden" onChange={handleReviewImageChange} />
+                    </label>
+                    {reviewImagePreview && (
+                      <div className="relative">
+                        <img src={reviewImagePreview} alt="Review" className="w-14 h-14 rounded-xl object-cover border border-gray-200 dark:border-gray-700" />
+                        <button
+                          onClick={() => { setReviewImage(null); setReviewImagePreview(null); }}
+                          className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] font-bold"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-3 pt-2">
+                  <Button onClick={handleSubmitReview} loading={submittingReview}>
+                    Submit Review
+                  </Button>
+                  <button
+                    onClick={() => { setShowReviewForm(false); setReviewImage(null); setReviewImagePreview(null); }}
+                    className="btn-secondary"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Review Cards */}
+          {allReviews.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {reviews.reviews.map((rev) => (
+              {allReviews.map((rev) => (
                 <div key={rev.id} className="bg-white dark:bg-gray-900 rounded-3xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-lg transition-shadow duration-300">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-amber-500/20">
                       {(rev.buyer?.name || 'B')[0]}
                     </div>
-                    <div>
+                    <div className="flex-1 min-w-0">
                       <p className="font-bold text-sm text-gray-900 dark:text-white">{rev.buyer?.name || 'Buyer'}</p>
                       <div className="flex items-center gap-0.5">
                         {Array.from({ length: 5 }, (_, i) => (
@@ -277,13 +468,29 @@ export default function CropDetailPage() {
                         ))}
                       </div>
                     </div>
+                    {rev.crop && (
+                      <span className="text-[10px] bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-md font-medium">
+                        {rev.crop.cropName}
+                      </span>
+                    )}
                   </div>
                   {rev.comment && <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">{rev.comment}</p>}
+                  {rev.imageUrl && (
+                    <img
+                      src={getImageUrl(rev.imageUrl)}
+                      alt="Review"
+                      className="mt-3 rounded-xl w-full max-h-40 object-cover border border-gray-100 dark:border-gray-700"
+                    />
+                  )}
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-400 dark:text-gray-500">No reviews yet. Be the first to review!</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

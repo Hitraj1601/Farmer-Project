@@ -7,6 +7,203 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id                  String         @id @default(uuid())
+  name                String
+  phone               String         @unique
+  email               String         @unique
+  password            String
+  role                Role           @default(FARMER)
+  createdAt           DateTime       @default(now())
+  buyerProfile        BuyerProfile?
+  buyerConversations  Conversation[] @relation("BuyerConversations")
+  farmerConversations Conversation[] @relation("FarmerConversations")
+  crops               Crop[]
+  farmerProfile       FarmerProfile?
+  sentMessages        Message[]      @relation("SentMessages")
+  buyerOrders         Order[]        @relation("BuyerOrders")
+  priceHistory        PriceHistory[]
+  reviewsGiven        Review[]       @relation("ReviewsGiven")
+  reviewsReceived     Review[]       @relation("ReviewsReceived")
+  wishlists           Wishlist[]
+
+  @@map("users")
+}
+
+model FarmerProfile {
+  id           String @id @default(uuid())
+  userId       String @unique
+  farmLocation String
+  bankAccount  String
+  ifscCode     String
+  user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("farmer_profiles")
+}
+
+model BuyerProfile {
+  id              String @id @default(uuid())
+  userId          String @unique
+  businessName    String
+  businessAddress String
+  user            User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("buyer_profiles")
+}
+
+model Crop {
+  id                  String         @id @default(uuid())
+  cropName            String
+  quantity            Float
+  pricePerKg          Float
+  location            String
+  category            String?
+  imageUrl            String?
+  farmerId            String
+  stockAlertThreshold Float          @default(0)
+  createdAt           DateTime       @default(now())
+  conversations       Conversation[]
+  farmer              User           @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  orders              Order[]
+  priceHistory        PriceHistory[]
+  reviews             Review[]
+  wishlists           Wishlist[]
+
+  @@index([farmerId], map: "crops_farmerId_fkey")
+  @@map("crops")
+}
+
+model Order {
+  id         String          @id @default(uuid())
+  buyerId    String
+  cropId     String
+  quantity   Float
+  totalPrice Float
+  status     OrderStatus     @default(PENDING)
+  createdAt  DateTime        @default(now())
+  tracking   OrderTracking[]
+  buyer      User            @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: Cascade)
+  crop       Crop            @relation(fields: [cropId], references: [id], onDelete: Cascade)
+  payment    Payment?
+
+  @@index([buyerId], map: "orders_buyerId_fkey")
+  @@index([cropId], map: "orders_cropId_fkey")
+  @@map("orders")
+}
+
+model Payment {
+  id              String        @id @default(uuid())
+  orderId         String        @unique
+  amount          Float
+  status          PaymentStatus @default(INITIATED)
+  method          String        @default("RAZORPAY")
+  transactionId   String?       @unique
+  razorpayOrderId String?       @unique
+  createdAt       DateTime      @default(now())
+  order           Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  buyerId   String
+  farmerId  String
+  cropId    String?
+  rating    Int
+  comment   String?  @db.Text
+  imageUrl  String?
+  createdAt DateTime @default(now())
+  buyer     User     @relation("ReviewsGiven", fields: [buyerId], references: [id], onDelete: Cascade)
+  crop      Crop?    @relation(fields: [cropId], references: [id])
+  farmer    User     @relation("ReviewsReceived", fields: [farmerId], references: [id], onDelete: Cascade)
+
+  @@unique([buyerId, farmerId, cropId])
+  @@index([cropId], map: "reviews_cropId_fkey")
+  @@index([farmerId], map: "reviews_farmerId_fkey")
+  @@map("reviews")
+}
+
+model PriceHistory {
+  id         String   @id @default(uuid())
+  cropId     String
+  cropName   String
+  category   String?
+  pricePerKg Float
+  location   String
+  farmerId   String
+  recordedAt DateTime @default(now())
+  crop       Crop     @relation(fields: [cropId], references: [id], onDelete: Cascade)
+  farmer     User     @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+
+  @@index([cropName, recordedAt])
+  @@index([category, recordedAt])
+  @@index([cropId], map: "price_history_cropId_fkey")
+  @@index([farmerId], map: "price_history_farmerId_fkey")
+  @@map("price_history")
+}
+
+model OrderTracking {
+  id        String      @id @default(uuid())
+  orderId   String
+  status    OrderStatus
+  location  String?
+  note      String?
+  timestamp DateTime    @default(now())
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId, timestamp])
+  @@map("order_tracking")
+}
+
+model Wishlist {
+  id            String   @id @default(uuid())
+  buyerId       String
+  cropId        String
+  notifiedPrice Float
+  addedAt       DateTime @default(now())
+  buyer         User     @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  crop          Crop     @relation(fields: [cropId], references: [id], onDelete: Cascade)
+
+  @@unique([buyerId, cropId])
+  @@index([cropId], map: "wishlists_cropId_fkey")
+  @@map("wishlists")
+}
+
+model Conversation {
+  id        String    @id @default(uuid())
+  buyerId   String
+  farmerId  String
+  cropId    String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  buyer     User      @relation("BuyerConversations", fields: [buyerId], references: [id], onDelete: Cascade)
+  crop      Crop?     @relation(fields: [cropId], references: [id])
+  farmer    User      @relation("FarmerConversations", fields: [farmerId], references: [id], onDelete: Cascade)
+  messages  Message[]
+
+  @@unique([buyerId, farmerId, cropId])
+  @@index([buyerId])
+  @@index([farmerId])
+  @@index([cropId], map: "conversations_cropId_fkey")
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  senderId       String
+  content        String       @db.Text
+  isRead         Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User         @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@index([senderId], map: "messages_senderId_fkey")
+  @@map("messages")
+}
+
 enum Role {
   FARMER
   BUYER
@@ -25,161 +222,4 @@ enum PaymentStatus {
   INITIATED
   SUCCESS
   FAILED
-}
-
-model User {
-  id        String   @id @default(uuid())
-  name      String
-  phone     String   @unique
-  email     String   @unique
-  password  String
-  role      Role     @default(FARMER)
-  createdAt DateTime @default(now())
-
-  farmerProfile   FarmerProfile?
-  buyerProfile    BuyerProfile?
-  crops           Crop[]
-  buyerOrders     Order[]   @relation("BuyerOrders")
-  reviewsGiven    Review[]       @relation("ReviewsGiven")
-  reviewsReceived Review[]       @relation("ReviewsReceived")
-  priceHistory    PriceHistory[]
-  wishlists       Wishlist[]
-
-  @@map("users")
-}
-
-model FarmerProfile {
-  id           String @id @default(uuid())
-  userId       String @unique
-  farmLocation String
-  bankAccount  String
-  ifscCode     String
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("farmer_profiles")
-}
-
-model BuyerProfile {
-  id              String @id @default(uuid())
-  userId          String @unique
-  businessName    String
-  businessAddress String
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("buyer_profiles")
-}
-
-model Crop {
-  id                  String   @id @default(uuid())
-  cropName            String
-  quantity            Float
-  pricePerKg          Float
-  location            String
-  category            String?
-  imageUrl            String?
-  farmerId            String
-  stockAlertThreshold Float    @default(0)
-  createdAt           DateTime @default(now())
-
-  farmer       User           @relation(fields: [farmerId], references: [id], onDelete: Cascade)
-  orders       Order[]
-  priceHistory PriceHistory[]
-  wishlists    Wishlist[]
-
-  @@map("crops")
-}
-
-model Order {
-  id         String      @id @default(uuid())
-  buyerId    String
-  cropId     String
-  quantity   Float
-  totalPrice Float
-  status     OrderStatus @default(PENDING)
-  createdAt  DateTime    @default(now())
-
-  buyer    User            @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: Cascade)
-  crop     Crop            @relation(fields: [cropId], references: [id], onDelete: Cascade)
-  payment  Payment?
-  tracking OrderTracking[]
-
-  @@map("orders")
-}
-
-model Payment {
-  id            String        @id @default(uuid())
-  orderId       String        @unique
-  amount        Float
-  status        PaymentStatus @default(INITIATED)
-  method        String        @default("RAZORPAY")
-  transactionId String?       @unique
-  razorpayOrderId String?     @unique
-  createdAt     DateTime      @default(now())
-
-  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
-
-  @@map("payments")
-}
-
-model Review {
-  id        String   @id @default(uuid())
-  buyerId   String
-  farmerId  String
-  rating    Int
-  comment   String?  @db.Text
-  createdAt DateTime @default(now())
-
-  buyer  User @relation("ReviewsGiven", fields: [buyerId], references: [id], onDelete: Cascade)
-  farmer User @relation("ReviewsReceived", fields: [farmerId], references: [id], onDelete: Cascade)
-
-  @@unique([buyerId, farmerId])
-  @@map("reviews")
-}
-
-model PriceHistory {
-  id         String   @id @default(uuid())
-  cropId     String
-  cropName   String
-  category   String?
-  pricePerKg Float
-  location   String
-  farmerId   String
-  recordedAt DateTime @default(now())
-
-  crop   Crop @relation(fields: [cropId], references: [id], onDelete: Cascade)
-  farmer User @relation(fields: [farmerId], references: [id], onDelete: Cascade)
-
-  @@index([cropName, recordedAt])
-  @@index([category, recordedAt])
-  @@map("price_history")
-}
-
-model OrderTracking {
-  id        String   @id @default(uuid())
-  orderId   String
-  status    OrderStatus
-  location  String?
-  note      String?
-  timestamp DateTime @default(now())
-
-  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
-
-  @@index([orderId, timestamp])
-  @@map("order_tracking")
-}
-
-model Wishlist {
-  id             String   @id @default(uuid())
-  buyerId        String
-  cropId         String
-  notifiedPrice  Float
-  addedAt        DateTime @default(now())
-
-  buyer User @relation(fields: [buyerId], references: [id], onDelete: Cascade)
-  crop  Crop @relation(fields: [cropId], references: [id], onDelete: Cascade)
-
-  @@unique([buyerId, cropId])
-  @@map("wishlists")
 }

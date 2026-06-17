@@ -3,9 +3,17 @@ const prisma = require("../config/db");
 const { generateToken } = require("../utils/jwt");
 const ApiError = require("../utils/apiError");
 
+const normalizeEmail = (email = "") => email.trim().toLowerCase();
+const normalizePhone = (phone = "") => phone.trim();
+const normalizeName = (name = "") => name.trim();
+
 const register = async ({ name, phone, email, password, role }) => {
+  const normalizedEmail = normalizeEmail(email);
+  const normalizedPhone = normalizePhone(phone);
+  const normalizedName = normalizeName(name);
+
   const existingUser = await prisma.user.findFirst({
-    where: { OR: [{ email }, { phone }] },
+    where: { OR: [{ email: normalizedEmail }, { phone: normalizedPhone }] },
   });
   if (existingUser) {
     throw new ApiError(409, "User with this email or phone already exists.");
@@ -14,7 +22,13 @@ const register = async ({ name, phone, email, password, role }) => {
   const hashedPassword = await bcrypt.hash(password, 12);
 
   const user = await prisma.user.create({
-    data: { name, phone, email, password: hashedPassword, role },
+    data: {
+      name: normalizedName,
+      phone: normalizedPhone,
+      email: normalizedEmail,
+      password: password.trim(),
+      role,
+    },
     select: { id: true, name: true, phone: true, email: true, role: true, createdAt: true },
   });
 
@@ -24,7 +38,8 @@ const register = async ({ name, phone, email, password, role }) => {
 };
 
 const login = async ({ email, password }) => {
-  const user = await prisma.user.findUnique({ where: { email } });
+  const normalizedEmail = normalizeEmail(email);
+  const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
   if (!user) {
     throw new ApiError(401, "Invalid email or password.");
   }

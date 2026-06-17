@@ -561,9 +561,10 @@ async function createReviews(farmers, buyers) {
   for (const review of reviews) {
     await prisma.review.upsert({
       where: {
-        buyerId_farmerId: {
+        buyerId_farmerId_cropId: {
           buyerId: review.buyerId,
           farmerId: review.farmerId,
+          cropId: null,
         },
       },
       update: {

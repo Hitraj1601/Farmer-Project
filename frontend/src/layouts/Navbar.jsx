@@ -1,13 +1,15 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
-import { FiMenu, FiX, FiUser, FiLogOut, FiShoppingBag, FiGrid, FiChevronDown, FiSettings, FiSun, FiMoon, FiHeart } from 'react-icons/fi';
+import { FiMenu, FiX, FiUser, FiLogOut, FiShoppingBag, FiGrid, FiChevronDown, FiSettings, FiSun, FiMoon, FiHeart, FiMessageSquare } from 'react-icons/fi';
 import { GiWheat } from 'react-icons/gi';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { useSocket } from '../context/SocketContext';
 
 export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
   const { dark, toggleTheme } = useTheme();
+  const { unreadChat } = useSocket();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -86,6 +88,19 @@ export default function Navbar() {
                     </Link>
                   </>
                 )}
+                {isAuthenticated && (
+                  <Link to="/chat" className={`${navLinkClass('/chat')} flex items-center gap-1`}>
+                    <span className="relative">
+                      <FiMessageSquare size={15} />
+                      {unreadChat > 0 && (
+                        <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 bg-emerald-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                          {unreadChat > 9 ? '9+' : unreadChat}
+                        </span>
+                      )}
+                    </span>
+                    <span className="ml-1">Chat</span>
+                  </Link>
+                )}
               </>
             )}
           </div>
@@ -100,6 +115,22 @@ export default function Navbar() {
             >
               {dark ? <FiSun size={18} /> : <FiMoon size={18} />}
             </button>
+
+            {/* Chat icon */}
+            {isAuthenticated && (
+              <Link
+                to="/chat"
+                className="relative p-2.5 rounded-full hover:bg-blue-50 dark:hover:bg-blue-950/60 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 border border-transparent hover:border-blue-100 dark:hover:border-blue-900/50"
+                aria-label="Messages"
+              >
+                <FiMessageSquare size={18} />
+                {unreadChat > 0 && (
+                  <span className="absolute top-0.5 right-0.5 min-w-[16px] h-4 px-1 bg-emerald-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center shadow-sm">
+                    {unreadChat > 9 ? '9+' : unreadChat}
+                  </span>
+                )}
+              </Link>
+            )}
 
             {isAuthenticated ? (
               <div className="relative" ref={menuRef}>
@@ -140,6 +171,15 @@ export default function Navbar() {
                         <Link to="/wishlist" onClick={() => setUserMenuOpen(false)}
                           className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-950 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors">
                           <FiHeart size={15} /> My Wishlist
+                        </Link>
+                        <Link to="/chat" onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-950 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors">
+                          <FiMessageSquare size={15} /> Messages
+                          {unreadChat > 0 && (
+                            <span className="ml-auto w-5 h-5 bg-emerald-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                              {unreadChat > 9 ? '9+' : unreadChat}
+                            </span>
+                          )}
                         </Link>
                       </>
                     )}
@@ -188,6 +228,16 @@ export default function Navbar() {
                       <FiHeart size={16} /> My Wishlist
                     </Link>
                   </>
+                )}
+                {isAuthenticated && (
+                  <Link to="/chat" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-950 hover:text-emerald-700 dark:hover:text-emerald-400 font-medium transition-colors">
+                    <FiMessageSquare size={16} /> Messages
+                    {unreadChat > 0 && (
+                      <span className="ml-auto w-5 h-5 bg-emerald-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                        {unreadChat > 9 ? '9+' : unreadChat}
+                      </span>
+                    )}
+                  </Link>
                 )}
                 <Link to="/profile" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-950 hover:text-emerald-700 dark:hover:text-emerald-400 font-medium transition-colors">
                   <FiUser size={16} /> Profile

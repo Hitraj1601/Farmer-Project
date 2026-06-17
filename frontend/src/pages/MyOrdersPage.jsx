@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FiShoppingBag, FiStar, FiMapPin, FiDownload, FiPackage, FiArrowRight } from 'react-icons/fi';
+import { FiShoppingBag, FiStar, FiMapPin, FiDownload, FiPackage, FiArrowRight, FiCamera } from 'react-icons/fi';
 import { orderService, paymentService, reviewService } from '../services';
 import { generateInvoice } from '../utils/generateInvoice';
 import OrderCard from '../components/OrderCard';
@@ -15,6 +15,8 @@ export default function MyOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [reviewModal, setReviewModal] = useState(null);
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
+  const [reviewImage, setReviewImage] = useState(null);
+  const [reviewImagePreview, setReviewImagePreview] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [trackingOrderId, setTrackingOrderId] = useState(null);
 
@@ -105,12 +107,21 @@ export default function MyOrdersPage() {
   const handleReview = async () => {
     setSubmitting(true);
     try {
-      await reviewService.create({ farmerId: reviewModal.farmerId, ...reviewForm });
+      const formData = new FormData();
+      formData.append('farmerId', reviewModal.farmerId);
+      if (reviewModal.cropId) formData.append('cropId', reviewModal.cropId);
+      formData.append('rating', reviewForm.rating);
+      if (reviewForm.comment) formData.append('comment', reviewForm.comment);
+      if (reviewImage) formData.append('image', reviewImage);
+
+      await reviewService.create(formData);
       toast.success('Review submitted!');
       setReviewModal(null);
       setReviewForm({ rating: 5, comment: '' });
-    } catch {
-      toast.error('Failed to submit review');
+      setReviewImage(null);
+      setReviewImagePreview(null);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to submit review');
     }
     setSubmitting(false);
   };
@@ -219,7 +230,11 @@ export default function MyOrdersPage() {
                         <Button
                           variant="secondary"
                           size="sm"
-                          onClick={() => setReviewModal({ farmerId: order.crop?.farmer?.id || order.crop?.farmerId })}
+                          onClick={() => setReviewModal({
+                            farmerId: order.crop?.farmer?.id || order.crop?.farmerId,
+                            cropId: order.cropId,
+                            cropName: order.crop?.cropName,
+                          })}
                         >
                           <FiStar size={14} className="mr-1" /> Review
                         </Button>
@@ -244,8 +259,13 @@ export default function MyOrdersPage() {
       </Modal>
 
       {/* Review Modal */}
-      <Modal isOpen={!!reviewModal} onClose={() => setReviewModal(null)} title="Write a Review">
+      <Modal isOpen={!!reviewModal} onClose={() => { setReviewModal(null); setReviewImage(null); setReviewImagePreview(null); }} title="Write a Review">
         <div className="space-y-5">
+          {reviewModal?.cropName && (
+            <p className="text-sm text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-950/50 px-3 py-2 rounded-xl">
+              Reviewing: {reviewModal.cropName}
+            </p>
+          )}
           <div>
             <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Rating</label>
             <div className="flex gap-2">
@@ -266,8 +286,35 @@ export default function MyOrdersPage() {
               value={reviewForm.comment}
               onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
               className="input-field h-28 resize-none rounded-2xl"
-              placeholder="Share your experience with this farmer..."
+              placeholder="Share your experience with this crop..."
             />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Photo (optional)</label>
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700 text-gray-500 cursor-pointer hover:border-emerald-400 hover:text-emerald-600 transition-colors">
+                <FiCamera size={16} />
+                <span className="text-sm font-medium">Upload Photo</span>
+                <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setReviewImage(file);
+                    setReviewImagePreview(URL.createObjectURL(file));
+                  }
+                }} />
+              </label>
+              {reviewImagePreview && (
+                <div className="relative">
+                  <img src={reviewImagePreview} alt="Review" className="w-14 h-14 rounded-xl object-cover border border-gray-200 dark:border-gray-700" />
+                  <button
+                    onClick={() => { setReviewImage(null); setReviewImagePreview(null); }}
+                    className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] font-bold"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
           <Button onClick={handleReview} loading={submitting} className="w-full rounded-2xl">
             Submit Review

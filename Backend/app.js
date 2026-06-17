@@ -17,6 +17,7 @@ const adminRoutes = require("./src/routes/admin.routes");
 const profileRoutes = require("./src/routes/profile.routes");
 const analyticsRoutes = require("./src/routes/analytics.routes");
 const wishlistRoutes = require("./src/routes/wishlist.routes");
+const chatRoutes = require("./src/routes/chat.routes");
 const errorHandler = require("./src/middleware/error.middleware");
 const { initSocket } = require("./src/config/socket");
 
@@ -106,6 +107,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/wishlist", wishlistRoutes);
+app.use("/api/chat", chatRoutes);
 
 // 404 handler
 app.use((_req, res) => {

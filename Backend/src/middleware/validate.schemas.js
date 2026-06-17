@@ -13,7 +13,7 @@ const registerSchema = Joi.object({
       "string.pattern.base": "Phone must be a valid 10-digit Indian mobile number",
       "any.required": "Phone is required",
     }),
-  email: Joi.string().email().required().messages({
+  email: Joi.string().trim().lowercase().email({ tlds: { allow: false } }).required().messages({
     "string.email": "Must be a valid email address",
     "any.required": "Email is required",
   }),
@@ -28,7 +28,7 @@ const registerSchema = Joi.object({
 });
 
 const loginSchema = Joi.object({
-  email: Joi.string().email().required().messages({
+  email: Joi.string().trim().lowercase().email({ tlds: { allow: false } }).required().messages({
     "string.email": "Must be a valid email address",
     "any.required": "Email is required",
   }),
@@ -103,6 +103,9 @@ const createReviewSchema = Joi.object({
   farmerId: Joi.string().uuid().required().messages({
     "string.uuid": "farmerId must be a valid UUID",
     "any.required": "farmerId is required",
+  }),
+  cropId: Joi.string().uuid().optional().allow(null, "").messages({
+    "string.uuid": "cropId must be a valid UUID",
   }),
   rating: Joi.number().integer().min(1).max(5).required().messages({
     "number.min": "Rating must be between 1 and 5",

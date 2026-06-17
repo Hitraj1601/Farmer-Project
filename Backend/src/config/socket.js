@@ -14,6 +14,43 @@ const initSocket = (io) => {
       }
     });
 
+    // --- Chat events ---
+
+    // Join a specific conversation room for real-time chat
+    socket.on("chat:join", (conversationId) => {
+      if (conversationId) {
+        socket.join(`chat:${conversationId}`);
+      }
+    });
+
+    // Leave a conversation room
+    socket.on("chat:leave", (conversationId) => {
+      if (conversationId) {
+        socket.leave(`chat:${conversationId}`);
+      }
+    });
+
+    // Typing indicator
+    socket.on("chat:typing", ({ conversationId, userId, userName }) => {
+      if (conversationId && userId) {
+        socket.to(`chat:${conversationId}`).emit("chat:typing", {
+          conversationId,
+          userId,
+          userName,
+        });
+      }
+    });
+
+    // Stop typing indicator
+    socket.on("chat:stop-typing", ({ conversationId, userId }) => {
+      if (conversationId && userId) {
+        socket.to(`chat:${conversationId}`).emit("chat:stop-typing", {
+          conversationId,
+          userId,
+        });
+      }
+    });
+
     socket.on("disconnect", () => {
       // cleanup handled automatically by socket.io
     });
@@ -36,4 +73,14 @@ const notifyUser = (userId, payload) => {
   _io.to(`room:${userId}`).emit("notification", payload);
 };
 
-module.exports = { initSocket, getIO, notifyUser };
+/**
+ * Emit a new chat message to a conversation room.
+ * @param {string} conversationId
+ * @param {object} message - the full message object (with sender info)
+ */
+const emitChatMessage = (conversationId, message) => {
+  if (!_io || !conversationId) return;
+  _io.to(`chat:${conversationId}`).emit("chat:message", message);
+};
+
+module.exports = { initSocket, getIO, notifyUser, emitChatMessage };

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useRef } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import toast from 'react-hot-toast';
 import { useAuth } from './AuthContext';
@@ -17,19 +17,33 @@ const NOTIFICATION_ICONS = {
 export function SocketProvider({ children }) {
   const { user, isAuthenticated } = useAuth();
   const socketRef = useRef(null);
+  const [unreadChat, setUnreadChat] = useState(0);
+
+  // Fetch initial unread count
+  const refreshUnreadCount = useCallback(async () => {
+    if (!isAuthenticated) {
+      setUnreadChat(0);
+      return;
+    }
+    try {
+      const { chatService } = await import('../services');
+      const res = await chatService.getUnreadCount();
+      setUnreadChat(res.data?.count || 0);
+    } catch {
+      // silent
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (!isAuthenticated || !user?.id) {
-      // Disconnect if user logs out
       if (socketRef.current) {
         socketRef.current.disconnect();
         socketRef.current = null;
       }
+      setUnreadChat(0);
       return;
     }
 
-    // Create socket connection — use polling first for a reliable handshake,
-    // then socket.io auto-upgrades to WebSocket once the connection is stable.
     const socket = io(SOCKET_URL, {
       transports: ['polling', 'websocket'],
       reconnectionAttempts: 3,
@@ -39,11 +53,10 @@ export function SocketProvider({ children }) {
     socketRef.current = socket;
 
     socket.on('connect', () => {
-      // Join personal notification room
       socket.emit('join', user.id);
     });
 
-    // Listen for notifications from server
+    // Notification listener
     socket.on('notification', (payload) => {
       const { title, message, type = 'info' } = payload;
       const icon = NOTIFICATION_ICONS[type] || '🔔';
@@ -56,20 +69,60 @@ export function SocketProvider({ children }) {
         </div>,
         { duration: 5000, id: `notif-${Date.now()}` }
       );
+
+      // If it's a new message notification, bump unread count
+      if (title === 'New Message') {
+        setUnreadChat((prev) => prev + 1);
+      }
     });
 
     socket.on('connect_error', () => {
       // Silent — notifications are non-critical
     });
 
+    // Fetch initial unread count
+    refreshUnreadCount();
+
     return () => {
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [isAuthenticated, user?.id]);
+  }, [isAuthenticated, user?.id, refreshUnreadCount]);
+
+  const joinChat = useCallback((conversationId) => {
+    socketRef.current?.emit('chat:join', conversationId);
+  }, []);
+
+  const leaveChat = useCallback((conversationId) => {
+    socketRef.current?.emit('chat:leave', conversationId);
+  }, []);
+
+  const emitTyping = useCallback((conversationId) => {
+    socketRef.current?.emit('chat:typing', {
+      conversationId,
+      userId: user?.id,
+      userName: user?.name,
+    });
+  }, [user]);
+
+  const emitStopTyping = useCallback((conversationId) => {
+    socketRef.current?.emit('chat:stop-typing', {
+      conversationId,
+      userId: user?.id,
+    });
+  }, [user]);
 
   return (
-    <SocketContext.Provider value={{ socket: socketRef.current }}>
+    <SocketContext.Provider value={{
+      socket: socketRef.current,
+      unreadChat,
+      setUnreadChat,
+      refreshUnreadCount,
+      joinChat,
+      leaveChat,
+      emitTyping,
+      emitStopTyping,
+    }}>
       {children}
     </SocketContext.Provider>
   );

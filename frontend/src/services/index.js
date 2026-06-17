@@ -33,8 +33,10 @@ export const paymentService = {
 };
 
 export const reviewService = {
-  create: (data) => api.post('/reviews', data),
+  create: (formData) =>
+    api.post('/reviews', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
   getFarmerReviews: (farmerId) => api.get(`/reviews/farmer/${farmerId}`),
+  getCropReviews: (cropId) => api.get(`/reviews/crop/${cropId}`),
 };
 
 export const profileService = {
@@ -66,4 +68,14 @@ export const wishlistService = {
   add: (cropId) => api.post(`/wishlist/${cropId}`),
   remove: (cropId) => api.delete(`/wishlist/${cropId}`),
   checkPriceDrops: () => api.get('/wishlist/price-drops'),
+};
+
+export const chatService = {
+  getOrCreateConversation: (farmerId, cropId) =>
+    api.post('/chat/conversation', { farmerId, cropId }),
+  sendMessage: (conversationId, content) =>
+    api.post('/chat/message', { conversationId, content }),
+  getConversations: () => api.get('/chat/conversations'),
+  getMessages: (conversationId) => api.get(`/chat/messages/${conversationId}`),
+  getUnreadCount: () => api.get('/chat/unread-count'),
 };
