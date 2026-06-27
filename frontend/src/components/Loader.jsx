@@ -16,16 +16,16 @@ export default function Loader({ size = 'md', className = '', text }) {
 
 export function SkeletonCard() {
   return (
-    <div className="card p-0">
-      <div className="h-48 skeleton" />
+    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800/80 overflow-hidden shadow-sm animate-pulse">
+      <div className="h-52 bg-gray-100 dark:bg-gray-800" />
       <div className="p-4 space-y-3">
-        <div className="h-5 w-3/4 skeleton" />
-        <div className="h-4 w-1/2 skeleton" />
+        <div className="h-4 w-2/3 bg-gray-100 dark:bg-gray-800 rounded-lg" />
+        <div className="h-3 w-1/2 bg-gray-100 dark:bg-gray-800 rounded-lg" />
         <div className="flex justify-between">
-          <div className="h-6 w-20 skeleton" />
-          <div className="h-4 w-16 skeleton" />
+          <div className="h-5 w-20 bg-gray-100 dark:bg-gray-800 rounded-lg" />
+          <div className="h-4 w-14 bg-gray-100 dark:bg-gray-800 rounded-lg" />
         </div>
-        <div className="h-10 skeleton" />
+        <div className="h-10 bg-gray-100 dark:bg-gray-800 rounded-xl" />
       </div>
     </div>
   );

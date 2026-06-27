@@ -34,7 +34,8 @@ export default function ChatPage() {
       const res = await chatService.getConversations();
       setConversations(res.data || []);
     } catch {
-      setConversations([]);
+      // Don't clear existing conversations on error — preserve chat history
+      setConversations((prev) => prev.length > 0 ? prev : []);
     } finally {
       setLoading(false);
     }
@@ -43,9 +44,17 @@ export default function ChatPage() {
   useEffect(() => { fetchConversations(); }, [fetchConversations]);
 
   // Fetch messages when active conversation changes
+  // Clear messages when switching to a different conversation
+  const prevConvIdRef = useRef(null);
   useEffect(() => {
     if (!activeConvId) return;
     let cancelled = false;
+
+    // Only clear messages when switching to a different conversation
+    if (prevConvIdRef.current !== activeConvId) {
+      setMessages([]);
+      prevConvIdRef.current = activeConvId;
+    }
 
     const fetchMessages = async () => {
       setMsgLoading(true);
@@ -53,7 +62,11 @@ export default function ChatPage() {
         const res = await chatService.getMessages(activeConvId);
         if (!cancelled) setMessages(res.data || []);
       } catch {
-        if (!cancelled) setMessages([]);
+        // Don't clear existing messages on error — preserve chat history
+        // Only set empty if there were no messages before
+        if (!cancelled) {
+          setMessages((prev) => prev.length > 0 ? prev : []);
+        }
       } finally {
         if (!cancelled) setMsgLoading(false);
       }

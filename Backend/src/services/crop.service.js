@@ -46,7 +46,7 @@ const createCrop = async (data) => {
 };
 
 const getAllCrops = async (query) => {
-  const { page = 1, limit = 10, location, search, category, minPrice, maxPrice, farmerName, sortBy } = query;
+  const { page = 1, limit = 20, location, search, category, minPrice, maxPrice, farmerName, sortBy } = query;
   const skip = (parseInt(page) - 1) * parseInt(limit);
 
   const where = {};
