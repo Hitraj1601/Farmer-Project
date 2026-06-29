@@ -15,6 +15,7 @@ const MyOrdersPage = lazy(() => import('./pages/MyOrdersPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const WishlistPage = lazy(() => import('./pages/WishlistPage'));
 const ChatPage = lazy(() => import('./pages/ChatPage'));
+const CartPage = lazy(() => import('./pages/CartPage'));
 
 const FarmerDashboard = lazy(() => import('./pages/farmer/FarmerDashboard'));
 const MyCrops = lazy(() => import('./pages/farmer/MyCrops'));
@@ -43,6 +44,7 @@ export default function App() {
             <Route element={<ProtectedRoute roles={['BUYER']} />}>
               <Route path="/my-orders" element={<MyOrdersPage />} />
               <Route path="/wishlist" element={<WishlistPage />} />
+              <Route path="/cart" element={<CartPage />} />
             </Route>
 
             <Route element={<ProtectedRoute />}>

@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { FiMapPin, FiStar, FiShoppingCart, FiChevronRight, FiMinus, FiPlus, FiUser, FiPhone, FiShield, FiTruck, FiCheckCircle, FiMessageSquare, FiCamera } from 'react-icons/fi';
 import { cropService, orderService, reviewService, paymentService, chatService } from '../services';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import { formatPrice, getImageUrl } from '../utils/helpers';
 import Loader from '../components/Loader';
 import Button from '../components/Button';
@@ -11,6 +12,7 @@ import toast from 'react-hot-toast';
 export default function CropDetailPage() {
   const { id } = useParams();
   const { user, isAuthenticated } = useAuth();
+  const { addToCart, isInCart } = useCart();
   const navigate = useNavigate();
   const [crop, setCrop] = useState(null);
   const [farmerReviews, setFarmerReviews] = useState(null);
@@ -18,6 +20,7 @@ export default function CropDetailPage() {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [ordering, setOrdering] = useState(false);
+  const [addingToCart, setAddingToCart] = useState(false);
   const [chatLoading, setChatLoading] = useState(false);
 
   // Review form state
@@ -343,10 +346,28 @@ export default function CropDetailPage() {
                   <span className="text-3xl font-black text-emerald-600 dark:text-emerald-400">{formatPrice(totalPrice)}</span>
                 </div>
 
-                <Button onClick={handleOrder} loading={ordering} className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl text-base">
-                  <FiShoppingCart size={20} />
-                  {ordering ? 'Placing Order...' : 'Place Order & Pay'}
-                </Button>
+                <div className="flex gap-3">
+                  <button
+                    onClick={async () => {
+                      if (!isAuthenticated) return navigate('/login');
+                      setAddingToCart(true);
+                      await addToCart(id, parseFloat(quantity));
+                      setAddingToCart(false);
+                    }}
+                    disabled={addingToCart || isInCart(id)}
+                    className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl text-base font-bold transition-all duration-300 border-2 ${
+                      isInCart(id)
+                        ? 'bg-violet-50 dark:bg-violet-950/30 border-violet-200 dark:border-violet-800 text-violet-600 dark:text-violet-400 cursor-default'
+                        : 'bg-white dark:bg-gray-900 border-violet-300 dark:border-violet-700 text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-950/50 hover:border-violet-400 hover:shadow-lg hover:shadow-violet-500/10'
+                    }`}
+                  >
+                    <FiShoppingCart size={20} />
+                    {addingToCart ? 'Adding...' : isInCart(id) ? '✓ In Cart' : 'Add to Cart'}
+                  </button>
+                  <Button onClick={handleOrder} loading={ordering} className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl text-base">
+                    {ordering ? 'Placing...' : 'Buy Now'}
+                  </Button>
+                </div>
               </div>
             )}
           </div>

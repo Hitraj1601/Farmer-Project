@@ -79,3 +79,12 @@ export const chatService = {
   getMessages: (conversationId) => api.get(`/chat/messages/${conversationId}`),
   getUnreadCount: () => api.get('/chat/unread-count'),
 };
+
+export const cartService = {
+  get: () => api.get('/cart'),
+  addItem: (data) => api.post('/cart/items', data),
+  updateItem: (cropId, quantity) => api.put(`/cart/items/${cropId}`, { quantity }),
+  removeItem: (cropId) => api.delete(`/cart/items/${cropId}`),
+  clear: () => api.delete('/cart'),
+  checkout: () => api.post('/cart/checkout'),
+};

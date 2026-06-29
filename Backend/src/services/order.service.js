@@ -52,6 +52,11 @@ const getMyOrders = async (userId, role) => {
           select: { cropName: true, pricePerKg: true, location: true, farmerId: true, farmer: { select: { id: true, name: true, phone: true } } },
         },
         payment: { select: { status: true, transactionId: true } },
+        items: {
+          include: {
+            crop: { select: { id: true, cropName: true, pricePerKg: true, imageUrl: true, location: true } },
+          },
+        },
       },
       orderBy: { createdAt: "desc" },
     });
@@ -64,6 +69,11 @@ const getMyOrders = async (userId, role) => {
         crop: { select: { cropName: true, pricePerKg: true } },
         buyer: { select: { name: true, phone: true, email: true } },
         payment: { select: { status: true, transactionId: true } },
+        items: {
+          include: {
+            crop: { select: { id: true, cropName: true, pricePerKg: true, imageUrl: true } },
+          },
+        },
       },
       orderBy: { createdAt: "desc" },
     });

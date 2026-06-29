@@ -129,6 +129,24 @@ const buyerProfileSchema = Joi.object({
   businessAddress: Joi.string().min(5).max(500).required(),
 });
 
+const addToCartSchema = Joi.object({
+  cropId: Joi.string().uuid().required().messages({
+    "string.uuid": "cropId must be a valid UUID",
+    "any.required": "cropId is required",
+  }),
+  quantity: Joi.number().positive().required().messages({
+    "number.positive": "Quantity must be a positive number",
+    "any.required": "Quantity is required",
+  }),
+});
+
+const updateCartItemSchema = Joi.object({
+  quantity: Joi.number().positive().required().messages({
+    "number.positive": "Quantity must be a positive number",
+    "any.required": "Quantity is required",
+  }),
+});
+
 module.exports = {
   registerSchema,
   loginSchema,
@@ -141,4 +159,6 @@ module.exports = {
   createReviewSchema,
   farmerProfileSchema,
   buyerProfileSchema,
+  addToCartSchema,
+  updateCartItemSchema,
 };

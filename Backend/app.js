@@ -18,6 +18,7 @@ const profileRoutes = require("./src/routes/profile.routes");
 const analyticsRoutes = require("./src/routes/analytics.routes");
 const wishlistRoutes = require("./src/routes/wishlist.routes");
 const chatRoutes = require("./src/routes/chat.routes");
+const cartRoutes = require("./src/routes/cart.routes");
 const errorHandler = require("./src/middleware/error.middleware");
 const { initSocket } = require("./src/config/socket");
 
@@ -108,6 +109,7 @@ app.use("/api/profile", profileRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/cart", cartRoutes);
 
 // 404 handler
 app.use((_req, res) => {

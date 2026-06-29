@@ -1,9 +1,10 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { FiMapPin, FiArrowRight, FiHeart, FiShoppingBag, FiUser, FiEye, FiBox } from 'react-icons/fi';
+import { FiMapPin, FiArrowRight, FiHeart, FiShoppingBag, FiUser, FiEye, FiBox, FiShoppingCart } from 'react-icons/fi';
 import { FaHeart } from 'react-icons/fa';
 import { formatPrice, getImageUrl } from '../utils/helpers';
 import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../hooks/useWishlist';
+import { useCart } from '../context/CartContext';
 
 /* Category color mapping for subtle accent variety */
 const CATEGORY_ACCENT = {
@@ -22,9 +23,11 @@ const getAccent = (cat) => CATEGORY_ACCENT[cat] || CATEGORY_ACCENT.Other;
 export default function CropCard({ crop, index = 0, viewMode = 'grid' }) {
   const { user } = useAuth();
   const { isWishlisted, toggle } = useWishlist();
+  const { addToCart, isInCart } = useCart();
   const navigate = useNavigate();
   const wishlisted = isWishlisted(crop.id);
   const isBuyer = user?.role === 'BUYER';
+  const inCart = isInCart(crop.id);
   const accent = getAccent(crop.category);
 
   const openDetails = () => navigate(`/crops/${crop.id}`);
@@ -104,16 +107,30 @@ export default function CropCard({ crop, index = 0, viewMode = 'grid' }) {
                 <FiArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform duration-300" />
               </Link>
               {isBuyer && (
-                <button
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggle(crop.id); }}
-                  className={`p-2.5 rounded-xl transition-all duration-300 ${
-                    wishlisted
-                      ? 'bg-red-50 dark:bg-red-950/50 text-red-500 scale-110'
-                      : 'bg-gray-100 dark:bg-gray-800 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50'
-                  }`}
-                >
-                  {wishlisted ? <FaHeart size={16} /> : <FiHeart size={16} />}
-                </button>
+                <>
+                  <button
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (!inCart) addToCart(crop.id, 1); }}
+                    disabled={inCart}
+                    className={`p-2.5 rounded-xl transition-all duration-300 ${
+                      inCart
+                        ? 'bg-violet-50 dark:bg-violet-950/50 text-violet-500 scale-110'
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-400 hover:text-violet-500 hover:bg-violet-50 dark:hover:bg-violet-950/50'
+                    }`}
+                    title={inCart ? 'Already in cart' : 'Add to cart'}
+                  >
+                    <FiShoppingCart size={16} />
+                  </button>
+                  <button
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggle(crop.id); }}
+                    className={`p-2.5 rounded-xl transition-all duration-300 ${
+                      wishlisted
+                        ? 'bg-red-50 dark:bg-red-950/50 text-red-500 scale-110'
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50'
+                    }`}
+                  >
+                    {wishlisted ? <FaHeart size={16} /> : <FiHeart size={16} />}
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -223,22 +240,38 @@ export default function CropCard({ crop, index = 0, viewMode = 'grid' }) {
           </div>
         )}
 
-        {/* CTA Button */}
-        <Link
-          to={`/crops/${crop.id}`}
-          onClick={(e) => e.stopPropagation()}
-          className="mt-3 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl
-                     bg-gray-50 dark:bg-gray-800/80
-                     text-gray-700 dark:text-gray-300 font-semibold text-sm
-                     border border-gray-100 dark:border-gray-700/80
-                     hover:bg-gradient-to-r hover:from-emerald-600 hover:to-teal-600 hover:text-white hover:border-transparent
-                     hover:shadow-lg hover:shadow-emerald-500/20 hover:-translate-y-0.5
-                     transition-all duration-300
-                     group/btn"
-        >
-          View Details
-          <FiArrowRight size={13} className="group-hover/btn:translate-x-1 transition-transform duration-300" />
-        </Link>
+        {/* CTA Buttons */}
+        <div className="mt-3 flex gap-2">
+          <Link
+            to={`/crops/${crop.id}`}
+            onClick={(e) => e.stopPropagation()}
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl
+                       bg-gray-50 dark:bg-gray-800/80
+                       text-gray-700 dark:text-gray-300 font-semibold text-sm
+                       border border-gray-100 dark:border-gray-700/80
+                       hover:bg-gradient-to-r hover:from-emerald-600 hover:to-teal-600 hover:text-white hover:border-transparent
+                       hover:shadow-lg hover:shadow-emerald-500/20 hover:-translate-y-0.5
+                       transition-all duration-300
+                       group/btn"
+          >
+            View Details
+            <FiArrowRight size={13} className="group-hover/btn:translate-x-1 transition-transform duration-300" />
+          </Link>
+          {isBuyer && (
+            <button
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (!inCart) addToCart(crop.id, 1); }}
+              disabled={inCart}
+              className={`flex items-center justify-center w-10 rounded-xl border transition-all duration-300 flex-shrink-0 ${
+                inCart
+                  ? 'bg-violet-50 dark:bg-violet-950/30 border-violet-200 dark:border-violet-800 text-violet-500'
+                  : 'bg-gray-50 dark:bg-gray-800/80 border-gray-100 dark:border-gray-700/80 text-gray-400 hover:text-violet-500 hover:bg-violet-50 dark:hover:bg-violet-950/50 hover:border-violet-300'
+              }`}
+              title={inCart ? 'Already in cart' : 'Add to cart'}
+            >
+              <FiShoppingCart size={14} />
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

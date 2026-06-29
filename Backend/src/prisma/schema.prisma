@@ -26,6 +26,7 @@ model User {
   reviewsGiven        Review[]       @relation("ReviewsGiven")
   reviewsReceived     Review[]       @relation("ReviewsReceived")
   wishlists           Wishlist[]
+  cart                Cart?
 
   @@map("users")
 }
@@ -68,6 +69,8 @@ model Crop {
   priceHistory        PriceHistory[]
   reviews             Review[]
   wishlists           Wishlist[]
+  cartItems           CartItem[]
+  orderItems          OrderItem[]
 
   @@index([farmerId], map: "crops_farmerId_fkey")
   @@map("crops")
@@ -85,6 +88,7 @@ model Order {
   buyer      User            @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: Cascade)
   crop       Crop            @relation(fields: [cropId], references: [id], onDelete: Cascade)
   payment    Payment?
+  items      OrderItem[]
 
   @@index([buyerId], map: "orders_buyerId_fkey")
   @@index([cropId], map: "orders_cropId_fkey")
@@ -222,4 +226,43 @@ enum PaymentStatus {
   INITIATED
   SUCCESS
   FAILED
+}
+
+model Cart {
+  id        String     @id @default(uuid())
+  buyerId   String     @unique
+  updatedAt DateTime   @updatedAt
+  buyer     User       @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  items     CartItem[]
+
+  @@map("carts")
+}
+
+model CartItem {
+  id       String   @id @default(uuid())
+  cartId   String
+  cropId   String
+  quantity Float
+  addedAt  DateTime @default(now())
+  cart     Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  crop     Crop     @relation(fields: [cropId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, cropId])
+  @@index([cropId], map: "cart_items_cropId_fkey")
+  @@map("cart_items")
+}
+
+model OrderItem {
+  id         String @id @default(uuid())
+  orderId    String
+  cropId     String
+  quantity   Float
+  pricePerKg Float
+  subtotal   Float
+  order      Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  crop       Crop   @relation(fields: [cropId], references: [id], onDelete: Cascade)
+
+  @@index([orderId], map: "order_items_orderId_fkey")
+  @@index([cropId], map: "order_items_cropId_fkey")
+  @@map("order_items")
 }
