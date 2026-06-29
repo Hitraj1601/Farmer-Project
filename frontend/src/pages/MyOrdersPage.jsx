@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FiShoppingBag, FiStar, FiMapPin, FiDownload, FiPackage, FiArrowRight, FiCamera } from 'react-icons/fi';
 import { orderService, paymentService, reviewService } from '../services';
-import { generateInvoice } from '../utils/generateInvoice';
 import OrderCard from '../components/OrderCard';
 import OrderTrackingTimeline from '../components/OrderTrackingTimeline';
 import Loader from '../components/Loader';
@@ -218,9 +217,13 @@ export default function MyOrdersPage() {
                         <Button
                           variant="secondary"
                           size="sm"
-                          onClick={() => {
-                            try { generateInvoice(order); }
-                            catch { toast.error('Could not generate invoice'); }
+                          onClick={async () => {
+                            try {
+                              const { generateInvoice } = await import('../utils/generateInvoice');
+                              generateInvoice(order);
+                            } catch {
+                              toast.error('Could not generate invoice');
+                            }
                           }}
                         >
                           <FiDownload size={14} className="mr-1" /> Invoice

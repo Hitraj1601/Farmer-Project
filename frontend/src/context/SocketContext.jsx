@@ -1,5 +1,4 @@
 import { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react';
-import { io } from 'socket.io-client';
 import toast from 'react-hot-toast';
 import { useAuth } from './AuthContext';
 
@@ -35,6 +34,9 @@ export function SocketProvider({ children }) {
   }, [isAuthenticated]);
 
   useEffect(() => {
+    let active = true;
+    let socketInstance = null;
+
     if (!isAuthenticated || !user?.id) {
       if (socketRef.current) {
         socketRef.current.disconnect();
@@ -44,47 +46,54 @@ export function SocketProvider({ children }) {
       return;
     }
 
-    const socket = io(SOCKET_URL, {
-      transports: ['polling', 'websocket'],
-      reconnectionAttempts: 3,
-      reconnectionDelay: 2000,
-    });
+    const connectSocket = async () => {
+      const { io } = await import('socket.io-client');
 
-    socketRef.current = socket;
+      if (!active) return;
 
-    socket.on('connect', () => {
-      socket.emit('join', user.id);
-    });
+      const socket = io(SOCKET_URL, {
+        transports: ['polling', 'websocket'],
+        reconnectionAttempts: 3,
+        reconnectionDelay: 2000,
+      });
 
-    // Notification listener
-    socket.on('notification', (payload) => {
-      const { title, message, type = 'info' } = payload;
-      const icon = NOTIFICATION_ICONS[type] || '🔔';
-      const toastFn = type === 'error' ? toast.error : type === 'success' ? toast.success : toast;
+      socketInstance = socket;
+      socketRef.current = socket;
 
-      toastFn(
-        <div>
-          <p className="font-semibold text-sm">{icon} {title}</p>
-          <p className="text-xs text-gray-500 mt-0.5">{message}</p>
-        </div>,
-        { duration: 5000, id: `notif-${Date.now()}` }
-      );
+      socket.on('connect', () => {
+        socket.emit('join', user.id);
+      });
 
-      // If it's a new message notification, bump unread count
-      if (title === 'New Message') {
-        setUnreadChat((prev) => prev + 1);
-      }
-    });
+      socket.on('notification', (payload) => {
+        const { title, message, type = 'info' } = payload;
+        const icon = NOTIFICATION_ICONS[type] || '🔔';
+        const toastFn = type === 'error' ? toast.error : type === 'success' ? toast.success : toast;
 
-    socket.on('connect_error', () => {
-      // Silent — notifications are non-critical
-    });
+        toastFn(
+          <div>
+            <p className="font-semibold text-sm">{icon} {title}</p>
+            <p className="text-xs text-gray-500 mt-0.5">{message}</p>
+          </div>,
+          { duration: 5000, id: `notif-${Date.now()}` }
+        );
 
-    // Fetch initial unread count
-    refreshUnreadCount();
+        if (title === 'New Message') {
+          setUnreadChat((prev) => prev + 1);
+        }
+      });
+
+      socket.on('connect_error', () => {
+        // Silent — notifications are non-critical
+      });
+
+      refreshUnreadCount();
+    };
+
+    connectSocket();
 
     return () => {
-      socket.disconnect();
+      active = false;
+      socketInstance?.disconnect();
       socketRef.current = null;
     };
   }, [isAuthenticated, user?.id, refreshUnreadCount]);

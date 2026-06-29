@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { FiUsers, FiShoppingBag, FiDollarSign, FiPackage } from 'react-icons/fi';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { adminService } from '../../services';
 import StatsCard from '../../components/StatsCard';
 import Loader from '../../components/Loader';
+
+const RevenueChart = lazy(() => import('../../components/RevenueChart'));
 
 export default function AdminDashboard() {
   const [analytics, setAnalytics] = useState(null);
@@ -59,19 +60,10 @@ export default function AdminDashboard() {
             <h2 className="font-bold text-lg text-gray-900 dark:text-white">Monthly Revenue</h2>
             <p className="text-sm text-gray-400">Revenue trends over time</p>
           </div>
-          <div className="px-2 pb-6">
-            <ResponsiveContainer width="100%" height={320}>
-              <BarChart data={stats.revenueByMonth} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-                <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#6b7280' }} axisLine={false} />
-                <YAxis tick={{ fontSize: 12, fill: '#6b7280' }} axisLine={false} />
-                <Tooltip
-                  formatter={(v) => `₹${v.toLocaleString()}`}
-                  contentStyle={{ borderRadius: '12px', border: '1px solid #e5e7eb', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.05)' }}
-                />
-                <Bar dataKey="revenue" fill="#059669" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="px-2 pb-6 min-h-[340px]">
+            <Suspense fallback={<Loader text="Loading chart..." />}>
+              <RevenueChart data={stats.revenueByMonth} />
+            </Suspense>
           </div>
         </div>
       )}

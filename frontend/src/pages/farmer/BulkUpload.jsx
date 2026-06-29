@@ -1,9 +1,18 @@
 import { useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { FiUploadCloud, FiDownload, FiCheckCircle, FiAlertCircle, FiFile, FiX, FiArrowRight, FiInfo } from 'react-icons/fi';
-import * as XLSX from 'xlsx';
 import { cropService } from '../../services';
 import toast from 'react-hot-toast';
+
+let xlsxPromise;
+
+const loadXlsx = () => {
+  if (!xlsxPromise) {
+    xlsxPromise = import('xlsx');
+  }
+
+  return xlsxPromise;
+};
 
 const TEMPLATE_HEADERS = ['cropName', 'quantity', 'pricePerKg', 'location', 'category', 'stockAlertThreshold'];
 const TEMPLATE_EXAMPLE = [
@@ -22,11 +31,13 @@ const COLUMNS_INFO = [
 ];
 
 function downloadTemplate() {
-  const ws = XLSX.utils.aoa_to_sheet([TEMPLATE_HEADERS, ...TEMPLATE_EXAMPLE]);
-  ws['!cols'] = TEMPLATE_HEADERS.map(() => ({ wch: 22 }));
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Crops');
-  XLSX.writeFile(wb, 'FarmConnect_Crop_Template.xlsx');
+  loadXlsx().then((XLSX) => {
+    const ws = XLSX.utils.aoa_to_sheet([TEMPLATE_HEADERS, ...TEMPLATE_EXAMPLE]);
+    ws['!cols'] = TEMPLATE_HEADERS.map(() => ({ wch: 22 }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Crops');
+    XLSX.writeFile(wb, 'FarmConnect_Crop_Template.xlsx');
+  });
 }
 
 export default function BulkUpload() {
@@ -50,17 +61,25 @@ export default function BulkUpload() {
 
     const reader = new FileReader();
     reader.onload = (e) => {
-      try {
-        const wb = XLSX.read(e.target.result, { type: 'binary' });
-        const ws = wb.Sheets[wb.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
-        setTotalRows(rows.length);
-        setPreview(rows.slice(0, 10));
-      } catch {
-        toast.error('Could not parse file. Please check the format.');
-        setFile(null);
-        setPreview([]);
-      }
+      loadXlsx()
+        .then((XLSX) => {
+          try {
+            const wb = XLSX.read(e.target.result, { type: 'binary' });
+            const ws = wb.Sheets[wb.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+            setTotalRows(rows.length);
+            setPreview(rows.slice(0, 10));
+          } catch {
+            toast.error('Could not parse file. Please check the format.');
+            setFile(null);
+            setPreview([]);
+          }
+        })
+        .catch(() => {
+          toast.error('Could not load spreadsheet support. Please try again.');
+          setFile(null);
+          setPreview([]);
+        });
     };
     reader.readAsBinaryString(f);
   }, []);
