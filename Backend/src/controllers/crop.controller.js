@@ -39,7 +39,7 @@ const getAllCrops = async (req, res, next) => {
 
 const getMyCrops = async (req, res, next) => {
   try {
-    const crops = await cropService.getMyCrops(req.user.id);
+    const crops = await cropService.getMyCrops(req.user.id, req.query);
     return sendResponse(res, 200, "Farmer crops fetched successfully.", crops);
   } catch (error) {
     next(error);

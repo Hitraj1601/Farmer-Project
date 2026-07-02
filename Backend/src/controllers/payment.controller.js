@@ -1,6 +1,26 @@
 const paymentService = require("../services/payment.service");
 const { sendResponse } = require("../utils/apiResponse");
 
+const getPaymentConfig = async (_req, res, next) => {
+  try {
+    const keyId = process.env.RAZORPAY_KEY_ID;
+    const keySecret = process.env.RAZORPAY_KEY_SECRET;
+    const configured = Boolean(
+      keyId &&
+      keySecret &&
+      keyId !== "your_razorpay_key_id" &&
+      keySecret !== "your_razorpay_key_secret"
+    );
+
+    return sendResponse(res, 200, "Payment configuration fetched successfully.", {
+      razorpayKeyId: configured ? keyId : null,
+      razorpayEnabled: configured,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const createPaymentOrder = async (req, res, next) => {
   try {
     const { orderId } = req.body;
@@ -51,4 +71,4 @@ const processFreePayment = async (req, res, next) => {
   }
 };
 
-module.exports = { createPaymentOrder, verifyPayment, processFreePayment };
+module.exports = { getPaymentConfig, createPaymentOrder, verifyPayment, processFreePayment };

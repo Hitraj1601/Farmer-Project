@@ -8,7 +8,7 @@ export const authService = {
 
 export const cropService = {
   getAll: (params) => api.get('/crops', { params }),
-  getMyCrops: () => api.get('/crops/my'),
+  getMyCrops: (params) => api.get('/crops/my', { params }),
   getById: (id) => api.get(`/crops/${id}`),
   create: (formData) =>
     api.post('/crops', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
@@ -27,6 +27,7 @@ export const orderService = {
 };
 
 export const paymentService = {
+  getConfig: () => api.get('/payments/config'),
   createOrder: (orderId) => api.post('/payments/create-order', { orderId }),
   verify: (data) => api.post('/payments/verify', data),
   processFree: (orderId) => api.post('/payments/free', { orderId }),

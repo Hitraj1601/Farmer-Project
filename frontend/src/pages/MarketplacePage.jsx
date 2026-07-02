@@ -117,7 +117,7 @@ export default function MarketplacePage() {
     const fetchCrops = async () => {
       setLoading(true);
       try {
-        const params = { page, limit: 20 };
+        const params = { page, limit: 12 };
         if (debouncedSearch) params.search = debouncedSearch;
         if (location) params.location = location;
         if (category && category !== 'All') params.category = category;

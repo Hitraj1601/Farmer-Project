@@ -5,6 +5,7 @@ const { authenticate, authorize } = require("../middleware/auth.middleware");
 const validate = require("../middleware/validate.middleware");
 const { createPaymentOrderSchema, verifyPaymentSchema } = require("../middleware/validate.schemas");
 
+router.get("/config", paymentController.getPaymentConfig);
 router.post("/create-order", authenticate, authorize("BUYER"), validate(createPaymentOrderSchema), paymentController.createPaymentOrder);
 router.post("/verify", authenticate, validate(verifyPaymentSchema), paymentController.verifyPayment);
 router.post("/free", authenticate, authorize("BUYER"), validate(createPaymentOrderSchema), paymentController.processFreePayment);

@@ -49,6 +49,8 @@ export default function CropCard({ crop, index = 0, viewMode = 'grid' }) {
             <img
               src={getImageUrl(crop.imageUrl)}
               alt={crop.cropName}
+              loading="lazy"
+              decoding="async"
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/5 group-hover:to-black/10 transition-all duration-500" />
@@ -154,6 +156,8 @@ export default function CropCard({ crop, index = 0, viewMode = 'grid' }) {
         <img
           src={getImageUrl(crop.imageUrl)}
           alt={crop.cropName}
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
         />
 

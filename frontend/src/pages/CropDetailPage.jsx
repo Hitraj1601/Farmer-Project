@@ -78,7 +78,15 @@ export default function CropDetailPage() {
       try {
         const payRes = await paymentService.createOrder(order.id);
         const { razorpayOrderId, amount, currency } = payRes.data;
-        const publicKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+        let publicKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+        if (!publicKey || publicKey === 'your_razorpay_key_id') {
+          try {
+            const config = await paymentService.getConfig();
+            publicKey = config.data?.razorpayKeyId;
+          } catch {
+            publicKey = null;
+          }
+        }
 
         if (!publicKey || publicKey === 'your_razorpay_key_id') {
           await paymentService.processFree(order.id);

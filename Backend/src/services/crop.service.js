@@ -98,12 +98,29 @@ const getAllCrops = async (query) => {
   };
 };
 
-const getMyCrops = async (farmerId) => {
-  const crops = await prisma.crop.findMany({
-    where: { farmerId },
-    orderBy: { createdAt: "desc" },
-  });
-  return crops;
+const getMyCrops = async (farmerId, query = {}) => {
+  const { page = 1, limit = 10 } = query;
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+
+  const [crops, total] = await Promise.all([
+    prisma.crop.findMany({
+      where: { farmerId },
+      skip,
+      take: parseInt(limit),
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.crop.count({ where: { farmerId } }),
+  ]);
+
+  return {
+    crops,
+    pagination: {
+      total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages: Math.ceil(total / parseInt(limit)),
+    },
+  };
 };
 
 const getCropById = async (id) => {

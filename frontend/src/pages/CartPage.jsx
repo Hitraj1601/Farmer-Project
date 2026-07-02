@@ -44,7 +44,15 @@ export default function CartPage() {
       }
 
       // Process payment for each order
-      const publicKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+      let publicKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+      if (!publicKey || publicKey === 'your_razorpay_key_id') {
+        try {
+          const config = await paymentService.getConfig();
+          publicKey = config.data?.razorpayKeyId;
+        } catch {
+          publicKey = null;
+        }
+      }
       const isDemo = !publicKey || publicKey === 'your_razorpay_key_id';
 
       for (const order of orders) {

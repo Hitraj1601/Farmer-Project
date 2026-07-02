@@ -34,7 +34,15 @@ export default function MyOrdersPage() {
   useEffect(() => { fetchOrders(); }, []);
 
   const handlePay = async (orderId, cropName) => {
-    const publicKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+    let publicKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+    if (!publicKey || publicKey === 'your_razorpay_key_id') {
+      try {
+        const config = await paymentService.getConfig();
+        publicKey = config.data?.razorpayKeyId;
+      } catch {
+        publicKey = null;
+      }
+    }
 
     // If Razorpay public key is not configured, go straight to free payment
     if (!publicKey || publicKey === 'your_razorpay_key_id') {
