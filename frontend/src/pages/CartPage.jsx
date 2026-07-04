@@ -308,6 +308,8 @@ function CartItemRow({ item, onUpdate, onRemove }) {
         <img
           src={getImageUrl(crop?.imageUrl)}
           alt={crop?.cropName}
+          loading="lazy"
+          decoding="async"
           className="gallery-thumb w-16 h-16 sm:w-20 sm:h-20"
         />
       </Link>

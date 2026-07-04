@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { FiMapPin, FiArrowRight, FiHeart, FiShoppingBag, FiUser, FiEye, FiBox, FiShoppingCart } from 'react-icons/fi';
+import { FiMapPin, FiArrowRight, FiHeart, FiShoppingBag, FiUser, FiBox, FiShoppingCart } from 'react-icons/fi';
 import { FaHeart } from 'react-icons/fa';
 import { formatPrice, getImageUrl } from '../utils/helpers';
 import { useAuth } from '../context/AuthContext';
@@ -164,17 +164,6 @@ export default function CropCard({ crop, index = 0, viewMode = 'grid' }) {
         {/* Hover overlay with gradient */}
         <div className="gallery-overlay bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
 
-        {/* Quick view button — appears on hover */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-3 group-hover:translate-y-0">
-          <Link
-            to={`/crops/${crop.id}`}
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md text-gray-900 dark:text-white font-bold text-sm py-2.5 px-5 rounded-xl shadow-xl hover:bg-emerald-500 hover:text-white transition-all duration-300 flex items-center gap-2 border border-white/20"
-          >
-            <FiEye size={15} />
-            Quick View
-          </Link>
-        </div>
 
         {/* Category pill — top left */}
         {crop.category && (

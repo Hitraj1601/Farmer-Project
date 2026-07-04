@@ -64,6 +64,8 @@ export default function OrderCard({ order, actions }) {
                     <img
                       src={getImageUrl(item.crop.imageUrl)}
                       alt={item.crop?.cropName}
+                      loading="lazy"
+                      decoding="async"
                       className="gallery-thumb w-9 h-9 flex-shrink-0"
                     />
                   )}

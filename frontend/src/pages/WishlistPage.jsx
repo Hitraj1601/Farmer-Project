@@ -126,6 +126,8 @@ export default function WishlistPage() {
                     <img
                       src={getImageUrl(crop.imageUrl)}
                       alt={crop.cropName}
+                      loading="lazy"
+                      decoding="async"
                       className="gallery-image w-full h-full object-cover"
                     />
                     <div className="gallery-overlay bg-gradient-to-t from-black/30 via-transparent to-transparent" />

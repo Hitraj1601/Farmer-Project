@@ -809,20 +809,27 @@ async function createReviews(farmers, buyers) {
   ];
 
   for (const review of reviews) {
-    await prisma.review.upsert({
+    const existing = await prisma.review.findFirst({
       where: {
-        buyerId_farmerId_cropId: {
-          buyerId: review.buyerId,
-          farmerId: review.farmerId,
-          cropId: null,
-        },
+        buyerId: review.buyerId,
+        farmerId: review.farmerId,
+        cropId: null,
       },
-      update: {
-        rating: review.rating,
-        comment: review.comment,
-      },
-      create: review,
     });
+
+    if (existing) {
+      await prisma.review.update({
+        where: { id: existing.id },
+        data: {
+          rating: review.rating,
+          comment: review.comment,
+        },
+      });
+    } else {
+      await prisma.review.create({
+        data: review,
+      });
+    }
   }
 }
 

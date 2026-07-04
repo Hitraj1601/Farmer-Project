@@ -343,6 +343,8 @@ export default function HomePage() {
                   <img
                     src={freshVegetables}
                     alt="Fresh organic vegetables"
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-[480px] object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
@@ -501,6 +503,8 @@ export default function HomePage() {
           <img
             src={farmLandscape}
             alt="Beautiful farmland panorama"
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-gray-950/95 via-gray-900/90 to-gray-950/95" />

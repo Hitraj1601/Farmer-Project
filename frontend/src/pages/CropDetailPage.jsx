@@ -546,6 +546,8 @@ export default function CropDetailPage() {
                     <img
                       src={getImageUrl(rev.imageUrl)}
                       alt="Review"
+                      loading="lazy"
+                      decoding="async"
                       className="mt-3 rounded-xl w-full max-h-40 object-cover border border-gray-100 dark:border-gray-700"
                     />
                   )}

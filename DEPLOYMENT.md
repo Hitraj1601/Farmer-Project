@@ -109,3 +109,37 @@ Important:
 - **Environment variables:**
    - `VITE_API_URL=https://<your-render-service>.onrender.com/api`
    - `VITE_RAZORPAY_KEY_ID=<your-razorpay-key-id>`
+
+---
+
+## 8) Containerized Deployment with Nginx + Docker Compose (Recommended)
+
+To run the complete application stack (MySQL, Node.js API, and Nginx Static Server) inside Docker containers:
+
+### Prerequisites
+Make sure **Docker** and **Docker Compose** are installed on the target machine.
+
+### Instructions
+
+1. **Environment Setup**:
+   Copy and fill environment variables for the database and secrets. In production, edit the environment variables in `docker-compose.yml` to specify secure credentials:
+   - `DATABASE_URL`: Ensure it connects to the `db` service container (default: `mysql://root:root_password_1234@db:3306/farmer_marketplace`).
+   - `JWT_SECRET`: A long secure key.
+
+2. **Build and Run**:
+   In the project root, run the following command to compile the frontend, package the backend service, stand up the MySQL container, apply database schemas, and start Nginx:
+   ```bash
+   docker-compose up --build -d
+   ```
+
+3. **Seeding the Database (Optional)**:
+   To load the default demo users (farmers, buyers, products, and order data), run the seed script inside the running backend container:
+   ```bash
+   docker-compose exec backend npm run seed
+   ```
+
+4. **Accessing the Marketplace**:
+   - Open your browser and go to `http://localhost`. The React app will load.
+   - Nginx handles static file requests directly and automatically forwards `/api/` endpoints to the Express container, preventing CORS issues.
+   - Uploaded files are saved to a shared persistent volume (`uploads-data`) and served directly by Nginx, reducing Node.js event-loop overhead.
+
