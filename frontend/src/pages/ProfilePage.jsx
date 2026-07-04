@@ -10,18 +10,18 @@ export default function ProfilePage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [farmerForm, setFarmerForm] = useState({ farmLocation: '', bankAccount: '', ifscCode: '' });
-  const [buyerForm, setBuyerForm] = useState({ businessName: '', businessAddress: '' });
+  const [farmerForm, setFarmerForm] = useState({ farmLocation: '', bankAccount: '', ifscCode: '', serviceableAreas: '' });
+  const [buyerForm, setBuyerForm] = useState({ businessName: '', businessAddress: '', deliveryAddress: '' });
 
   useEffect(() => {
     const load = async () => {
       try {
         if (user?.role === 'FARMER') {
           const res = await profileService.getFarmerProfile();
-          if (res.data) setFarmerForm({ farmLocation: res.data.farmLocation || '', bankAccount: res.data.bankAccount || '', ifscCode: res.data.ifscCode || '' });
+          if (res.data) setFarmerForm({ farmLocation: res.data.farmLocation || '', bankAccount: res.data.bankAccount || '', ifscCode: res.data.ifscCode || '', serviceableAreas: res.data.serviceableAreas || '' });
         } else if (user?.role === 'BUYER') {
           const res = await profileService.getBuyerProfile();
-          if (res.data) setBuyerForm({ businessName: res.data.businessName || '', businessAddress: res.data.businessAddress || '' });
+          if (res.data) setBuyerForm({ businessName: res.data.businessName || '', businessAddress: res.data.businessAddress || '', deliveryAddress: res.data.deliveryAddress || '' });
         }
       } catch { /* no profile yet */ }
       setLoading(false);
@@ -162,6 +162,22 @@ export default function ProfilePage() {
                     <input className="input-field pl-12 py-3.5 rounded-2xl" placeholder="e.g. SBIN0001234" value={farmerForm.ifscCode} onChange={(e) => setFarmerForm({ ...farmerForm, ifscCode: e.target.value.toUpperCase() })} />
                   </div>
                 </div>
+                {/* Serviceable Areas */}
+                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-2xl p-5 border border-emerald-100 dark:border-emerald-800/30">
+                  <div className="flex items-center gap-2 mb-2">
+                    <FiHome className="text-emerald-600" size={18} />
+                    <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Delivery Service Areas</span>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                    List the cities or states where you can deliver. Buyers outside these areas will see a warning. Leave empty to accept orders from everywhere.
+                  </p>
+                  <textarea
+                    className="input-field py-3.5 rounded-2xl min-h-[80px] resize-none"
+                    placeholder="e.g. Mumbai, Pune, Nashik, Maharashtra"
+                    value={farmerForm.serviceableAreas}
+                    onChange={(e) => setFarmerForm({ ...farmerForm, serviceableAreas: e.target.value })}
+                  />
+                </div>
               </div>
             ) : (
               <div className="space-y-5">
@@ -178,6 +194,19 @@ export default function ProfilePage() {
                     <FiHome className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                     <input className="input-field pl-12 py-3.5 rounded-2xl" placeholder="Your business address" value={buyerForm.businessAddress} onChange={(e) => setBuyerForm({ ...buyerForm, businessAddress: e.target.value })} />
                   </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Delivery Address</label>
+                  <div className="relative">
+                    <FiMapPin className="absolute left-4 top-4 text-gray-400" size={18} />
+                    <textarea
+                      className="input-field pl-12 py-3.5 rounded-2xl min-h-[120px] resize-none"
+                      placeholder="House / street / locality / city / pincode"
+                      value={buyerForm.deliveryAddress}
+                      onChange={(e) => setBuyerForm({ ...buyerForm, deliveryAddress: e.target.value })}
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Farmers will see this address before accepting the order.</p>
                 </div>
               </div>
             )}

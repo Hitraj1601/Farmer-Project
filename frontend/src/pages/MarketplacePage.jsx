@@ -31,15 +31,15 @@ const CATEGORY_ICONS = {
 };
 
 const CATEGORY_GRADIENTS = {
-  All: 'from-gray-600 to-slate-700',
-  Grains: 'from-amber-500 to-yellow-600',
-  Vegetables: 'from-emerald-500 to-green-600',
-  Fruits: 'from-rose-500 to-pink-600',
-  Spices: 'from-orange-500 to-red-600',
-  Pulses: 'from-violet-500 to-purple-600',
-  Oilseeds: 'from-teal-500 to-cyan-600',
-  Dairy: 'from-blue-500 to-indigo-600',
-  Others: 'from-slate-500 to-gray-600',
+  All: 'from-slate-200 to-slate-300 dark:from-gray-600 dark:to-slate-700',
+  Grains: 'from-amber-100 to-yellow-200 dark:from-amber-500 dark:to-yellow-600',
+  Vegetables: 'from-emerald-200 to-lime-200 dark:from-emerald-500 dark:to-green-600',
+  Fruits: 'from-rose-100 to-pink-200 dark:from-rose-500 dark:to-pink-600',
+  Spices: 'from-orange-100 to-red-200 dark:from-orange-500 dark:to-red-600',
+  Pulses: 'from-violet-100 to-purple-200 dark:from-violet-500 dark:to-purple-600',
+  Oilseeds: 'from-teal-100 to-cyan-200 dark:from-teal-500 dark:to-cyan-600',
+  Dairy: 'from-blue-100 to-indigo-200 dark:from-blue-500 dark:to-indigo-600',
+  Others: 'from-slate-200 to-gray-300 dark:from-slate-500 dark:to-gray-600',
 };
 
 const CATEGORY_EMOJI = {
@@ -226,32 +226,32 @@ export default function MarketplacePage() {
 
           {/* ─── Floating Search Bar ─── */}
           <div className="mt-10 max-w-3xl mx-auto animate-fade-in-up fill-mode-both" style={{ animationDelay: '200ms' }}>
-            <div className="bg-white/[0.08] backdrop-blur-2xl rounded-2xl p-1.5 border border-white/[0.08] shadow-2xl shadow-black/30">
+            <div className="bg-white/95 backdrop-blur-2xl rounded-2xl p-1.5 border border-emerald-200/80 shadow-[0_18px_60px_-26px_rgba(15,23,42,0.35)] dark:bg-white/[0.08] dark:border-white/[0.08] dark:shadow-2xl dark:shadow-black/30">
               <div className="flex flex-col sm:flex-row gap-1.5">
                 <div className="relative flex-1">
-                  <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                  <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-600 dark:text-gray-400" size={18} />
                   <input
                     type="text"
                     placeholder="Search for crops, vegetables, fruits..."
                     value={search}
                     onChange={(e) => { setSearch(e.target.value); resetPage(); }}
-                    className="w-full pl-11 pr-4 py-3.5 bg-white/[0.06] rounded-xl text-white placeholder:text-gray-500 outline-none focus:bg-white/[0.1] transition-all duration-300 border border-transparent focus:border-emerald-500/30 text-sm"
+                    className="w-full pl-11 pr-4 py-3.5 bg-white text-gray-900 rounded-xl placeholder:text-gray-400 outline-none transition-all duration-300 border border-emerald-100 shadow-sm focus:bg-white focus:border-emerald-300 focus:ring-2 focus:ring-emerald-200/60 text-sm dark:bg-white/[0.06] dark:text-white dark:placeholder:text-gray-500 dark:border-transparent dark:focus:border-emerald-500/30 dark:focus:ring-0"
                     id="marketplace-search"
                   />
                 </div>
                 <div className="relative sm:w-44">
-                  <FiMapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                  <FiMapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-600 dark:text-gray-400" size={16} />
                   <input
                     type="text"
                     placeholder="Location..."
                     value={location}
                     onChange={(e) => { setLocation(e.target.value); resetPage(); }}
-                    className="w-full pl-11 pr-4 py-3.5 bg-white/[0.06] rounded-xl text-white placeholder:text-gray-500 outline-none focus:bg-white/[0.1] transition-all duration-300 border border-transparent focus:border-emerald-500/30 text-sm"
+                    className="w-full pl-11 pr-4 py-3.5 bg-white text-gray-900 rounded-xl placeholder:text-gray-400 outline-none transition-all duration-300 border border-emerald-100 shadow-sm focus:bg-white focus:border-emerald-300 focus:ring-2 focus:ring-emerald-200/60 text-sm dark:bg-white/[0.06] dark:text-white dark:placeholder:text-gray-500 dark:border-transparent dark:focus:border-emerald-500/30 dark:focus:ring-0"
                     id="marketplace-location"
                   />
                 </div>
                 <button
-                  className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-bold py-3.5 px-7 rounded-xl transition-all duration-300 shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 flex items-center justify-center gap-2 hover:-translate-y-0.5 text-sm"
+                  className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-bold py-3.5 px-7 rounded-xl transition-all duration-300 shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/35 flex items-center justify-center gap-2 hover:-translate-y-0.5 text-sm"
                   id="marketplace-search-btn"
                 >
                   <FiSearch size={16} />
@@ -280,7 +280,7 @@ export default function MarketplacePage() {
               <div className="flex items-center gap-0.5 bg-gray-100 dark:bg-gray-800 rounded-lg p-0.5">
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded-md transition-all duration-200 ${viewMode === 'grid' ? 'bg-white dark:bg-gray-700 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}
+                  className={`p-2 rounded-md transition-all duration-200 ${viewMode === 'grid' ? 'bg-white dark:bg-gray-700 text-emerald-500 dark:text-emerald-400 shadow-sm' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}
                   title="Grid view"
                   id="view-grid-btn"
                 >
@@ -288,7 +288,7 @@ export default function MarketplacePage() {
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-md transition-all duration-200 ${viewMode === 'list' ? 'bg-white dark:bg-gray-700 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}
+                  className={`p-2 rounded-md transition-all duration-200 ${viewMode === 'list' ? 'bg-white dark:bg-gray-700 text-emerald-500 dark:text-emerald-400 shadow-sm' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}
                   title="List view"
                   id="view-list-btn"
                 >
@@ -309,8 +309,8 @@ export default function MarketplacePage() {
                     onClick={() => { setCategory(cat); resetPage(); }}
                     className={`group flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 whitespace-nowrap flex-shrink-0 ${
                       isActive
-                        ? `bg-gradient-to-r ${gradient} text-white shadow-lg shadow-emerald-500/15 scale-[1.03]`
-                        : 'bg-gray-50 dark:bg-gray-800/80 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-900 dark:hover:text-white hover:scale-[1.02]'
+                        ? `bg-gradient-to-r ${gradient} text-emerald-950 dark:text-white shadow-lg shadow-emerald-500/15 scale-[1.03]`
+                        : 'bg-gray-50 dark:bg-gray-800/80 text-gray-600 dark:text-gray-400 hover:bg-emerald-50 dark:hover:bg-gray-700/80 hover:text-emerald-800 dark:hover:text-white hover:scale-[1.02]'
                     }`}
                     id={`category-${cat.toLowerCase()}`}
                   >
@@ -333,7 +333,7 @@ export default function MarketplacePage() {
                 <select
                   value={sortBy}
                   onChange={(e) => { setSortBy(e.target.value); resetPage(); }}
-                  className="w-full pl-10 pr-9 py-2.5 bg-gray-50 dark:bg-gray-800/80 rounded-xl text-sm text-gray-700 dark:text-gray-300 font-medium border border-gray-200 dark:border-gray-700/80 focus:border-emerald-500 dark:focus:border-emerald-500 outline-none appearance-none cursor-pointer transition-colors duration-200"
+                  className="w-full pl-10 pr-9 py-2.5 bg-gray-50 dark:bg-gray-800/80 rounded-xl text-sm text-gray-700 dark:text-gray-300 font-medium border border-gray-200 dark:border-gray-700/80 focus:border-emerald-400 dark:focus:border-emerald-500 outline-none appearance-none cursor-pointer transition-colors duration-200"
                   id="sort-select"
                 >
                   {SORT_OPTIONS.map(opt => (
@@ -348,15 +348,15 @@ export default function MarketplacePage() {
                 onClick={() => setShowAdvanced(v => !v)}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all duration-300 whitespace-nowrap
                   ${showAdvanced
-                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-500/20'
-                    : 'bg-gray-50 dark:bg-gray-800/80 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700/80 hover:border-emerald-400 dark:hover:border-emerald-600 hover:text-emerald-600 dark:hover:text-emerald-400'
+                    ? 'bg-emerald-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/20 dark:bg-emerald-600 dark:border-emerald-600'
+                    : 'bg-gray-50 dark:bg-gray-800/80 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700/80 hover:border-emerald-300 dark:hover:border-emerald-600 hover:text-emerald-700 dark:hover:text-emerald-400'
                   }`}
                 id="advanced-filters-btn"
               >
                 <FiFilter size={14} />
                 Filters
                 {activeFilterCount > 0 && (
-                  <span className={`rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold ${showAdvanced ? 'bg-white text-emerald-600' : 'bg-emerald-500 text-white'}`}>
+                  <span className={`rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold ${showAdvanced ? 'bg-white text-emerald-500' : 'bg-emerald-400 text-emerald-950 dark:bg-emerald-500 dark:text-white'}`}>
                     {activeFilterCount}
                   </span>
                 )}
@@ -390,7 +390,7 @@ export default function MarketplacePage() {
                       placeholder="e.g. 10"
                       value={minPrice}
                       onChange={(e) => { setMinPrice(e.target.value); resetPage(); }}
-                      className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800/80 rounded-xl text-sm text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700/80 focus:border-emerald-500 outline-none transition-colors duration-200 placeholder:text-gray-400"
+                      className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800/80 rounded-xl text-sm text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700/80 focus:border-emerald-400 outline-none transition-colors duration-200 placeholder:text-gray-400"
                       min="0"
                       id="filter-min-price"
                     />
@@ -402,7 +402,7 @@ export default function MarketplacePage() {
                       placeholder="e.g. 500"
                       value={maxPrice}
                       onChange={(e) => { setMaxPrice(e.target.value); resetPage(); }}
-                      className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800/80 rounded-xl text-sm text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700/80 focus:border-emerald-500 outline-none transition-colors duration-200 placeholder:text-gray-400"
+                      className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800/80 rounded-xl text-sm text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700/80 focus:border-emerald-400 outline-none transition-colors duration-200 placeholder:text-gray-400"
                       min="0"
                       id="filter-max-price"
                     />
@@ -416,7 +416,7 @@ export default function MarketplacePage() {
                         placeholder="Search by farmer..."
                         value={farmerName}
                         onChange={(e) => { setFarmerName(e.target.value); resetPage(); }}
-                        className="w-full pl-10 pr-3.5 py-2.5 bg-gray-50 dark:bg-gray-800/80 rounded-xl text-sm text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700/80 focus:border-emerald-500 outline-none transition-colors duration-200 placeholder:text-gray-400"
+                        className="w-full pl-10 pr-3.5 py-2.5 bg-gray-50 dark:bg-gray-800/80 rounded-xl text-sm text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700/80 focus:border-emerald-400 outline-none transition-colors duration-200 placeholder:text-gray-400"
                         id="filter-farmer-name"
                       />
                     </div>
@@ -485,7 +485,7 @@ export default function MarketplacePage() {
               {activeFilterCount > 0 && (
                 <button
                   onClick={clearAllFilters}
-                  className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 hover:-translate-y-0.5 transition-all duration-300 text-sm"
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-300 to-teal-300 text-emerald-950 font-bold py-3 px-6 rounded-xl shadow-lg shadow-emerald-500/15 hover:shadow-emerald-500/25 hover:-translate-y-0.5 transition-all duration-300 text-sm dark:from-emerald-600 dark:to-teal-600 dark:text-white"
                   id="empty-clear-filters"
                 >
                   <FiRefreshCw size={15} /> Clear All Filters
@@ -515,10 +515,10 @@ export default function MarketplacePage() {
 /* ─── Filter Chip ─── */
 function FilterChip({ label, icon, onRemove }) {
   return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 text-[11px] font-semibold rounded-lg border border-emerald-200/60 dark:border-emerald-800/50 group hover:bg-emerald-100 dark:hover:bg-emerald-950/60 transition-colors">
-      {icon && <span className="text-emerald-500">{icon}</span>}
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-100/80 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-400 text-[11px] font-semibold rounded-lg border border-emerald-200/60 dark:border-emerald-800/50 group hover:bg-emerald-200/70 dark:hover:bg-emerald-950/60 transition-colors">
+      {icon && <span className="text-emerald-600 dark:text-emerald-500">{icon}</span>}
       {label}
-      <button onClick={onRemove} className="hover:text-emerald-900 dark:hover:text-emerald-200 transition-colors ml-0.5">
+      <button onClick={onRemove} className="hover:text-emerald-950 dark:hover:text-emerald-200 transition-colors ml-0.5">
         <FiX size={11} />
       </button>
     </span>

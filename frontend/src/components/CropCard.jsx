@@ -36,7 +36,7 @@ export default function CropCard({ crop, index = 0, viewMode = 'grid' }) {
   if (viewMode === 'list') {
     return (
       <div
-        className="group relative bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800/80 hover:border-emerald-200 dark:hover:border-emerald-800/60 shadow-sm hover:shadow-xl hover:shadow-emerald-500/[0.06] transition-all duration-500 overflow-hidden cursor-pointer animate-fade-in-up fill-mode-both"
+        className="group gallery-card relative bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800/80 hover:border-emerald-200 dark:hover:border-emerald-800/60 shadow-sm hover:shadow-xl hover:shadow-emerald-500/[0.06] cursor-pointer animate-fade-in-up fill-mode-both"
         style={{ animationDelay: `${index * 50}ms` }}
         role="link"
         tabIndex={0}
@@ -45,15 +45,15 @@ export default function CropCard({ crop, index = 0, viewMode = 'grid' }) {
       >
         <div className="flex flex-col sm:flex-row">
           {/* Image */}
-          <div className="relative w-full sm:w-52 md:w-60 h-48 sm:h-auto overflow-hidden flex-shrink-0">
+          <div className="gallery-media relative w-full sm:w-52 md:w-60 h-48 sm:h-auto overflow-hidden flex-shrink-0">
             <img
               src={getImageUrl(crop.imageUrl)}
               alt={crop.cropName}
               loading="lazy"
               decoding="async"
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+              className="gallery-image w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/5 group-hover:to-black/10 transition-all duration-500" />
+            <div className="gallery-overlay bg-gradient-to-r from-transparent to-black/5" />
             {crop.quantity <= 10 && (
               <span className="absolute top-3 left-3 bg-red-500/90 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg shadow-red-500/30 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
@@ -61,7 +61,7 @@ export default function CropCard({ crop, index = 0, viewMode = 'grid' }) {
               </span>
             )}
             {crop.category && (
-              <span className={`absolute bottom-3 left-3 ${accent.light} ${accent.text} ${accent.border} border backdrop-blur-sm text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wider`}>
+              <span className={`gallery-chip absolute bottom-3 left-3 ${accent.light} ${accent.text} ${accent.border} border`}>
                 {crop.category}
               </span>
             )}
@@ -144,7 +144,7 @@ export default function CropCard({ crop, index = 0, viewMode = 'grid' }) {
   /* ═══════════════════ GRID VIEW ═══════════════════ */
   return (
     <div
-      className="group relative bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800/80 hover:border-emerald-200/80 dark:hover:border-emerald-700/50 shadow-sm hover:shadow-2xl hover:shadow-emerald-500/[0.08] transition-all duration-500 hover:-translate-y-1.5 overflow-hidden cursor-pointer animate-fade-in-up fill-mode-both"
+      className="group gallery-card relative bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800/80 hover:border-emerald-200/80 dark:hover:border-emerald-700/50 shadow-sm hover:shadow-2xl hover:shadow-emerald-500/[0.08] cursor-pointer animate-fade-in-up fill-mode-both"
       style={{ animationDelay: `${index * 60}ms` }}
       role="link"
       tabIndex={0}
@@ -152,17 +152,17 @@ export default function CropCard({ crop, index = 0, viewMode = 'grid' }) {
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetails(); } }}
     >
       {/* ── Image Section ── */}
-      <div className="relative h-52 overflow-hidden bg-gray-100 dark:bg-gray-800">
+      <div className="gallery-media relative h-52 overflow-hidden bg-gray-100 dark:bg-gray-800">
         <img
           src={getImageUrl(crop.imageUrl)}
           alt={crop.cropName}
           loading="lazy"
           decoding="async"
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+          className="gallery-image w-full h-full object-cover"
         />
 
         {/* Hover overlay with gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
+        <div className="gallery-overlay bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
 
         {/* Quick view button — appears on hover */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-3 group-hover:translate-y-0">
@@ -179,7 +179,7 @@ export default function CropCard({ crop, index = 0, viewMode = 'grid' }) {
         {/* Category pill — top left */}
         {crop.category && (
           <div className="absolute top-3 left-3 z-10">
-            <span className={`${accent.light} ${accent.text} ${accent.border} border backdrop-blur-md text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wider shadow-sm`}>
+            <span className={`${accent.light} ${accent.text} ${accent.border} gallery-chip border`}>
               {crop.category}
             </span>
           </div>
@@ -243,6 +243,29 @@ export default function CropCard({ crop, index = 0, viewMode = 'grid' }) {
             <p className="text-xs text-gray-500 dark:text-gray-400 font-medium truncate">{crop.farmer.name}</p>
           </div>
         )}
+
+        {/* Delivery availability badge */}
+        {crop.farmer && (() => {
+          const areas = crop.farmer.farmerProfile?.serviceableAreas;
+          if (areas) {
+            const areaList = areas.split(',').map(a => a.trim()).filter(Boolean);
+            const display = areaList.length > 2
+              ? `${areaList.slice(0, 2).join(', ')} +${areaList.length - 2} more`
+              : areaList.join(', ');
+            return (
+              <div className="flex items-center gap-1.5 mt-2 text-[11px] text-blue-600 dark:text-blue-400 font-medium">
+                <FiMapPin size={10} className="flex-shrink-0" />
+                <span className="truncate">Delivers to: {display}</span>
+              </div>
+            );
+          }
+          return (
+            <div className="flex items-center gap-1.5 mt-2 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+              <FiMapPin size={10} className="flex-shrink-0" />
+              <span>Delivers Everywhere</span>
+            </div>
+          );
+        })()}
 
         {/* CTA Buttons */}
         <div className="mt-3 flex gap-2">

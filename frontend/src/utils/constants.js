@@ -11,5 +11,10 @@ export const CROP_CATEGORIES = [
   'Pulses',
   'Oilseeds',
   'Dairy',
+  'Flowers',
+  'Cash Crops',
+  'Herbs & Medicinal',
+  'Dry Fruits & Nuts',
+  'Organic Manures',
   'Others',
 ];

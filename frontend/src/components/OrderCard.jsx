@@ -7,6 +7,8 @@ export default function OrderCard({ order, actions }) {
   const isRejected = order.status === 'REJECTED';
   const hasItems = order.items && order.items.length > 0;
   const isMultiItem = hasItems && order.items.length > 1;
+  const previewImage = order.crop?.imageUrl || order.items?.[0]?.crop?.imageUrl;
+  const previewName = order.crop?.cropName || order.items?.[0]?.crop?.cropName || 'Crop';
 
   // Build display name
   const displayName = isMultiItem
@@ -14,7 +16,30 @@ export default function OrderCard({ order, actions }) {
     : order.crop?.cropName || 'Crop';
 
   return (
-    <div className="card card-hover p-5">
+    <div className="gallery-card card-hover p-5">
+      {previewImage && (
+        <div className="gallery-media relative mb-4 h-44 sm:h-52 rounded-[1.35rem] overflow-hidden">
+          <img
+            src={getImageUrl(previewImage)}
+            alt={previewName}
+            loading="lazy"
+            decoding="async"
+            className="gallery-image w-full h-full object-cover"
+          />
+          <div className="gallery-overlay" />
+          <div className="absolute inset-0 flex items-end justify-between p-4 sm:p-5">
+            <span className="gallery-chip bg-white/90 text-gray-700 border-white/40 dark:bg-slate-900/90 dark:text-gray-100 dark:border-white/10">
+              {displayName}
+            </span>
+            {isMultiItem && (
+              <span className="gallery-chip bg-emerald-500/90 text-white border-emerald-400/40">
+                {order.items.length} crops
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row gap-4">
         {/* Left: Details */}
         <div className="flex-1 min-w-0">
@@ -39,7 +64,7 @@ export default function OrderCard({ order, actions }) {
                     <img
                       src={getImageUrl(item.crop.imageUrl)}
                       alt={item.crop?.cropName}
-                      className="w-9 h-9 rounded-lg object-cover border border-gray-200 dark:border-gray-700 flex-shrink-0"
+                      className="gallery-thumb w-9 h-9 flex-shrink-0"
                     />
                   )}
                   <div className="flex-1 min-w-0">

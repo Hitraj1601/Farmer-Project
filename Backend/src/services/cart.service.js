@@ -3,6 +3,19 @@ const ApiError = require("../utils/apiError");
 const { addTrackingEntry } = require("./tracking.service");
 const { notifyUser } = require("../config/socket");
 
+const getBuyerDeliveryAddress = async (buyerId) => {
+  const buyerProfile = await prisma.buyerProfile.findUnique({
+    where: { userId: buyerId },
+    select: { deliveryAddress: true },
+  });
+
+  if (!buyerProfile?.deliveryAddress) {
+    throw new ApiError(400, "Please add a delivery address in your profile before placing an order.");
+  }
+
+  return buyerProfile.deliveryAddress;
+};
+
 /**
  * Get or create a cart for the buyer, with full item details.
  */
@@ -149,6 +162,8 @@ const clearCart = async (buyerId) => {
  * Checkout: validate items, group by farmer, create orders with OrderItems.
  */
 const checkout = async (buyerId) => {
+  const deliveryAddress = await getBuyerDeliveryAddress(buyerId);
+
   // 1. Get cart with items
   const cart = await prisma.cart.findUnique({
     where: { buyerId },
@@ -231,6 +246,7 @@ const checkout = async (buyerId) => {
           cropId: primaryItem.cropId,
           quantity: primaryItem.quantity,
           totalPrice,
+          deliveryAddress,
           items: { create: orderItemsData },
         },
         include: {

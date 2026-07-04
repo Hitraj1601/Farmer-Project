@@ -75,6 +75,11 @@ export default function CropDetailPage() {
       const res = await orderService.create({ cropId: id, quantity: parseFloat(quantity) });
       const order = res.data;
 
+      // Show delivery warning if applicable
+      if (order.deliveryWarning) {
+        toast(order.deliveryWarning, { icon: '⚠️', duration: 6000 });
+      }
+
       try {
         const payRes = await paymentService.createOrder(order.id);
         const { razorpayOrderId, amount, currency } = payRes.data;
@@ -222,19 +227,19 @@ export default function CropDetailPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="grid lg:grid-cols-2 gap-10 lg:gap-14">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="grid lg:grid-cols-2 gap-6 lg:gap-10">
           {/* Image */}
           <div className="animate-fade-in-up fill-mode-both">
-            <div className="relative rounded-3xl overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-2xl shadow-gray-300/30 dark:shadow-black/30 border border-gray-200/50 dark:border-gray-700/50">
+            <div className="gallery-card relative rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-xl shadow-gray-300/30 dark:shadow-black/30 border border-gray-200/50 dark:border-gray-700/50">
               <img
                 src={getImageUrl(crop.imageUrl)}
                 alt={crop.cropName}
-                className="w-full h-80 lg:h-[520px] object-cover"
+                className="gallery-image w-full h-64 lg:h-[420px] object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+              <div className="gallery-overlay bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-100" />
               {crop.category && (
-                <span className="absolute top-5 left-5 px-4 py-2 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl rounded-2xl text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider shadow-lg border border-white/30 dark:border-gray-700/30">
+                <span className="gallery-chip absolute top-3 left-3 px-3 py-1 text-xs bg-white/90 dark:bg-gray-900/90 text-gray-700 dark:text-gray-300 border-white/30 dark:border-gray-700/30">
                   {crop.category}
                 </span>
               )}
@@ -248,35 +253,35 @@ export default function CropDetailPage() {
 
           {/* Details */}
           <div className="animate-fade-in-up fill-mode-both delay-100">
-            <h1 className="text-3xl lg:text-4xl font-black text-gray-900 dark:text-white leading-tight">{crop.cropName}</h1>
-            <div className="flex items-center gap-4 mt-4">
-              <div className="flex items-center gap-2 text-gray-500">
-                <FiMapPin size={16} className="text-emerald-500" />
+            <h1 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white leading-tight">{crop.cropName}</h1>
+            <div className="flex items-center gap-3 mt-2">
+              <div className="flex items-center gap-1.5 text-gray-500">
+                <FiMapPin size={14} className="text-emerald-500" />
                 <span className="text-sm font-medium">{crop.location}</span>
               </div>
               {farmerReviews && (
-                <div className="flex items-center gap-1.5 bg-amber-50 dark:bg-amber-950/30 px-3 py-1 rounded-xl">
-                  <FiStar className="text-amber-400 fill-amber-400" size={14} />
-                  <span className="text-sm font-bold text-amber-700 dark:text-amber-400">{farmerReviews.averageRating}</span>
-                  <span className="text-xs text-amber-500/70">({farmerReviews.totalReviews})</span>
+                <div className="flex items-center gap-1 bg-amber-50 dark:bg-amber-950/30 px-2.5 py-0.5 rounded-lg">
+                  <FiStar className="text-amber-400 fill-amber-400" size={12} />
+                  <span className="text-xs font-bold text-amber-700 dark:text-amber-400">{farmerReviews.averageRating}</span>
+                  <span className="text-[11px] text-amber-500/70">({farmerReviews.totalReviews})</span>
                 </div>
               )}
             </div>
 
             {/* Price Card */}
-            <div className="mt-8 bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 dark:from-emerald-950/30 dark:via-green-950/30 dark:to-teal-950/30 rounded-3xl p-7 border border-emerald-100 dark:border-emerald-900/50 shadow-lg shadow-emerald-500/[0.05]">
-              <div className="flex items-baseline gap-3">
-                <span className="text-4xl lg:text-5xl font-black text-emerald-600 dark:text-emerald-400">{formatPrice(crop.pricePerKg)}</span>
-                <span className="text-gray-500 font-medium">per kg</span>
+            <div className="mt-4 bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 dark:from-emerald-950/30 dark:via-green-950/30 dark:to-teal-950/30 rounded-2xl p-5 border border-emerald-100 dark:border-emerald-900/50 shadow-sm">
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl lg:text-3xl font-black text-emerald-600 dark:text-emerald-400">{formatPrice(crop.pricePerKg)}</span>
+                <span className="text-sm text-gray-500 font-medium">per kg</span>
               </div>
-              <div className="mt-5">
-                <div className="flex justify-between text-sm mb-2">
+              <div className="mt-3">
+                <div className="flex justify-between text-xs mb-1.5">
                   <span className="text-gray-600 dark:text-gray-400 font-medium">Available Stock</span>
                   <span className="font-bold text-gray-900 dark:text-white">{crop.quantity} kg</span>
                 </div>
-                <div className="w-full bg-emerald-100 dark:bg-emerald-900/30 rounded-full h-3 overflow-hidden">
+                <div className="w-full bg-emerald-100 dark:bg-emerald-900/30 rounded-full h-2 overflow-hidden">
                   <div
-                    className="bg-gradient-to-r from-emerald-500 to-green-400 h-3 rounded-full transition-all duration-700 ease-out"
+                    className="bg-gradient-to-r from-emerald-500 to-green-400 h-2 rounded-full transition-all duration-700 ease-out"
                     style={{ width: `${stockPercent}%` }}
                   />
                 </div>
@@ -285,17 +290,17 @@ export default function CropDetailPage() {
 
             {/* Farmer Card + Message Button */}
             {crop.farmer && (
-              <div className="mt-5 flex items-center gap-3 p-5 bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-lg transition-shadow duration-300">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center text-white font-black text-xl flex-shrink-0 shadow-lg shadow-emerald-500/20">
+              <div className="mt-3 flex items-center gap-3 p-4 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow duration-300">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center text-white font-bold text-base flex-shrink-0 shadow-md shadow-emerald-500/20">
                   {crop.farmer.name?.[0]?.toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                    <FiUser size={14} className="text-gray-400" /> {crop.farmer.name}
+                  <p className="font-semibold text-sm text-gray-900 dark:text-white flex items-center gap-1.5">
+                    <FiUser size={12} className="text-gray-400" /> {crop.farmer.name}
                   </p>
                   {crop.farmer.phone && (
-                    <p className="text-sm text-gray-500 flex items-center gap-2 mt-0.5">
-                      <FiPhone size={13} className="text-gray-400" /> {crop.farmer.phone}
+                    <p className="text-xs text-gray-500 flex items-center gap-1.5 mt-0.5">
+                      <FiPhone size={11} className="text-gray-400" /> {crop.farmer.phone}
                     </p>
                   )}
                 </div>
@@ -303,37 +308,70 @@ export default function CropDetailPage() {
                   <button
                     onClick={handleMessageFarmer}
                     disabled={chatLoading}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 font-semibold text-sm hover:bg-blue-100 dark:hover:bg-blue-950 transition-colors disabled:opacity-50 flex-shrink-0"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 font-semibold text-xs hover:bg-blue-100 dark:hover:bg-blue-950 transition-colors disabled:opacity-50 flex-shrink-0"
                   >
-                    <FiMessageSquare size={15} />
+                    <FiMessageSquare size={13} />
                     {chatLoading ? 'Opening...' : 'Message'}
                   </button>
                 )}
               </div>
             )}
 
+            {/* Delivery Availability */}
+            {crop.farmer && (() => {
+              const areas = crop.farmer.farmerProfile?.serviceableAreas;
+              if (areas) {
+                const areaList = areas.split(',').map(a => a.trim()).filter(Boolean);
+                return (
+                  <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-100 dark:border-blue-900/50">
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      <FiTruck className="text-blue-600 dark:text-blue-400" size={13} />
+                      <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Delivery Available To</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {areaList.map((area) => (
+                        <span key={area} className="px-2 py-0.5 bg-white dark:bg-gray-800 text-[11px] font-semibold text-blue-700 dark:text-blue-300 rounded-md border border-blue-200 dark:border-blue-800">
+                          {area}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="text-[10px] text-blue-500/70 mt-1.5">If your area isn't listed, message the farmer to confirm delivery availability.</p>
+                  </div>
+                );
+              }
+              return (
+                <div className="mt-2 p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-xl border border-emerald-100 dark:border-emerald-900/50">
+                  <div className="flex items-center gap-1.5">
+                    <FiTruck className="text-emerald-600 dark:text-emerald-400" size={13} />
+                    <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">Delivers Across India 🇮🇳</span>
+                  </div>
+                  <p className="text-[10px] text-emerald-500/70 mt-1">This farmer accepts orders from all locations.</p>
+                </div>
+              );
+            })()}
+
             {/* Trust badges */}
-            <div className="mt-5 grid grid-cols-3 gap-3">
+            <div className="mt-3 grid grid-cols-3 gap-2">
               {[
                 { icon: FiShield, text: 'Verified', color: 'emerald' },
                 { icon: FiTruck, text: 'Fast Delivery', color: 'blue' },
                 { icon: FiCheckCircle, text: 'Quality Assured', color: 'violet' },
               ].map((badge) => (
-                <div key={badge.text} className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 rounded-2xl px-3 py-3 border border-gray-100 dark:border-gray-700">
-                  <badge.icon size={14} className={`text-${badge.color}-500`} />
-                  <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">{badge.text}</span>
+                <div key={badge.text} className="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-800 rounded-xl px-2.5 py-2 border border-gray-100 dark:border-gray-700">
+                  <badge.icon size={12} className={`text-${badge.color}-500`} />
+                  <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">{badge.text}</span>
                 </div>
               ))}
             </div>
 
             {/* Order section */}
             {user?.role !== 'FARMER' && (
-              <div className="mt-8 space-y-5">
-                <div className="flex items-center gap-5">
-                  <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Quantity (kg):</span>
-                  <div className="flex items-center border-2 border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden bg-white dark:bg-gray-900">
-                    <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-400">
-                      <FiMinus size={16} />
+              <div className="mt-5 space-y-3">
+                <div className="flex items-center gap-4">
+                  <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Quantity (kg):</span>
+                  <div className="flex items-center border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-900">
+                    <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-400">
+                      <FiMinus size={14} />
                     </button>
                     <input
                       type="number"
@@ -341,17 +379,17 @@ export default function CropDetailPage() {
                       max={crop.quantity}
                       value={quantity}
                       onChange={(e) => setQuantity(Math.max(1, Math.min(crop.quantity, Number(e.target.value))))}
-                      className="w-16 text-center border-x-2 border-gray-200 dark:border-gray-700 py-3 text-sm font-bold focus:outline-none dark:bg-gray-900 dark:text-white"
+                      className="w-14 text-center border-x border-gray-200 dark:border-gray-700 py-2 text-sm font-bold focus:outline-none dark:bg-gray-900 dark:text-white"
                     />
-                    <button onClick={() => setQuantity(Math.min(crop.quantity, quantity + 1))} className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-400">
-                      <FiPlus size={16} />
+                    <button onClick={() => setQuantity(Math.min(crop.quantity, quantity + 1))} className="px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-400">
+                      <FiPlus size={14} />
                     </button>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between p-5 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-800/50 rounded-2xl border border-gray-200 dark:border-gray-700">
-                  <span className="font-bold text-gray-700 dark:text-gray-300">Total Price</span>
-                  <span className="text-3xl font-black text-emerald-600 dark:text-emerald-400">{formatPrice(totalPrice)}</span>
+                <div className="flex items-center justify-between p-3.5 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
+                  <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Total Price</span>
+                  <span className="text-xl font-black text-emerald-600 dark:text-emerald-400">{formatPrice(totalPrice)}</span>
                 </div>
 
                 <div className="flex gap-3">
@@ -363,16 +401,16 @@ export default function CropDetailPage() {
                       setAddingToCart(false);
                     }}
                     disabled={addingToCart || isInCart(id)}
-                    className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl text-base font-bold transition-all duration-300 border-2 ${
+                    className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all duration-300 border ${
                       isInCart(id)
                         ? 'bg-violet-50 dark:bg-violet-950/30 border-violet-200 dark:border-violet-800 text-violet-600 dark:text-violet-400 cursor-default'
                         : 'bg-white dark:bg-gray-900 border-violet-300 dark:border-violet-700 text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-950/50 hover:border-violet-400 hover:shadow-lg hover:shadow-violet-500/10'
                     }`}
                   >
-                    <FiShoppingCart size={20} />
+                    <FiShoppingCart size={16} />
                     {addingToCart ? 'Adding...' : isInCart(id) ? '✓ In Cart' : 'Add to Cart'}
                   </button>
-                  <Button onClick={handleOrder} loading={ordering} className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl text-base">
+                  <Button onClick={handleOrder} loading={ordering} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm">
                     {ordering ? 'Placing...' : 'Buy Now'}
                   </Button>
                 </div>
@@ -382,14 +420,14 @@ export default function CropDetailPage() {
         </div>
 
         {/* Reviews Section */}
-        <div className="mt-20 animate-fade-in-up fill-mode-both delay-200">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-500/20">
-                <FiStar className="text-white" size={18} />
+        <div className="mt-12 animate-fade-in-up fill-mode-both delay-200">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center shadow-md shadow-amber-500/20">
+                <FiStar className="text-white" size={14} />
               </div>
               <div>
-                <h2 className="text-2xl font-black text-gray-900 dark:text-white">
+                <h2 className="text-lg font-black text-gray-900 dark:text-white">
                   {cropReviews?.totalReviews ? 'Crop Reviews' : 'Farmer Reviews'}
                 </h2>
                 {(cropReviews?.totalReviews || farmerReviews?.totalReviews) ? (

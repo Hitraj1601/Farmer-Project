@@ -85,6 +85,17 @@ export default function FarmerOrders() {
                         </>
                       )}
                     </div>
+                    <div className="mt-2 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/40">
+                      <div className="flex items-start gap-2">
+                        <FiMapPin size={14} className="text-emerald-600 dark:text-emerald-400 mt-0.5 shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Delivery Address</p>
+                          <p className="text-sm text-gray-700 dark:text-gray-200 break-words">
+                            {order.deliveryAddress || order.buyer?.buyerProfile?.deliveryAddress || 'Not provided'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                     <p className="text-xs text-gray-400 mt-1.5">
                       Payment: <span className={order.payment?.status === 'SUCCESS' ? 'text-emerald-600 font-medium' : 'text-gray-500'}>{order.payment?.status || 'Pending'}</span>
                     </p>

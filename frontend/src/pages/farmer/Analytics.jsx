@@ -19,7 +19,7 @@ export default function Analytics() {
           cropService.getMyCrops(),
           orderService.getMyOrders(),
         ]);
-        setCrops(cropsRes.data || []);
+        setCrops(cropsRes.data?.crops || cropsRes.data || []);
         setOrders(ordersRes.data || []);
       } catch {
         setCrops([]);

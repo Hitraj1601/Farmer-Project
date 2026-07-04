@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { GiWheat } from 'react-icons/gi';
 import { FiMail, FiLock, FiArrowRight, FiShield, FiTruck, FiCheckCircle } from 'react-icons/fi';
@@ -11,8 +11,16 @@ export default function LoginPage() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.role === 'ADMIN') navigate('/admin', { replace: true });
+      else if (user.role === 'FARMER') navigate('/dashboard', { replace: true });
+      else navigate('/marketplace', { replace: true });
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

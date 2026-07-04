@@ -32,12 +32,13 @@ model User {
 }
 
 model FarmerProfile {
-  id           String @id @default(uuid())
-  userId       String @unique
-  farmLocation String
-  bankAccount  String
-  ifscCode     String
-  user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id               String  @id @default(uuid())
+  userId           String  @unique
+  farmLocation     String
+  bankAccount      String
+  ifscCode         String
+  serviceableAreas String? @db.VarChar(1000)
+  user             User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("farmer_profiles")
 }
@@ -47,6 +48,7 @@ model BuyerProfile {
   userId          String @unique
   businessName    String
   businessAddress String
+  deliveryAddress String? @db.VarChar(500)
   user            User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("buyer_profiles")
@@ -82,6 +84,7 @@ model Order {
   cropId     String
   quantity   Float
   totalPrice Float
+  deliveryAddress String?     @db.VarChar(500)
   status     OrderStatus     @default(PENDING)
   createdAt  DateTime        @default(now())
   tracking   OrderTracking[]

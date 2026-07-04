@@ -308,7 +308,7 @@ function CartItemRow({ item, onUpdate, onRemove }) {
         <img
           src={getImageUrl(crop?.imageUrl)}
           alt={crop?.cropName}
-          className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border border-gray-100 dark:border-gray-700 hover:opacity-80 transition-opacity"
+          className="gallery-thumb w-16 h-16 sm:w-20 sm:h-20"
         />
       </Link>
 

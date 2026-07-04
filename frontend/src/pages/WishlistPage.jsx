@@ -110,7 +110,7 @@ export default function WishlistPage() {
               return (
                 <div
                   key={item.id}
-                  className="group bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-2xl hover:shadow-rose-500/[0.08] transition-all duration-500 hover:-translate-y-2 overflow-hidden animate-fade-in-up fill-mode-both relative"
+                  className="group gallery-card bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-2xl hover:shadow-rose-500/[0.08] animate-fade-in-up fill-mode-both relative"
                   style={{ animationDelay: `${i * 0.08}s` }}
                 >
                   {/* Price drop badge */}
@@ -122,16 +122,16 @@ export default function WishlistPage() {
                   )}
 
                   {/* Image */}
-                  <div className="relative h-52 overflow-hidden bg-gray-100 dark:bg-gray-800">
+                  <div className="gallery-media relative h-52 overflow-hidden bg-gray-100 dark:bg-gray-800">
                     <img
                       src={getImageUrl(crop.imageUrl)}
                       alt={crop.cropName}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                      className="gallery-image w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="gallery-overlay bg-gradient-to-t from-black/30 via-transparent to-transparent" />
 
                     {crop.category && (
-                      <span className="absolute top-4 left-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl text-gray-700 dark:text-gray-200 text-[10px] font-bold px-3 py-1.5 rounded-xl uppercase tracking-wider shadow-lg border border-white/30 dark:border-gray-700/30">
+                      <span className="gallery-chip absolute top-4 left-4 bg-white/90 dark:bg-gray-900/90 text-gray-700 dark:text-gray-200 border-white/30 dark:border-gray-700/30">
                         {crop.category}
                       </span>
                     )}
@@ -140,7 +140,7 @@ export default function WishlistPage() {
                     <button
                       onClick={() => handleRemove(item.cropId, crop.cropName)}
                       disabled={removing === item.cropId}
-                      className="absolute top-4 right-4 w-10 h-10 rounded-2xl bg-red-500 text-white flex items-center justify-center shadow-lg shadow-red-500/30 hover:bg-red-600 hover:scale-110 transition-all duration-300 disabled:opacity-50 backdrop-blur-xl"
+                      className="gallery-action absolute top-4 right-4 w-10 h-10 rounded-2xl bg-red-500 text-white flex items-center justify-center shadow-lg shadow-red-500/30 hover:bg-red-600 hover:scale-110 transition-all duration-300 disabled:opacity-50 backdrop-blur-xl"
                       aria-label="Remove from wishlist"
                     >
                       {removing === item.cropId

@@ -122,11 +122,13 @@ const farmerProfileSchema = Joi.object({
     .pattern(/^[A-Z]{4}0[A-Z0-9]{6}$/)
     .required()
     .messages({ "string.pattern.base": "IFSC code must be in valid format (e.g., SBIN0001234)" }),
+  serviceableAreas: Joi.string().max(1000).allow(null, "").optional(),
 });
 
 const buyerProfileSchema = Joi.object({
   businessName: Joi.string().min(2).max(200).required(),
   businessAddress: Joi.string().min(5).max(500).required(),
+  deliveryAddress: Joi.string().min(5).max(500).required(),
 });
 
 const addToCartSchema = Joi.object({

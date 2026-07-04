@@ -3,7 +3,7 @@ const { sendResponse } = require("../utils/apiResponse");
 
 const upsertFarmerProfile = async (req, res, next) => {
   try {
-    const { farmLocation, bankAccount, ifscCode } = req.body;
+    const { farmLocation, bankAccount, ifscCode, serviceableAreas } = req.body;
 
     if (!farmLocation || !bankAccount || !ifscCode) {
       return sendResponse(res, 400, "farmLocation, bankAccount, and ifscCode are required.");
@@ -13,6 +13,7 @@ const upsertFarmerProfile = async (req, res, next) => {
       farmLocation,
       bankAccount,
       ifscCode,
+      serviceableAreas: serviceableAreas || null,
     });
 
     return sendResponse(res, 200, "Farmer profile saved successfully.", profile);
@@ -33,15 +34,16 @@ const getFarmerProfile = async (req, res, next) => {
 
 const upsertBuyerProfile = async (req, res, next) => {
   try {
-    const { businessName, businessAddress } = req.body;
+    const { businessName, businessAddress, deliveryAddress } = req.body;
 
-    if (!businessName || !businessAddress) {
-      return sendResponse(res, 400, "businessName and businessAddress are required.");
+    if (!businessName || !businessAddress || !deliveryAddress) {
+      return sendResponse(res, 400, "businessName, businessAddress, and deliveryAddress are required.");
     }
 
     const profile = await profileService.upsertBuyerProfile(req.user.id, {
       businessName,
       businessAddress,
+      deliveryAddress,
     });
 
     return sendResponse(res, 200, "Buyer profile saved successfully.", profile);

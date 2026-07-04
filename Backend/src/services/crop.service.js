@@ -81,7 +81,7 @@ const getAllCrops = async (query) => {
       where,
       skip,
       take: parseInt(limit),
-      include: { farmer: { select: { id: true, name: true, phone: true, email: true } } },
+      include: { farmer: { select: { id: true, name: true, phone: true, email: true, farmerProfile: { select: { serviceableAreas: true } } } } },
       orderBy,
     }),
     prisma.crop.count({ where }),
@@ -126,7 +126,7 @@ const getMyCrops = async (farmerId, query = {}) => {
 const getCropById = async (id) => {
   const crop = await prisma.crop.findUnique({
     where: { id },
-    include: { farmer: { select: { id: true, name: true, phone: true, email: true } } },
+    include: { farmer: { select: { id: true, name: true, phone: true, email: true, farmerProfile: { select: { serviceableAreas: true } } } } },
   });
   if (!crop) throw new ApiError(404, "Crop not found.");
   return crop;

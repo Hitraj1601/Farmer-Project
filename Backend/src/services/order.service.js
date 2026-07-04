@@ -3,8 +3,24 @@ const ApiError = require("../utils/apiError");
 const { addTrackingEntry } = require("./tracking.service");
 const { notifyUser } = require("../config/socket");
 
+const getBuyerDeliveryAddress = async (buyerId) => {
+  const buyerProfile = await prisma.buyerProfile.findUnique({
+    where: { userId: buyerId },
+    select: { deliveryAddress: true },
+  });
+
+  if (!buyerProfile?.deliveryAddress) {
+    throw new ApiError(400, "Please add a delivery address in your profile before placing an order.");
+  }
+
+  return buyerProfile.deliveryAddress;
+};
+
 const createOrder = async ({ buyerId, cropId, quantity }) => {
-  const crop = await prisma.crop.findUnique({ where: { id: cropId } });
+  const crop = await prisma.crop.findUnique({
+    where: { id: cropId },
+    include: { farmer: { select: { farmerProfile: { select: { serviceableAreas: true } } } } },
+  });
   if (!crop) throw new ApiError(404, "Crop not found.");
 
   if (crop.farmerId === buyerId) {
@@ -15,10 +31,23 @@ const createOrder = async ({ buyerId, cropId, quantity }) => {
     throw new ApiError(400, `Only ${crop.quantity} kg available.`);
   }
 
+  const deliveryAddress = await getBuyerDeliveryAddress(buyerId);
   const totalPrice = parseFloat((quantity * crop.pricePerKg).toFixed(2));
 
+  // Check delivery feasibility (soft warning, does not block)
+  let deliveryWarning = null;
+  const serviceableAreas = crop.farmer?.farmerProfile?.serviceableAreas;
+  if (serviceableAreas) {
+    const areas = serviceableAreas.split(",").map((a) => a.trim().toLowerCase()).filter(Boolean);
+    const addressLower = deliveryAddress.toLowerCase();
+    const isServiceable = areas.some((area) => addressLower.includes(area));
+    if (!isServiceable) {
+      deliveryWarning = `This farmer typically delivers to: ${serviceableAreas}. Your delivery address may be outside their service area. We recommend confirming with the farmer via chat.`;
+    }
+  }
+
   const order = await prisma.order.create({
-    data: { buyerId, cropId, quantity, totalPrice },
+    data: { buyerId, cropId, quantity, totalPrice, deliveryAddress },
     include: {
       crop: { select: { cropName: true, pricePerKg: true, location: true } },
     },
@@ -40,7 +69,7 @@ const createOrder = async ({ buyerId, cropId, quantity }) => {
     orderId: order.id,
   });
 
-  return order;
+  return { ...order, deliveryWarning };
 };
 
 const getMyOrders = async (userId, role) => {
@@ -67,7 +96,14 @@ const getMyOrders = async (userId, role) => {
       where: { crop: { farmerId: userId } },
       include: {
         crop: { select: { cropName: true, pricePerKg: true } },
-        buyer: { select: { name: true, phone: true, email: true } },
+        buyer: {
+          select: {
+            name: true,
+            phone: true,
+            email: true,
+            buyerProfile: { select: { businessName: true, businessAddress: true, deliveryAddress: true } },
+          },
+        },
         payment: { select: { status: true, transactionId: true } },
         items: {
           include: {
@@ -83,7 +119,7 @@ const getMyOrders = async (userId, role) => {
   return prisma.order.findMany({
     include: {
       crop: { select: { cropName: true, pricePerKg: true } },
-      buyer: { select: { name: true, phone: true } },
+      buyer: { select: { name: true, phone: true, buyerProfile: { select: { deliveryAddress: true } } } },
       payment: { select: { status: true, transactionId: true } },
     },
     orderBy: { createdAt: "desc" },

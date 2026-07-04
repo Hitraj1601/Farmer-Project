@@ -12,22 +12,25 @@ export default function FarmerDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchData = async () => {
       try {
         const [cropsRes, ordersRes] = await Promise.all([
           cropService.getMyCrops(),
           orderService.getMyOrders(),
         ]);
-        const crops = cropsRes.data;
-        const orders = ordersRes.data;
+        // cropsRes.data is { crops: [...], pagination: {...} } — extract the crops array
+        const crops = cropsRes.data?.crops || [];
+        const orders = Array.isArray(ordersRes.data) ? ordersRes.data : [];
         const revenue = orders.filter(o => o.status === 'DELIVERED').reduce((sum, o) => sum + o.totalPrice, 0);
         const pending = orders.filter(o => o.status === 'PENDING').length;
         setStats({ crops: crops.length, orders: orders.length, revenue, pending });
         setRecentOrders(orders.slice(0, 5));
-      } catch { /* silent */ }
+      } catch (err) {
+        console.error('Failed to load dashboard data:', err);
+      }
       setLoading(false);
     };
-    fetch();
+    fetchData();
   }, []);
 
   if (loading) return <Loader text="Loading dashboard..." />;

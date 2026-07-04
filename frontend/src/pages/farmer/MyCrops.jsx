@@ -82,7 +82,7 @@ export default function MyCrops() {
                   alt={crop.cropName}
                   loading="lazy"
                   decoding="async"
-                  className="w-20 h-20 rounded-xl object-cover flex-shrink-0 ring-1 ring-gray-100"
+                  className="gallery-thumb w-20 h-20 flex-shrink-0"
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
