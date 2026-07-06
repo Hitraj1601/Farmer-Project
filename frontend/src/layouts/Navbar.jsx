@@ -77,9 +77,11 @@ export default function Navbar() {
             <Link to="/marketplace" className={navLinkClass('/marketplace')}>Marketplace</Link>
             {isAuthenticated && (
               <>
-                <Link to={getDashboardLink()} className={navLinkClass(getDashboardLink())}>
-                  Dashboard
-                </Link>
+                {user?.role !== 'BUYER' && (
+                  <Link to={getDashboardLink()} className={navLinkClass(getDashboardLink())}>
+                    Dashboard
+                  </Link>
+                )}
                 {user?.role === 'BUYER' && (
                   <>
                     <Link to="/my-orders" className={navLinkClass('/my-orders')}>
@@ -129,37 +131,7 @@ export default function Navbar() {
               {dark ? <FiSun size={18} /> : <FiMoon size={18} />}
             </button>
 
-            {/* Chat icon + Cart icon */}
-            {isAuthenticated && (
-              <>
-                <Link
-                  to="/chat"
-                  className="relative p-2.5 rounded-full hover:bg-blue-50 dark:hover:bg-blue-950/60 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 border border-transparent hover:border-blue-100 dark:hover:border-blue-900/50"
-                  aria-label="Messages"
-                >
-                  <FiMessageSquare size={18} />
-                  {unreadChat > 0 && (
-                    <span className="absolute top-0.5 right-0.5 min-w-[16px] h-4 px-1 bg-emerald-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center shadow-sm">
-                      {unreadChat > 9 ? '9+' : unreadChat}
-                    </span>
-                  )}
-                </Link>
-                {user?.role === 'BUYER' && (
-                  <Link
-                    to="/cart"
-                    className="relative p-2.5 rounded-full hover:bg-violet-50 dark:hover:bg-violet-950/60 text-gray-500 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-all duration-200 border border-transparent hover:border-violet-100 dark:hover:border-violet-900/50"
-                    aria-label="Cart"
-                  >
-                    <FiShoppingCart size={18} />
-                    {cartCount > 0 && (
-                      <span className="absolute top-0.5 right-0.5 min-w-[16px] h-4 px-1 bg-violet-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center shadow-sm">
-                        {cartCount > 9 ? '9+' : cartCount}
-                      </span>
-                    )}
-                  </Link>
-                )}
-              </>
-            )}
+
 
             {isAuthenticated ? (
               <div className="relative" ref={menuRef}>
@@ -187,10 +159,12 @@ export default function Navbar() {
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-950 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors">
                       <FiSettings size={15} /> Profile Settings
                     </Link>
-                    <Link to={getDashboardLink()} onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-950 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors">
-                      <FiGrid size={15} /> Dashboard
-                    </Link>
+                    {user?.role !== 'BUYER' && (
+                      <Link to={getDashboardLink()} onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-950 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors">
+                        <FiGrid size={15} /> Dashboard
+                      </Link>
+                    )}
                     {user?.role === 'BUYER' && (
                       <>
                         <Link to="/my-orders" onClick={() => setUserMenuOpen(false)}
@@ -254,9 +228,11 @@ export default function Navbar() {
             </Link>
             {isAuthenticated ? (
               <>
-                <Link to={getDashboardLink()} className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-950 hover:text-emerald-700 dark:hover:text-emerald-400 font-medium transition-colors">
-                  <FiGrid size={16} /> Dashboard
-                </Link>
+                {user?.role !== 'BUYER' && (
+                  <Link to={getDashboardLink()} className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-950 hover:text-emerald-700 dark:hover:text-emerald-400 font-medium transition-colors">
+                    <FiGrid size={16} /> Dashboard
+                  </Link>
+                )}
                 {user?.role === 'BUYER' && (
                   <>
                     <Link to="/my-orders" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-950 hover:text-emerald-700 dark:hover:text-emerald-400 font-medium transition-colors">
