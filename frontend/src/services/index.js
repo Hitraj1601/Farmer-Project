@@ -24,6 +24,7 @@ export const orderService = {
   create: (data) => api.post('/orders', data),
   getMyOrders: () => api.get('/orders/my'),
   updateStatus: (id, status) => api.put(`/orders/${id}/status`, { status }),
+  cancel: (id, reason) => api.post(`/orders/${id}/cancel`, { reason }),
 };
 
 export const paymentService = {

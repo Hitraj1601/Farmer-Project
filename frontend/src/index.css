@@ -285,6 +285,7 @@
   .badge-shipped { @apply bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-950 dark:text-purple-400 dark:border-purple-800; }
   .badge-delivered { @apply bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950 dark:text-emerald-400 dark:border-emerald-800; }
   .badge-rejected { @apply bg-red-50 text-red-700 border border-red-200 dark:bg-red-950 dark:text-red-400 dark:border-red-800; }
+  .badge-cancelled { @apply bg-slate-50 text-slate-700 border border-slate-200 dark:bg-slate-900/60 dark:text-slate-400 dark:border-slate-800; }
 
   .badge::before {
     content: '';
@@ -295,6 +296,7 @@
   .badge-shipped::before { @apply bg-purple-500; }
   .badge-delivered::before { @apply bg-emerald-500; }
   .badge-rejected::before { @apply bg-red-500; }
+  .badge-cancelled::before { @apply bg-slate-500; }
 
   /* Glass effect */
   .glass {

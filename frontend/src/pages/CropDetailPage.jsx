@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { FiMapPin, FiStar, FiShoppingCart, FiChevronRight, FiMinus, FiPlus, FiUser, FiPhone, FiShield, FiTruck, FiCheckCircle, FiMessageSquare, FiCamera } from 'react-icons/fi';
+import { FiMapPin, FiStar, FiShoppingCart, FiChevronRight, FiMinus, FiPlus, FiUser, FiPhone, FiShield, FiTruck, FiCheckCircle, FiMessageSquare, FiCamera, FiAlertCircle } from 'react-icons/fi';
 import { cropService, orderService, reviewService, paymentService, chatService } from '../services';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -317,11 +317,61 @@ export default function CropDetailPage() {
               </div>
             )}
 
-            {/* Delivery Availability */}
             {crop.farmer && (() => {
               const areas = crop.farmer.farmerProfile?.serviceableAreas;
               if (areas) {
                 const areaList = areas.split(',').map(a => a.trim()).filter(Boolean);
+                const areaListLower = areaList.map(a => a.toLowerCase());
+                
+                let deliveryStatusElement = null;
+                
+                if (user && user.role === 'BUYER') {
+                  const deliveryAddress = user.buyerProfile?.deliveryAddress;
+                  if (deliveryAddress) {
+                    const addressLower = deliveryAddress.toLowerCase();
+                    const isAvailable = areaListLower.some(area => addressLower.includes(area));
+                    
+                    if (isAvailable) {
+                      deliveryStatusElement = (
+                        <div className="mt-2.5 p-2 bg-emerald-50 dark:bg-emerald-950/20 rounded-xl border border-emerald-100 dark:border-emerald-900/30 flex items-center gap-2 text-emerald-700 dark:text-emerald-400 text-xs font-bold animate-fade-in">
+                          <FiCheckCircle size={14} className="flex-shrink-0" />
+                          <span>Delivery is available in your area</span>
+                        </div>
+                      );
+                    } else {
+                      deliveryStatusElement = (
+                        <div className="mt-2.5 p-2.5 bg-rose-50 dark:bg-rose-950/20 rounded-xl border border-rose-100 dark:border-rose-900/30 flex items-start gap-2 text-rose-700 dark:text-rose-400 text-xs font-bold animate-fade-in">
+                          <FiAlertCircle size={15} className="flex-shrink-0 mt-0.5" />
+                          <div>
+                            <span>Delivery is not available in your area</span>
+                            <p className="text-[10px] text-rose-600/80 dark:text-rose-400/80 font-normal mt-0.5">
+                              Your registered address is outside the farmer's serviceable areas. Please contact the farmer via chat if you'd like to confirm.
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+                  } else {
+                    deliveryStatusElement = (
+                      <p className="text-[10px] text-blue-500/70 mt-1.5">
+                        Set a delivery address in your <Link to="/profile" className="underline font-bold text-blue-600 dark:text-blue-400">Profile</Link> to check delivery availability.
+                      </p>
+                    );
+                  }
+                } else if (!user) {
+                  deliveryStatusElement = (
+                    <p className="text-[10px] text-blue-500/70 mt-1.5">
+                      <Link to="/login" className="underline font-bold text-blue-600 dark:text-blue-400">Log in</Link> as a buyer to check delivery availability.
+                    </p>
+                  );
+                } else {
+                  deliveryStatusElement = (
+                    <p className="text-[10px] text-blue-500/70 mt-1.5">
+                      If your area isn't listed, message the farmer to confirm delivery availability.
+                    </p>
+                  );
+                }
+
                 return (
                   <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-100 dark:border-blue-900/50">
                     <div className="flex items-center gap-1.5 mb-1.5">
@@ -335,7 +385,7 @@ export default function CropDetailPage() {
                         </span>
                       ))}
                     </div>
-                    <p className="text-[10px] text-blue-500/70 mt-1.5">If your area isn't listed, message the farmer to confirm delivery availability.</p>
+                    {deliveryStatusElement}
                   </div>
                 );
               }

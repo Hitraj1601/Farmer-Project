@@ -38,7 +38,7 @@ const updateOrderStatus = async (req, res, next) => {
       return sendResponse(res, 400, "Status is required.");
     }
 
-    const validStatuses = ["PENDING", "ACCEPTED", "REJECTED", "SHIPPED", "DELIVERED"];
+    const validStatuses = ["PENDING", "ACCEPTED", "REJECTED", "SHIPPED", "DELIVERED", "CANCELLED"];
     if (!validStatuses.includes(status)) {
       return sendResponse(res, 400, `Status must be one of: ${validStatuses.join(", ")}`);
     }
@@ -56,4 +56,14 @@ const updateOrderStatus = async (req, res, next) => {
   }
 };
 
-module.exports = { createOrder, getMyOrders, updateOrderStatus };
+const cancelOrder = async (req, res, next) => {
+  try {
+    const { reason } = req.body;
+    const order = await orderService.cancelOrder(req.params.id, req.user.id, reason);
+    return sendResponse(res, 200, "Order cancelled successfully.", order);
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { createOrder, getMyOrders, updateOrderStatus, cancelOrder };

@@ -86,6 +86,7 @@ model Order {
   totalPrice Float
   deliveryAddress String?     @db.VarChar(500)
   status     OrderStatus     @default(PENDING)
+  cancelReason String?        @db.VarChar(500)
   createdAt  DateTime        @default(now())
   tracking   OrderTracking[]
   buyer      User            @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: Cascade)
@@ -223,6 +224,7 @@ enum OrderStatus {
   REJECTED
   SHIPPED
   DELIVERED
+  CANCELLED
 }
 
 enum PaymentStatus {

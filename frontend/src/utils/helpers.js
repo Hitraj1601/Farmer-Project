@@ -21,6 +21,7 @@ export const getStatusBadge = (status) => {
     SHIPPED: 'badge-shipped',
     DELIVERED: 'badge-delivered',
     REJECTED: 'badge-rejected',
+    CANCELLED: 'badge-cancelled',
   };
   return map[status] || 'badge-pending';
 };

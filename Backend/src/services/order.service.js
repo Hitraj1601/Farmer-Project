@@ -194,4 +194,61 @@ const updateOrderStatus = async (orderId, status, userId, role) => {
   return updated;
 };
 
-module.exports = { createOrder, getMyOrders, updateOrderStatus };
+const cancelOrder = async (orderId, userId, reason) => {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: { crop: true },
+  });
+
+  if (!order) throw new ApiError(404, "Order not found.");
+  if (order.buyerId !== userId) {
+    throw new ApiError(403, "You can only cancel your own orders.");
+  }
+
+  // Cancellation is only allowed for PENDING or ACCEPTED status
+  if (order.status !== "PENDING" && order.status !== "ACCEPTED") {
+    throw new ApiError(400, "You can only cancel orders that are PENDING or ACCEPTED.");
+  }
+
+  // Restore inventory if status was ACCEPTED (since stock was already decremented)
+  if (order.status === "ACCEPTED") {
+    await prisma.crop.update({
+      where: { id: order.cropId },
+      data: { quantity: { increment: order.quantity } },
+    });
+  }
+
+  // Update order status to CANCELLED and store reason
+  const updatedOrder = await prisma.order.update({
+    where: { id: orderId },
+    data: {
+      status: "CANCELLED",
+      cancelReason: reason,
+    },
+    include: {
+      crop: { select: { cropName: true, location: true, farmerId: true } },
+    },
+  });
+
+  // Log timeline tracking event
+  await addTrackingEntry({
+    orderId: updatedOrder.id,
+    status: "CANCELLED",
+    location: updatedOrder.crop?.location || null,
+    note: `Order cancelled by buyer. Reason: ${reason}`,
+  });
+
+  // Notify the farmer in real-time via WebSocket
+  if (updatedOrder.crop?.farmerId) {
+    notifyUser(updatedOrder.crop.farmerId, {
+      title: "Order Cancelled",
+      message: `Buyer cancelled order #${order.id.slice(0, 8)} for ${updatedOrder.crop.cropName}. Reason: ${reason}`,
+      type: "error",
+      orderId: updatedOrder.id,
+    });
+  }
+
+  return updatedOrder;
+};
+
+module.exports = { createOrder, getMyOrders, updateOrderStatus, cancelOrder };

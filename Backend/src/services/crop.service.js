@@ -50,7 +50,12 @@ const getAllCrops = async (query) => {
   const skip = (parseInt(page) - 1) * parseInt(limit);
 
   const where = {};
-  if (location) where.location = { contains: location };
+  if (location) {
+    where.OR = [
+      { location: { contains: location } },
+      { farmer: { farmerProfile: { serviceableAreas: { contains: location } } } }
+    ];
+  }
   if (search) where.cropName = { contains: search };
 
   // Price range filter

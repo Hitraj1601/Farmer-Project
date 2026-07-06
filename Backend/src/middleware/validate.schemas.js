@@ -78,12 +78,20 @@ const createOrderSchema = Joi.object({
 
 const updateOrderStatusSchema = Joi.object({
   status: Joi.string()
-    .valid("PENDING", "ACCEPTED", "REJECTED", "SHIPPED", "DELIVERED")
+    .valid("PENDING", "ACCEPTED", "REJECTED", "SHIPPED", "DELIVERED", "CANCELLED")
     .required()
     .messages({
-      "any.only": "Status must be one of: PENDING, ACCEPTED, REJECTED, SHIPPED, DELIVERED",
+      "any.only": "Status must be one of: PENDING, ACCEPTED, REJECTED, SHIPPED, DELIVERED, CANCELLED",
       "any.required": "Status is required",
     }),
+});
+
+const cancelOrderSchema = Joi.object({
+  reason: Joi.string().min(3).max(500).required().messages({
+    "string.min": "Reason must be at least 3 characters",
+    "string.max": "Reason must not exceed 500 characters",
+    "any.required": "Reason is required",
+  }),
 });
 
 const createPaymentOrderSchema = Joi.object({
@@ -163,4 +171,5 @@ module.exports = {
   buyerProfileSchema,
   addToCartSchema,
   updateCartItemSchema,
+  cancelOrderSchema,
 };

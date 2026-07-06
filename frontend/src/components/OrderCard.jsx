@@ -4,7 +4,7 @@ import { FiPackage, FiUser, FiCalendar, FiCreditCard } from 'react-icons/fi';
 export default function OrderCard({ order, actions }) {
   const statusSteps = ['PENDING', 'ACCEPTED', 'SHIPPED', 'DELIVERED'];
   const currentStep = statusSteps.indexOf(order.status);
-  const isRejected = order.status === 'REJECTED';
+  const isRejectedOrCancelled = ['REJECTED', 'CANCELLED'].includes(order.status);
   const hasItems = order.items && order.items.length > 0;
   const isMultiItem = hasItems && order.items.length > 1;
   const previewImage = order.crop?.imageUrl || order.items?.[0]?.crop?.imageUrl;
@@ -108,7 +108,7 @@ export default function OrderCard({ order, actions }) {
           </div>
 
           {/* Progress bar (mini) */}
-          {!isRejected && (
+          {!isRejectedOrCancelled && (
             <div className="mt-4 flex items-center gap-1">
               {statusSteps.map((step, i) => (
                 <div key={step} className="flex items-center flex-1">
@@ -117,6 +117,13 @@ export default function OrderCard({ order, actions }) {
                   }`} />
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Cancellation Reason Banner */}
+          {order.status === 'CANCELLED' && order.cancelReason && (
+            <div className="mt-3 p-3 bg-red-50 dark:bg-red-950/20 rounded-xl border border-red-100 dark:border-red-900/30 text-xs text-red-700 dark:text-red-400">
+              <span className="font-bold">Cancellation Reason:</span> {order.cancelReason}
             </div>
           )}
 

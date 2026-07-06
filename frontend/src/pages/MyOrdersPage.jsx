@@ -18,6 +18,9 @@ export default function MyOrdersPage() {
   const [reviewImagePreview, setReviewImagePreview] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [trackingOrderId, setTrackingOrderId] = useState(null);
+  const [cancellationOrder, setCancellationOrder] = useState(null);
+  const [cancellationReason, setCancellationReason] = useState('');
+  const [cancelling, setCancelling] = useState(false);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -133,6 +136,27 @@ export default function MyOrdersPage() {
     setSubmitting(false);
   };
 
+  const handleCancelOrder = async () => {
+    if (!cancellationOrder) return;
+    if (!cancellationReason.trim() || cancellationReason.trim().length < 3) {
+      toast.error('Please provide a reason (at least 3 characters)');
+      return;
+    }
+
+    setCancelling(true);
+    try {
+      await orderService.cancel(cancellationOrder.id, cancellationReason);
+      toast.success('Order cancelled successfully');
+      setCancellationOrder(null);
+      setCancellationReason('');
+      fetchOrders();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to cancel order');
+    } finally {
+      setCancelling(false);
+    }
+  };
+
   if (loading) return <Loader text="Loading your orders..." />;
 
   return (
@@ -219,6 +243,15 @@ export default function MyOrdersPage() {
                       {order.status === 'PENDING' && order.payment?.status !== 'SUCCESS' && (
                         <Button size="sm" onClick={() => handlePay(order.id, order.crop?.cropName)}>
                           Pay Now
+                        </Button>
+                      )}
+                      {['PENDING', 'ACCEPTED'].includes(order.status) && (
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => setCancellationOrder(order)}
+                        >
+                          Cancel
                         </Button>
                       )}
                       {['ACCEPTED', 'SHIPPED', 'DELIVERED'].includes(order.status) && (
@@ -330,6 +363,51 @@ export default function MyOrdersPage() {
           <Button onClick={handleReview} loading={submitting} className="w-full rounded-2xl">
             Submit Review
           </Button>
+        </div>
+      </Modal>
+
+      {/* ─── Cancellation Modal ─── */}
+      <Modal
+        isOpen={!!cancellationOrder}
+        onClose={() => {
+          setCancellationOrder(null);
+          setCancellationReason('');
+        }}
+        title="Cancel Order"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+              Why are you cancelling this order?
+            </label>
+            <textarea
+              className="form-input w-full min-h-[100px] text-sm resize-none rounded-xl"
+              placeholder="Provide a cancellation reason (at least 3 characters)..."
+              value={cancellationReason}
+              onChange={(e) => setCancellationReason(e.target.value)}
+              disabled={cancelling}
+            />
+          </div>
+          <div className="flex gap-3 justify-end">
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setCancellationOrder(null);
+                setCancellationReason('');
+              }}
+              disabled={cancelling}
+            >
+              Back
+            </Button>
+            <Button
+              variant="danger"
+              onClick={handleCancelOrder}
+              loading={cancelling}
+              disabled={cancellationReason.trim().length < 3}
+            >
+              Confirm Cancellation
+            </Button>
+          </div>
         </div>
       </Modal>
     </div>

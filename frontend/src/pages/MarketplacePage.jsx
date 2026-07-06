@@ -235,7 +235,7 @@ export default function MarketplacePage() {
                     placeholder="Search for crops, vegetables, fruits..."
                     value={search}
                     onChange={(e) => { setSearch(e.target.value); resetPage(); }}
-                    className="w-full pl-11 pr-4 py-3.5 bg-white text-gray-900 rounded-xl placeholder:text-gray-400 outline-none transition-all duration-300 border border-emerald-100 shadow-sm focus:bg-white focus:border-emerald-300 focus:ring-2 focus:ring-emerald-200/60 text-sm dark:bg-white/[0.06] dark:text-white dark:placeholder:text-gray-500 dark:border-transparent dark:focus:border-emerald-500/30 dark:focus:ring-0"
+                    className="w-full pl-11 pr-4 py-3.5 bg-white text-gray-900 rounded-xl placeholder:text-gray-400 outline-none transition-all duration-300 border border-emerald-100 shadow-sm focus:bg-white dark:focus:bg-gray-900 focus:border-emerald-300 focus:ring-2 focus:ring-emerald-200/60 text-sm dark:bg-white/[0.06] dark:text-white dark:placeholder:text-gray-500 dark:border-transparent dark:focus:border-emerald-500/30 dark:focus:ring-0"
                     id="marketplace-search"
                   />
                 </div>
@@ -246,7 +246,7 @@ export default function MarketplacePage() {
                     placeholder="Location..."
                     value={location}
                     onChange={(e) => { setLocation(e.target.value); resetPage(); }}
-                    className="w-full pl-11 pr-4 py-3.5 bg-white text-gray-900 rounded-xl placeholder:text-gray-400 outline-none transition-all duration-300 border border-emerald-100 shadow-sm focus:bg-white focus:border-emerald-300 focus:ring-2 focus:ring-emerald-200/60 text-sm dark:bg-white/[0.06] dark:text-white dark:placeholder:text-gray-500 dark:border-transparent dark:focus:border-emerald-500/30 dark:focus:ring-0"
+                    className="w-full pl-11 pr-4 py-3.5 bg-white text-gray-900 rounded-xl placeholder:text-gray-400 outline-none transition-all duration-300 border border-emerald-100 shadow-sm focus:bg-white dark:focus:bg-gray-900 focus:border-emerald-300 focus:ring-2 focus:ring-emerald-200/60 text-sm dark:bg-white/[0.06] dark:text-white dark:placeholder:text-gray-500 dark:border-transparent dark:focus:border-emerald-500/30 dark:focus:ring-0"
                     id="marketplace-location"
                   />
                 </div>
