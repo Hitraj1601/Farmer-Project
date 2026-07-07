@@ -34,15 +34,14 @@ const createOrder = async ({ buyerId, cropId, quantity }) => {
   const deliveryAddress = await getBuyerDeliveryAddress(buyerId);
   const totalPrice = parseFloat((quantity * crop.pricePerKg).toFixed(2));
 
-  // Check delivery feasibility (soft warning, does not block)
-  let deliveryWarning = null;
+  // Check delivery feasibility (hard block)
   const serviceableAreas = crop.farmer?.farmerProfile?.serviceableAreas;
   if (serviceableAreas) {
     const areas = serviceableAreas.split(",").map((a) => a.trim().toLowerCase()).filter(Boolean);
     const addressLower = deliveryAddress.toLowerCase();
     const isServiceable = areas.some((area) => addressLower.includes(area));
     if (!isServiceable) {
-      deliveryWarning = `This farmer typically delivers to: ${serviceableAreas}. Your delivery address may be outside their service area. We recommend confirming with the farmer via chat.`;
+      throw new ApiError(400, `Delivery is not available in your area. This crop can only be delivered to: ${serviceableAreas}`);
     }
   }
 
@@ -69,7 +68,7 @@ const createOrder = async ({ buyerId, cropId, quantity }) => {
     orderId: order.id,
   });
 
-  return { ...order, deliveryWarning };
+  return order;
 };
 
 const getMyOrders = async (userId, role) => {

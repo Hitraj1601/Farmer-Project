@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { formatPrice, formatDate, getStatusBadge, getImageUrl } from '../utils/helpers';
+import { formatPrice, formatDate, getStatusBadge, getImageUrl, formatAddress } from '../utils/helpers';
 import { FiPackage, FiUser, FiCalendar, FiCreditCard, FiChevronDown, FiMapPin, FiBox, FiTruck } from 'react-icons/fi';
 
 export default function OrderCard({ order, actions }) {
@@ -139,7 +139,7 @@ export default function OrderCard({ order, actions }) {
                 <DetailItem label="Buyer" value={order.buyer.name} icon={FiUser} />
               )}
               {order.deliveryAddress && (
-                <DetailItem label="Delivery" value={order.deliveryAddress} icon={FiMapPin} />
+                <DetailItem label="Delivery" value={formatAddress(order.deliveryAddress)} icon={FiMapPin} />
               )}
               {order.payment && (
                 <DetailItem

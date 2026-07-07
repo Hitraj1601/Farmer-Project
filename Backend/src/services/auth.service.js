@@ -2,6 +2,8 @@ const bcrypt = require("bcrypt");
 const prisma = require("../config/db");
 const { generateToken } = require("../utils/jwt");
 const ApiError = require("../utils/apiError");
+const { OAuth2Client } = require("google-auth-library");
+const client = new OAuth2Client();
 
 const normalizeEmail = (email = "") => email.trim().toLowerCase();
 const normalizePhone = (phone = "") => phone.trim();
@@ -80,4 +82,47 @@ const getProfile = async (userId) => {
   return user;
 };
 
-module.exports = { register, login, getProfile };
+const googleLogin = async ({ idToken, role }) => {
+  const audience = process.env.GOOGLE_CLIENT_ID;
+  if (!audience) {
+    throw new ApiError(500, "Google Client ID is not configured on the server. Please set GOOGLE_CLIENT_ID in your .env file.");
+  }
+
+  let payload;
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience,
+    });
+    payload = ticket.getPayload();
+  } catch (error) {
+    console.error("Google token verification error:", error);
+    throw new ApiError(401, "Invalid or expired Google ID Token.");
+  }
+
+  const { email, name } = payload;
+  const normalizedEmail = normalizeEmail(email);
+
+  let user = await prisma.user.findUnique({
+    where: { email: normalizedEmail },
+  });
+
+  if (!user) {
+    const allowedRoles = ["FARMER", "BUYER"];
+    const userRole = role && allowedRoles.includes(role.toUpperCase()) ? role.toUpperCase() : "BUYER";
+
+    user = await prisma.user.create({
+      data: {
+        name: name || "Google User",
+        email: normalizedEmail,
+        role: userRole,
+      },
+    });
+  }
+
+  const token = generateToken({ id: user.id, email: user.email, role: user.role });
+  const { password: _, ...userWithoutPassword } = user;
+  return { user: userWithoutPassword, token };
+};
+
+module.exports = { register, login, getProfile, googleLogin };

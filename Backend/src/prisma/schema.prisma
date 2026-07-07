@@ -10,9 +10,9 @@ datasource db {
 model User {
   id                  String         @id @default(uuid())
   name                String
-  phone               String         @unique
+  phone               String?        @unique
   email               String         @unique
-  password            String
+  password            String?
   role                Role           @default(FARMER)
   createdAt           DateTime       @default(now())
   buyerProfile        BuyerProfile?

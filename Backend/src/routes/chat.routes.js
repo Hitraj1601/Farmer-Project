@@ -11,5 +11,7 @@ router.post("/message", chatController.sendMessage);
 router.get("/conversations", chatController.getConversations);
 router.get("/messages/:conversationId", chatController.getMessages);
 router.get("/unread-count", chatController.getUnreadCount);
+router.delete("/conversation/:conversationId", chatController.deleteConversation);
+router.delete("/message/:messageId", chatController.deleteMessage);
 
 module.exports = router;

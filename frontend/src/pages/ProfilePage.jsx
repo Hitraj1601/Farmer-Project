@@ -7,11 +7,12 @@ import Loader from '../components/Loader';
 import toast from 'react-hot-toast';
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [farmerForm, setFarmerForm] = useState({ farmLocation: '', bankAccount: '', ifscCode: '', serviceableAreas: '' });
-  const [buyerForm, setBuyerForm] = useState({ businessName: '', businessAddress: '', deliveryAddress: '' });
+  const [buyerForm, setBuyerForm] = useState({ businessName: '', businessAddress: '' });
+  const [addressForm, setAddressForm] = useState({ street: '', landmark: '', city: '', state: '', pincode: '' });
 
   useEffect(() => {
     const load = async () => {
@@ -21,7 +22,29 @@ export default function ProfilePage() {
           if (res.data) setFarmerForm({ farmLocation: res.data.farmLocation || '', bankAccount: res.data.bankAccount || '', ifscCode: res.data.ifscCode || '', serviceableAreas: res.data.serviceableAreas || '' });
         } else if (user?.role === 'BUYER') {
           const res = await profileService.getBuyerProfile();
-          if (res.data) setBuyerForm({ businessName: res.data.businessName || '', businessAddress: res.data.businessAddress || '', deliveryAddress: res.data.deliveryAddress || '' });
+          if (res.data) {
+            setBuyerForm({ businessName: res.data.businessName || '', businessAddress: res.data.businessAddress || '' });
+            
+            const rawAddress = res.data.deliveryAddress || '';
+            let parsedAddress = { street: '', landmark: '', city: '', state: '', pincode: '' };
+            try {
+              const parsed = JSON.parse(rawAddress);
+              if (parsed && typeof parsed === 'object') {
+                parsedAddress = {
+                  street: parsed.street || '',
+                  landmark: parsed.landmark || '',
+                  city: parsed.city || '',
+                  state: parsed.state || '',
+                  pincode: parsed.pincode || '',
+                };
+              } else {
+                parsedAddress.street = rawAddress;
+              }
+            } catch {
+              parsedAddress.street = rawAddress;
+            }
+            setAddressForm(parsedAddress);
+          }
         }
       } catch { /* no profile yet */ }
       setLoading(false);
@@ -32,8 +55,29 @@ export default function ProfilePage() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      if (user?.role === 'FARMER') await profileService.upsertFarmerProfile(farmerForm);
-      else await profileService.upsertBuyerProfile(buyerForm);
+      if (user?.role === 'FARMER') {
+        await profileService.upsertFarmerProfile(farmerForm);
+      } else {
+        if (!addressForm.street.trim() || !addressForm.city.trim() || !addressForm.state.trim() || !addressForm.pincode.trim()) {
+          toast.error('Flat/Street, City, State, and Pincode are required fields.');
+          setSaving(false);
+          return;
+        }
+        const payload = {
+          ...buyerForm,
+          deliveryAddress: JSON.stringify({
+            street: addressForm.street.trim(),
+            landmark: addressForm.landmark.trim(),
+            city: addressForm.city.trim(),
+            state: addressForm.state.trim(),
+            pincode: addressForm.pincode.trim(),
+          }),
+        };
+        await profileService.upsertBuyerProfile(payload);
+      }
+      
+      // Update local storage and React auth state context
+      await refreshProfile();
       toast.success('Profile saved successfully!');
     } catch (err) {
       toast.error(err.message || 'Failed to save profile');
@@ -44,58 +88,42 @@ export default function ProfilePage() {
   if (loading) return <Loader text="Loading profile..." />;
 
   return (
-    <div className="min-h-screen">
-      {/* ─── Hero Banner ─── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-violet-950 to-gray-900 pt-8 pb-24">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-0 left-1/4 w-[500px] h-[500px] rounded-full bg-violet-500/10 blur-[120px]" />
-          <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] rounded-full bg-purple-500/10 blur-[100px]" />
-          <div
-            className="absolute inset-0 opacity-[0.03]"
-            style={{
-              backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)',
-              backgroundSize: '40px 40px',
-            }}
-          />
-        </div>
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
-            {/* Avatar */}
-            <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white text-4xl font-black shadow-2xl shadow-violet-500/30 border-4 border-white/10 animate-fade-in fill-mode-both">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+      {/* ─── Enterprise Header ─── */}
+      <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 py-6 mb-8">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-2xl font-black shadow-md shadow-emerald-500/10">
               {user?.name?.[0]?.toUpperCase()}
             </div>
-            <div className="text-center sm:text-left animate-fade-in-up fill-mode-both">
-              <h1 className="text-3xl sm:text-4xl font-black text-white">{user?.name}</h1>
-              <div className="flex items-center justify-center sm:justify-start gap-3 mt-3">
-                <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 border border-white/10 backdrop-blur-xl rounded-full text-sm text-white/90 font-semibold">
-                  {user?.role === 'FARMER' ? '🌾' : user?.role === 'ADMIN' ? '⚙️' : '🛒'} {user?.role}
-                </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-sm text-emerald-400 font-semibold">
-                  <FiShield size={12} /> Verified
-                </span>
-              </div>
+            <div>
+              <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+                {user?.name}
+              </h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Manage your profile details and settings.
+              </p>
             </div>
           </div>
+          <div className="flex items-center gap-3">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs text-gray-700 dark:text-gray-300 font-semibold shadow-sm">
+              {user?.role === 'FARMER' ? '🌾' : user?.role === 'ADMIN' ? '⚙️' : '🛒'} {user?.role}
+            </span>
+            <span className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200/50 dark:border-emerald-900/50 rounded-lg text-xs text-emerald-700 dark:text-emerald-400 font-semibold">
+              Verified
+            </span>
+          </div>
         </div>
+      </header>
 
-        {/* Bottom wave */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
-            <path d="M0 30 C 360 60 1080 0 1440 30 L 1440 60 L 0 60 Z" className="fill-gray-50 dark:fill-gray-950" />
-          </svg>
-        </div>
-      </section>
-
-      {/* ─── Content ─── */}
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 pb-16 relative z-10">
-
+      {/* ─── Content Area ─── */}
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         {/* User Info Card */}
         <div className="bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-xl shadow-gray-200/40 dark:shadow-black/30 overflow-hidden mb-6 animate-fade-in-up fill-mode-both">
           <div className="grid sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-gray-100 dark:divide-gray-800">
             <div className="px-6 py-5 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-950 flex items-center justify-center">
-                <FiMail className="text-blue-500" size={18} />
+              <div className="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-950 flex items-center justify-center">
+                <FiMail className="text-emerald-500" size={18} />
               </div>
               <div className="min-w-0">
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Email</p>
@@ -112,8 +140,8 @@ export default function ProfilePage() {
               </div>
             </div>
             <div className="px-6 py-5 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-violet-50 dark:bg-violet-950 flex items-center justify-center">
-                <FiAward className="text-violet-500" size={18} />
+              <div className="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-950 flex items-center justify-center">
+                <FiAward className="text-emerald-500" size={18} />
               </div>
               <div>
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Role</p>
@@ -127,11 +155,7 @@ export default function ProfilePage() {
         {user?.role !== 'ADMIN' && (
           <div className="bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-xl shadow-gray-200/40 dark:shadow-black/30 p-8 animate-fade-in-up fill-mode-both delay-100">
             <div className="flex items-center gap-3 mb-8">
-              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg ${
-                user?.role === 'FARMER'
-                  ? 'bg-gradient-to-br from-emerald-400 to-green-500 shadow-emerald-500/20'
-                  : 'bg-gradient-to-br from-blue-400 to-indigo-500 shadow-blue-500/20'
-              }`}>
+              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg bg-gradient-to-br from-emerald-400 to-teal-500 shadow-emerald-500/20`}>
                 {user?.role === 'FARMER' ? <FiMapPin className="text-white" size={18} /> : <FiBriefcase className="text-white" size={18} />}
               </div>
               <h2 className="text-xl font-black text-gray-900 dark:text-white">
@@ -195,16 +219,83 @@ export default function ProfilePage() {
                     <input className="input-field pl-12 py-3.5 rounded-2xl" placeholder="Your business address" value={buyerForm.businessAddress} onChange={(e) => setBuyerForm({ ...buyerForm, businessAddress: e.target.value })} />
                   </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Delivery Address</label>
-                  <div className="relative">
-                    <FiMapPin className="absolute left-4 top-4 text-gray-400" size={18} />
-                    <textarea
-                      className="input-field pl-12 py-3.5 rounded-2xl min-h-[120px] resize-none"
-                      placeholder="House / street / locality / city / pincode"
-                      value={buyerForm.deliveryAddress}
-                      onChange={(e) => setBuyerForm({ ...buyerForm, deliveryAddress: e.target.value })}
-                    />
+                <div className="space-y-4">
+                  <span className="block text-sm font-bold text-gray-700 dark:text-gray-300">Delivery Address</span>
+                  
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Flat, House No., Building, Street *</label>
+                    <div className="relative">
+                      <FiHome className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                      <input
+                        type="text"
+                        className="input-field pl-11 py-3.5 rounded-2xl text-sm"
+                        placeholder="e.g. Flat 101, building name, street name"
+                        value={addressForm.street}
+                        onChange={(e) => setAddressForm({ ...addressForm, street: e.target.value })}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Landmark (Optional)</label>
+                      <div className="relative">
+                        <FiMapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                        <input
+                          type="text"
+                          className="input-field pl-11 py-3.5 rounded-2xl text-sm"
+                          placeholder="e.g. Near bus stop"
+                          value={addressForm.landmark}
+                          onChange={(e) => setAddressForm({ ...addressForm, landmark: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Pincode *</label>
+                      <div className="relative">
+                        <FiHash className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                        <input
+                          type="text"
+                          className="input-field pl-11 py-3.5 rounded-2xl text-sm"
+                          placeholder="e.g. 400001"
+                          value={addressForm.pincode}
+                          onChange={(e) => setAddressForm({ ...addressForm, pincode: e.target.value.replace(/\D/g, '') })}
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">City *</label>
+                      <div className="relative">
+                        <FiMapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                        <input
+                          type="text"
+                          className="input-field pl-11 py-3.5 rounded-2xl text-sm"
+                          placeholder="e.g. Mumbai"
+                          value={addressForm.city}
+                          onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">State *</label>
+                      <div className="relative">
+                        <FiMapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                        <input
+                          type="text"
+                          className="input-field pl-11 py-3.5 rounded-2xl text-sm"
+                          placeholder="e.g. Maharashtra"
+                          value={addressForm.state}
+                          onChange={(e) => setAddressForm({ ...addressForm, state: e.target.value })}
+                          required
+                        />
+                      </div>
+                    </div>
                   </div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Farmers will see this address before accepting the order.</p>
                 </div>

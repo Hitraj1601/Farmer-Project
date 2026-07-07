@@ -43,4 +43,17 @@ const getProfile = async (req, res, next) => {
   }
 };
 
-module.exports = { register, login, getProfile };
+const googleLogin = async (req, res, next) => {
+  try {
+    const { idToken, role } = req.body;
+    if (!idToken) {
+      return sendResponse(res, 400, "Google ID Token is required.");
+    }
+    const result = await authService.googleLogin({ idToken, role });
+    return sendResponse(res, 200, "Google login successful.", result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { register, login, getProfile, googleLogin };

@@ -4,8 +4,10 @@ import { GiWheat, GiFarmer, GiReceiveMoney, GiFruitBowl, GiCorn } from 'react-ic
 import {
   FiShield, FiTruck, FiUsers, FiArrowRight, FiStar,
   FiCheckCircle, FiHeart, FiZap, FiGlobe, FiAward,
-  FiTrendingUp, FiPackage, FiSun, FiDroplet, FiMapPin, FiPlay
+  FiTrendingUp, FiPackage, FiSun, FiDroplet, FiMapPin, FiPlay, FiX
 } from 'react-icons/fi';
+import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 
 import heroFarmer from '../assets/hero-farmer.png';
 import freshVegetables from '../assets/fresh-vegetables.png';
@@ -72,32 +74,68 @@ const features = [
   {
     icon: FiUsers, title: 'Direct from Farmers',
     desc: 'Buy directly from verified farmers with zero middlemen. Honest pricing, complete transparency, and real human connection.',
-    gradient: 'from-emerald-500 to-teal-600', glow: 'emerald'
+    gradient: 'from-emerald-500 to-teal-600', glow: 'emerald',
+    details: [
+      { title: 'Zero Middlemen', desc: 'Interact and deal directly with growers to ensure fairer crop revenue distribution.' },
+      { title: 'Honest Pricing', desc: 'Pay authentic market rates without hidden commission fees or markup charges.' },
+      { title: 'Verified Profiles', desc: 'Every farmer\'s identity, land holding records, and credentials are fully verified.' },
+      { title: 'Direct Messages', desc: 'Connect with farmers via live chat to inquire about harvest conditions.' }
+    ]
   },
   {
     icon: FiShield, title: 'Secure Payments',
     desc: 'Razorpay-powered transactions with buyer protection. Pay safely using UPI, cards, or net banking — every rupee tracked.',
-    gradient: 'from-blue-500 to-indigo-600', glow: 'blue'
+    gradient: 'from-blue-500 to-indigo-600', glow: 'blue',
+    details: [
+      { title: 'Escrow Protection', desc: 'Your money is kept secure and only released when crop delivery is completed.' },
+      { title: 'Multiple Payment Methods', desc: 'Pay smoothly using UPI, Google Pay, Net Banking, Credit/Debit cards, or Wallets.' },
+      { title: 'Automatic Invoicing', desc: 'Downloadable PDF receipts and invoices are generated automatically for your accounts.' },
+      { title: 'Hassle-Free Refunds', desc: 'Instant refund resolution systems in place for dispute or cancellation scenarios.' }
+    ]
   },
   {
     icon: FiTruck, title: 'Farm to Doorstep',
     desc: 'Real-time GPS tracking from harvest to your kitchen. Fresh produce guaranteed within 48 hours of picking.',
-    gradient: 'from-violet-500 to-purple-600', glow: 'violet'
+    gradient: 'from-violet-500 to-purple-600', glow: 'violet',
+    details: [
+      { title: 'Direct Logistical Chain', desc: 'Crops bypass regional storage units and travel straight from local farms.' },
+      { title: 'Under 48 Hours', desc: 'We coordinate harvest and swift dispatch to deliver produce at peak quality.' },
+      { title: 'Freshness Guaranteed', desc: 'Transported under ventilated conditions to preserve maximum nutrient levels.' },
+      { title: 'Real-time GPS Tracking', desc: 'Monitor transit routes live from your active order dashboard.' }
+    ]
   },
   {
     icon: FiTrendingUp, title: 'Smart Pricing',
     desc: 'AI-powered price suggestions based on market trends. Farmers earn more, buyers pay fair — everyone wins.',
-    gradient: 'from-amber-500 to-orange-600', glow: 'amber'
+    gradient: 'from-amber-500 to-orange-600', glow: 'amber',
+    details: [
+      { title: 'AI-Driven Mandi Insights', desc: 'Our algorithms analyze daily price indexes from multiple regional mandis.' },
+      { title: 'Fair Trade Model', desc: 'Protects growers from selling below costs while ensuring fair consumer pricing.' },
+      { title: 'Demand Forecasting', desc: 'Helps buyers predict price drops and farmers prepare for high-demand seasons.' },
+      { title: 'Transparent Margins', desc: 'View complete cost-breakdowns and historical trends directly in marketplace listings.' }
+    ]
   },
   {
     icon: FiGlobe, title: 'Pan-India Network',
     desc: 'Access farmers from 28+ states. From Kashmir apples to Kerala spices, discover India\'s agricultural diversity.',
-    gradient: 'from-rose-500 to-pink-600', glow: 'rose'
+    gradient: 'from-rose-500 to-pink-600', glow: 'rose',
+    details: [
+      { title: 'Nationwide Logistics', desc: 'Order crops from any state, supported by integrated cross-country transport links.' },
+      { title: 'Regional Specialties', desc: 'Discover geographic-indicated products like Darjeeling Tea or Alphonso Mangoes.' },
+      { title: 'Diverse Crops', desc: 'Get year-round availability by sourcing crops growing in different seasonal zones.' },
+      { title: 'Community Support', desc: 'Empowering local smallholder farming cooperatives across all states.' }
+    ]
   },
   {
     icon: FiAward, title: 'Quality Verified',
     desc: 'Every farmer is verified. Every crop quality-checked. Organic certifications tracked and displayed transparently.',
-    gradient: 'from-cyan-500 to-blue-600', glow: 'cyan'
+    gradient: 'from-cyan-500 to-blue-600', glow: 'cyan',
+    details: [
+      { title: 'Identity Audits', desc: 'We verify identity documents and land possession records before activation.' },
+      { title: 'Rigorous Grading', desc: 'Crops are cataloged with standardized size, weight, and visual parameters.' },
+      { title: 'Organic Tracking', desc: 'Certified organic listings are cross-checked with official testing laboratories.' },
+      { title: 'Transparent Reviews', desc: 'Real buyers leave star ratings and direct reviews on every batch completed.' }
+    ]
   },
 ];
 
@@ -190,7 +228,9 @@ function ScrollRevealSection({ children, className = '', delay = 0 }) {
 
 /* ─── Main Page ─── */
 export default function HomePage() {
+  const { user, isAuthenticated } = useAuth();
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [selectedFeature, setSelectedFeature] = useState(null);
 
   useEffect(() => {
     const handleMouse = (e) => {
@@ -298,13 +338,32 @@ export default function HomePage() {
                     <FiArrowRight className="group-hover:translate-x-1.5 transition-transform duration-300" size={20} />
                   </span>
                 </Link>
-                <Link
-                  to="/register"
-                  className="group inline-flex items-center gap-3 border-2 border-white/20 text-white font-bold py-4 px-8 rounded-full hover:bg-white/10 backdrop-blur-sm transition-all duration-300 hover:border-white/40"
-                >
-                  <FiPlay size={16} className="group-hover:scale-110 transition-transform" />
-                  Start Selling
-                </Link>
+                {isAuthenticated && user?.role === 'FARMER' ? (
+                  <Link
+                    to="/dashboard"
+                    className="group inline-flex items-center gap-3 border-2 border-white/20 text-white font-bold py-4 px-8 rounded-full hover:bg-white/10 backdrop-blur-sm transition-all duration-300 hover:border-white/40"
+                  >
+                    <FiPlay size={16} className="group-hover:scale-110 transition-transform" />
+                    Go to Dashboard
+                  </Link>
+                ) : isAuthenticated && user?.role === 'BUYER' ? (
+                  <button
+                    type="button"
+                    onClick={() => toast.error('You are logged in as a Buyer. Log out and register a Farmer account to sell crops.')}
+                    className="group inline-flex items-center gap-3 border-2 border-white/20 text-white font-bold py-4 px-8 rounded-full hover:bg-white/10 backdrop-blur-sm transition-all duration-300 hover:border-white/40"
+                  >
+                    <FiPlay size={16} className="group-hover:scale-110 transition-transform" />
+                    Start Selling
+                  </button>
+                ) : (
+                  <Link
+                    to="/register"
+                    className="group inline-flex items-center gap-3 border-2 border-white/20 text-white font-bold py-4 px-8 rounded-full hover:bg-white/10 backdrop-blur-sm transition-all duration-300 hover:border-white/40"
+                  >
+                    <FiPlay size={16} className="group-hover:scale-110 transition-transform" />
+                    Start Selling
+                  </Link>
+                )}
               </div>
 
               {/* Trust badges */}
@@ -476,7 +535,10 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((f, i) => (
               <ScrollRevealSection key={f.title} delay={i * 100}>
-                <div className={`group relative bg-white dark:bg-gray-900 rounded-3xl p-8 border border-gray-100 dark:border-gray-800 hover:border-transparent transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-${f.glow}-500/10 overflow-hidden h-full`}>
+                <div 
+                  onClick={() => setSelectedFeature(f)}
+                  className={`group relative bg-white dark:bg-gray-900 rounded-3xl p-8 border border-gray-100 dark:border-gray-800 hover:border-transparent transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-${f.glow}-500/10 overflow-hidden h-full cursor-pointer`}
+                >
                   {/* Hover glow */}
                   <div className={`absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br ${f.gradient} rounded-full opacity-0 group-hover:opacity-10 blur-3xl transition-all duration-500`} />
 
@@ -658,6 +720,69 @@ export default function HomePage() {
           </ScrollRevealSection>
         </div>
       </section>
+
+      {/* ─────────── FEATURE DETAIL MODAL ─────────── */}
+      {selectedFeature && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
+            onClick={() => setSelectedFeature(null)}
+          />
+          
+          {/* Modal Content Container */}
+          <div className="relative bg-white dark:bg-gray-900 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-gray-100 dark:border-gray-800 transform transition-all duration-300 animate-in fade-in zoom-in-95 duration-200">
+            {/* Header pattern banner */}
+            <div className={`h-24 bg-gradient-to-br ${selectedFeature.gradient} relative flex items-center justify-between px-6`}>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-white">
+                  <selectedFeature.icon size={22} />
+                </div>
+                <h3 className="text-xl font-bold text-white">{selectedFeature.title}</h3>
+              </div>
+              <button 
+                onClick={() => setSelectedFeature(null)}
+                className="w-8 h-8 rounded-full bg-black/20 hover:bg-black/40 text-white flex items-center justify-center transition-colors focus:outline-none"
+              >
+                <FiX size={18} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6">
+              <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-6">
+                {selectedFeature.desc}
+              </p>
+
+              <h4 className="font-bold text-gray-900 dark:text-white text-xs uppercase tracking-wider mb-4">Key Benefits</h4>
+              
+              <div className="space-y-4">
+                {selectedFeature.details.map((detail, idx) => (
+                  <div key={idx} className="flex gap-3 items-start">
+                    <div className="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                      <FiCheckCircle size={12} />
+                    </div>
+                    <div>
+                      <h5 className="font-semibold text-sm text-gray-900 dark:text-white">{detail.title}</h5>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{detail.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Action Button */}
+              <div className="mt-8 flex justify-end">
+                <button
+                  onClick={() => setSelectedFeature(null)}
+                  className={`px-5 py-2.5 rounded-xl bg-gradient-to-r ${selectedFeature.gradient} text-white font-semibold text-sm shadow-md hover:shadow-lg transition-all active:scale-95`}
+                >
+                  Got it, thanks!
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

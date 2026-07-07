@@ -16,7 +16,13 @@ const sizes = {
 export default function Button({ children, variant = 'primary', size = 'md', className = '', disabled, loading, ...props }) {
   return (
     <button
-      className={clsx(variants[variant], sizes[size], className, loading && 'relative !text-transparent')}
+      className={clsx(
+        variants[variant],
+        sizes[size],
+        disabled && 'opacity-40 cursor-not-allowed pointer-events-none filter blur-[0.3px]',
+        className,
+        loading && 'relative !text-transparent'
+      )}
       disabled={disabled || loading}
       {...props}
     >

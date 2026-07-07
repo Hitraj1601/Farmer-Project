@@ -178,7 +178,13 @@ const checkout = async (buyerId) => {
               quantity: true,
               location: true,
               farmerId: true,
-              farmer: { select: { id: true, name: true } },
+              farmer: {
+                select: {
+                  id: true,
+                  name: true,
+                  farmerProfile: { select: { serviceableAreas: true } },
+                },
+              },
             },
           },
         },
@@ -202,6 +208,17 @@ const checkout = async (buyerId) => {
     }
     if (item.quantity > item.crop.quantity) {
       errors.push(`"${item.crop.cropName}" only has ${item.crop.quantity} kg available (you requested ${item.quantity} kg).`);
+    }
+    
+    // Validate serviceable areas
+    const serviceableAreas = item.crop.farmer?.farmerProfile?.serviceableAreas;
+    if (serviceableAreas) {
+      const areas = serviceableAreas.split(",").map((a) => a.trim().toLowerCase()).filter(Boolean);
+      const addressLower = deliveryAddress.toLowerCase();
+      const isServiceable = areas.some((area) => addressLower.includes(area));
+      if (!isServiceable) {
+        errors.push(`Delivery is not available in your area for "${item.crop.cropName}". The farmer only delivers to: ${serviceableAreas}`);
+      }
     }
   }
   if (errors.length > 0) {

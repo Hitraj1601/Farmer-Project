@@ -37,3 +37,23 @@ export const truncate = (str, len = 50) => {
   if (!str) return '';
   return str.length > len ? str.slice(0, len) + '...' : str;
 };
+
+export const formatAddress = (addressStr) => {
+  if (!addressStr) return '';
+  try {
+    const parsed = JSON.parse(addressStr);
+    if (parsed && typeof parsed === 'object') {
+      const parts = [
+        parsed.street,
+        parsed.landmark ? `Landmark: ${parsed.landmark}` : null,
+        parsed.city,
+        parsed.state,
+        parsed.pincode
+      ].filter(Boolean);
+      return parts.join(', ');
+    }
+  } catch {
+    // Fallback for raw text
+  }
+  return addressStr;
+};

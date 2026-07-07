@@ -3,6 +3,7 @@ import api from './api';
 export const authService = {
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),
+  googleLogin: (data) => api.post('/auth/google', data),
   getProfile: () => api.get('/auth/profile'),
 };
 
@@ -80,6 +81,8 @@ export const chatService = {
   getConversations: () => api.get('/chat/conversations'),
   getMessages: (conversationId) => api.get(`/chat/messages/${conversationId}`),
   getUnreadCount: () => api.get('/chat/unread-count'),
+  deleteConversation: (conversationId) => api.delete(`/chat/conversation/${conversationId}`),
+  deleteMessage: (messageId) => api.delete(`/chat/message/${messageId}`),
 };
 
 export const cartService = {

@@ -71,10 +71,30 @@ const getUnreadCount = async (req, res, next) => {
   }
 };
 
+const deleteConversation = async (req, res, next) => {
+  try {
+    await chatService.deleteConversation(req.params.conversationId, req.user.id);
+    return sendResponse(res, 200, "Conversation deleted successfully.");
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteMessage = async (req, res, next) => {
+  try {
+    await chatService.deleteMessage(req.params.messageId, req.user.id);
+    return sendResponse(res, 200, "Message deleted successfully.");
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getOrCreateConversation,
   sendMessage,
   getConversations,
   getMessages,
   getUnreadCount,
+  deleteConversation,
+  deleteMessage,
 };

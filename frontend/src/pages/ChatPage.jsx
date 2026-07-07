@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FiMessageSquare, FiSend, FiArrowLeft, FiPackage, FiCheck, FiCheckCircle } from 'react-icons/fi';
+import { FiMessageSquare, FiSend, FiArrowLeft, FiPackage, FiCheck, FiCheckCircle, FiTrash2 } from 'react-icons/fi';
 import { chatService } from '../services';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
@@ -157,6 +157,31 @@ export default function ChatPage() {
     }
   };
 
+  const handleDeleteConversation = async () => {
+    if (!window.confirm("Are you sure you want to delete this entire chat? This will remove the person from your list and delete all messages.")) return;
+    try {
+      await chatService.deleteConversation(activeConvId);
+      toast.success("Chat deleted successfully");
+      setActiveConvId(null);
+      setMobileShowChat(false);
+      navigate('/chat', { replace: true });
+      fetchConversations();
+    } catch {
+      toast.error("Failed to delete chat");
+    }
+  };
+
+  const handleDeleteMessage = async (messageId) => {
+    if (!window.confirm("Are you sure you want to delete this message?")) return;
+    try {
+      await chatService.deleteMessage(messageId);
+      setMessages((prev) => prev.filter((m) => m.id !== messageId));
+      fetchConversations();
+    } catch {
+      toast.error("Failed to delete message");
+    }
+  };
+
   const selectConversation = (convId) => {
     setActiveConvId(convId);
     setMobileShowChat(true);
@@ -281,6 +306,13 @@ export default function ChatPage() {
                       </p>
                     )}
                   </div>
+                  <button
+                    onClick={handleDeleteConversation}
+                    className="ml-auto p-2 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all duration-200"
+                    title="Delete Conversation"
+                  >
+                    <FiTrash2 size={18} />
+                  </button>
                 </div>
 
                 {/* Messages */}
@@ -297,7 +329,16 @@ export default function ChatPage() {
                     messages.map((msg) => {
                       const isOwn = msg.senderId === user?.id;
                       return (
-                        <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
+                        <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'} items-center gap-2 group`}>
+                          {isOwn && (
+                            <button
+                              onClick={() => handleDeleteMessage(msg.id)}
+                              className="opacity-0 group-hover:opacity-100 flex items-center justify-center w-7 h-7 rounded-xl text-gray-400 hover:text-red-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
+                              title="Delete Message"
+                            >
+                              <FiTrash2 size={13} />
+                            </button>
+                          )}
                           <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
                             isOwn
                               ? 'bg-emerald-600 text-white rounded-br-md'

@@ -175,10 +175,52 @@ const getUnreadCount = async (userId) => {
   return count;
 };
 
+const deleteConversation = async (conversationId, userId) => {
+  const conversation = await prisma.conversation.findUnique({
+    where: { id: conversationId },
+  });
+
+  if (!conversation) {
+    throw new ApiError(404, "Conversation not found.");
+  }
+
+  if (conversation.buyerId !== userId && conversation.farmerId !== userId) {
+    throw new ApiError(403, "You are not part of this conversation.");
+  }
+
+  await prisma.conversation.delete({
+    where: { id: conversationId },
+  });
+
+  return true;
+};
+
+const deleteMessage = async (messageId, userId) => {
+  const message = await prisma.message.findUnique({
+    where: { id: messageId },
+  });
+
+  if (!message) {
+    throw new ApiError(404, "Message not found.");
+  }
+
+  if (message.senderId !== userId) {
+    throw new ApiError(403, "You can only delete your own messages.");
+  }
+
+  await prisma.message.delete({
+    where: { id: messageId },
+  });
+
+  return true;
+};
+
 module.exports = {
   getOrCreateConversation,
   sendMessage,
   getConversations,
   getMessages,
   getUnreadCount,
+  deleteConversation,
+  deleteMessage,
 };

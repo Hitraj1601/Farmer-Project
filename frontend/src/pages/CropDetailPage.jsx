@@ -4,14 +4,15 @@ import { FiMapPin, FiStar, FiShoppingCart, FiChevronRight, FiMinus, FiPlus, FiUs
 import { cropService, orderService, reviewService, paymentService, chatService } from '../services';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import { formatPrice, getImageUrl } from '../utils/helpers';
+import { formatPrice, getImageUrl, formatAddress } from '../utils/helpers';
 import Loader from '../components/Loader';
 import Button from '../components/Button';
+import Modal from '../components/Modal';
 import toast from 'react-hot-toast';
 
 export default function CropDetailPage() {
   const { id } = useParams();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, refreshProfile } = useAuth();
   const { addToCart, isInCart } = useCart();
   const navigate = useNavigate();
   const [crop, setCrop] = useState(null);
@@ -22,6 +23,7 @@ export default function CropDetailPage() {
   const [ordering, setOrdering] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
   const [chatLoading, setChatLoading] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   // Review form state
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -75,10 +77,7 @@ export default function CropDetailPage() {
       const res = await orderService.create({ cropId: id, quantity: parseFloat(quantity) });
       const order = res.data;
 
-      // Show delivery warning if applicable
-      if (order.deliveryWarning) {
-        toast(order.deliveryWarning, { icon: '⚠️', duration: 6000 });
-      }
+      setIsConfirmModalOpen(false);
 
       try {
         const payRes = await paymentService.createOrder(order.id);
@@ -211,6 +210,14 @@ export default function CropDetailPage() {
   );
 
   const totalPrice = quantity * crop.pricePerKg;
+  const hasDeliveryAddress = !!user?.buyerProfile?.deliveryAddress;
+  const serviceableAreas = crop?.farmer?.farmerProfile?.serviceableAreas;
+  let isDeliveryAvailable = true;
+  if (serviceableAreas && hasDeliveryAddress && user?.role === 'BUYER') {
+    const areaListLower = serviceableAreas.split(',').map(a => a.trim().toLowerCase()).filter(Boolean);
+    const addressLower = formatAddress(user.buyerProfile.deliveryAddress).toLowerCase();
+    isDeliveryAvailable = areaListLower.some(area => addressLower.includes(area));
+  }
   const stockPercent = Math.min(100, (crop.quantity / 100) * 100);
   const allReviews = cropReviews?.reviews || farmerReviews?.reviews || [];
 
@@ -328,7 +335,7 @@ export default function CropDetailPage() {
                 if (user && user.role === 'BUYER') {
                   const deliveryAddress = user.buyerProfile?.deliveryAddress;
                   if (deliveryAddress) {
-                    const addressLower = deliveryAddress.toLowerCase();
+                    const addressLower = formatAddress(deliveryAddress).toLowerCase();
                     const isAvailable = areaListLower.some(area => addressLower.includes(area));
                     
                     if (isAvailable) {
@@ -460,8 +467,15 @@ export default function CropDetailPage() {
                     <FiShoppingCart size={16} />
                     {addingToCart ? 'Adding...' : isInCart(id) ? '✓ In Cart' : 'Add to Cart'}
                   </button>
-                  <Button onClick={handleOrder} loading={ordering} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm">
-                    {ordering ? 'Placing...' : 'Buy Now'}
+                  <Button
+                    onClick={() => {
+                      if (!isAuthenticated) return navigate('/login');
+                      setIsConfirmModalOpen(true);
+                    }}
+                    disabled={isAuthenticated && user?.role === 'BUYER' && (!hasDeliveryAddress || !isDeliveryAvailable)}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm"
+                  >
+                    Buy Now
                   </Button>
                 </div>
               </div>
@@ -611,6 +625,88 @@ export default function CropDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Purchase Confirmation Modal */}
+      <Modal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        title="Confirm Purchase Details"
+        size="md"
+      >
+        <div className="space-y-4">
+          <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-xl space-y-2.5 border border-gray-100 dark:border-gray-800">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500 dark:text-gray-400 font-medium">Crop:</span>
+              <span className="font-bold text-gray-900 dark:text-white">{crop.cropName}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500 dark:text-gray-400 font-medium">Price per kg:</span>
+              <span className="font-semibold text-gray-800 dark:text-gray-200">{formatPrice(crop.pricePerKg)}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500 dark:text-gray-400 font-medium">Quantity:</span>
+              <span className="font-semibold text-gray-800 dark:text-gray-200">{quantity} kg</span>
+            </div>
+            <div className="border-t border-gray-200 dark:border-gray-700/80 pt-2.5 flex justify-between text-base font-black">
+              <span className="text-gray-950 dark:text-white">Total Price:</span>
+              <span className="text-emerald-600 dark:text-emerald-400">{formatPrice(totalPrice)}</span>
+            </div>
+          </div>
+
+          <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-xl space-y-2 border border-gray-100 dark:border-gray-800">
+            <span className="block text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Delivery Address</span>
+            {hasDeliveryAddress ? (
+              <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{formatAddress(user.buyerProfile.deliveryAddress)}</p>
+            ) : (
+              <div className="p-3 bg-red-50 dark:bg-red-950/20 rounded-xl border border-red-100 dark:border-red-900/30 text-xs text-red-700 dark:text-red-400 flex items-start gap-2">
+                <FiAlertCircle className="flex-shrink-0 mt-0.5" size={15} />
+                <div>
+                  <span className="font-bold">No delivery address found.</span>
+                  <p className="font-normal mt-0.5">Please add a delivery address in your <Link to="/profile" className="underline font-bold text-red-700 dark:text-red-400">Profile</Link> before placing an order.</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Service Area Validation */}
+          {hasDeliveryAddress && (
+            isDeliveryAvailable ? (
+              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-xl border border-emerald-100 dark:border-emerald-900/30 text-xs text-emerald-700 dark:text-emerald-400 flex items-center gap-2 font-semibold">
+                <FiCheckCircle size={15} className="flex-shrink-0" />
+                <span>Delivery is available in your area</span>
+              </div>
+            ) : (
+              <div className="p-3.5 bg-red-50 dark:bg-red-950/20 rounded-xl border border-red-100 dark:border-red-900/30 text-xs text-red-700 dark:text-red-400 flex items-start gap-2">
+                <FiAlertCircle className="flex-shrink-0 mt-0.5" size={15} />
+                <div>
+                  <span className="font-bold">Delivery is not available in your area.</span>
+                  <p className="font-normal mt-1">This farmer only delivers to: <span className="font-bold">{serviceableAreas}</span>.</p>
+                  <p className="font-normal mt-0.5 text-red-600/80 dark:text-red-400/80">You cannot purchase this crop with your current delivery address. You can chat with the farmer to ask if they can deliver to your area.</p>
+                </div>
+              </div>
+            )
+          )}
+
+          <div className="flex gap-3 pt-2">
+            <Button
+              variant="secondary"
+              onClick={() => setIsConfirmModalOpen(false)}
+              className="flex-1 py-3 rounded-xl text-sm font-semibold"
+              disabled={ordering}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleOrder}
+              className="flex-1 py-3 rounded-xl text-sm font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/25"
+              disabled={ordering || !hasDeliveryAddress || !isDeliveryAvailable}
+              loading={ordering}
+            >
+              {ordering ? 'Confirming...' : 'Confirm & Pay'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

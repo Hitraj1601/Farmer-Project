@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { GiWheat } from 'react-icons/gi';
 import { FiUser, FiPhone, FiMail, FiLock, FiArrowRight } from 'react-icons/fi';
@@ -11,8 +11,59 @@ export default function RegisterPage() {
   const [form, setForm] = useState({ name: '', phone: '', email: '', password: '', role: 'FARMER' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { register, isAuthenticated, user } = useAuth();
+  const { register, googleLogin, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
+  const roleRef = useRef(form.role);
+
+  useEffect(() => {
+    roleRef.current = form.role;
+  }, [form.role]);
+
+  const handleGoogleResponse = async (response) => {
+    setError('');
+    setLoading(true);
+    try {
+      const user = await googleLogin(response.credential, roleRef.current);
+      toast.success(`Welcome to FarmConnect, ${user.name}!`);
+      if (user.role === 'FARMER') navigate('/dashboard');
+      else navigate('/marketplace');
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || 'Google Sign-Up failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const initGoogle = () => {
+      if (window.google) {
+        window.google.accounts.id.initialize({
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com",
+          callback: handleGoogleResponse,
+        });
+        window.google.accounts.id.renderButton(
+          document.getElementById("google-signup-btn"),
+          { theme: "outline", size: "large", width: "380", text: "signup_with" }
+        );
+      }
+    };
+
+    if (window.google) {
+      initGoogle();
+    } else {
+      let checks = 0;
+      const interval = setInterval(() => {
+        checks++;
+        if (window.google) {
+          initGoogle();
+          clearInterval(interval);
+        } else if (checks > 30) {
+          clearInterval(interval);
+        }
+      }, 100);
+      return () => clearInterval(interval);
+    }
+  }, [googleLogin, navigate]);
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -171,6 +222,19 @@ export default function RegisterPage() {
               Create Account <FiArrowRight size={18} />
             </Button>
           </form>
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-200 dark:border-gray-800"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-gray-50/50 dark:bg-gray-950 text-gray-500 dark:text-gray-400">Or continue with</span>
+            </div>
+          </div>
+
+          <div className="w-full flex justify-center">
+            <div id="google-signup-btn"></div>
+          </div>
 
           <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-8">
             Already have an account?{' '}

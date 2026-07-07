@@ -112,52 +112,31 @@ export default function CartPage() {
   if (loading) return <Loader text="Loading your cart..." />;
 
   return (
-    <div className="min-h-screen">
-      {/* Hero Banner */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-violet-950 to-gray-900 pt-8 pb-20">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-0 left-1/4 w-[500px] h-[500px] rounded-full bg-violet-500/10 blur-[120px]" />
-          <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] rounded-full bg-purple-500/10 blur-[100px]" />
-          <div
-            className="absolute inset-0 opacity-[0.03]"
-            style={{
-              backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)',
-              backgroundSize: '40px 40px',
-            }}
-          />
-        </div>
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-violet-500/10 border border-violet-500/20 backdrop-blur-xl rounded-full text-sm text-violet-400 mb-6 animate-fade-in fill-mode-both">
-              <FiShoppingCart size={14} />
-              {cartCount} item{cartCount !== 1 ? 's' : ''} in cart
-            </div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-[1.1] tracking-tight animate-fade-in-up fill-mode-both">
-              Shopping{' '}
-              <span className="bg-gradient-to-r from-violet-400 via-purple-300 to-fuchsia-400 bg-clip-text text-transparent animate-gradient bg-[length:200%_auto]">
-                Cart
-              </span>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+      {/* ─── Enterprise Header ─── */}
+      <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 py-6 mb-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+              Shopping Cart
             </h1>
-            <p className="mt-4 text-lg text-gray-400 max-w-xl mx-auto leading-relaxed animate-fade-in-up fill-mode-both delay-200">
-              Review your items and checkout when ready
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              Manage items selected for purchase.
             </p>
           </div>
+          <div className="flex items-center gap-2 text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/35 px-3 py-1.5 rounded-lg border border-emerald-200/50 dark:border-emerald-900/50 self-start md:self-auto">
+            <FiShoppingCart size={14} />
+            {cartCount} item{cartCount !== 1 ? 's' : ''} in cart
+          </div>
         </div>
+      </header>
 
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
-            <path d="M0 30 C 360 60 1080 0 1440 30 L 1440 60 L 0 60 Z" className="fill-gray-50 dark:fill-gray-950" />
-          </svg>
-        </div>
-      </section>
-
-      {/* Content */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 pb-16 relative z-10">
+      {/* ─── Content Area ─── */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         {cartCount === 0 ? (
           <div className="bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-xl shadow-gray-200/40 dark:shadow-black/30 p-16 text-center animate-fade-in-up fill-mode-both">
-            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-violet-100 to-purple-200 dark:from-violet-950 dark:to-purple-900 rounded-3xl flex items-center justify-center mb-6">
-              <FiShoppingCart size={40} className="text-violet-400" />
+            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-emerald-100 to-teal-200 dark:from-emerald-950 dark:to-teal-900 rounded-3xl flex items-center justify-center mb-6">
+              <FiShoppingCart size={40} className="text-emerald-400" />
             </div>
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Your cart is empty</h3>
             <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-sm mx-auto">
@@ -256,9 +235,9 @@ export default function CartPage() {
                 </div>
 
                 {/* Info banner */}
-                <div className="flex items-start gap-2.5 p-3 bg-blue-50 dark:bg-blue-950/30 rounded-2xl border border-blue-100 dark:border-blue-900/50 mb-5">
-                  <FiAlertCircle size={16} className="text-blue-500 mt-0.5 flex-shrink-0" />
-                  <p className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed">
+                <div className="flex items-start gap-2.5 p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100 dark:border-emerald-900/50 mb-5">
+                  <FiAlertCircle size={16} className="text-emerald-500 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs text-emerald-700 dark:text-emerald-400 leading-relaxed font-semibold">
                     Each farmer will receive a separate order. You can track and pay for each order independently.
                   </p>
                 </div>

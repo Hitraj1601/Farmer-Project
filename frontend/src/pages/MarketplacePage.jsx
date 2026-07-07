@@ -50,14 +50,9 @@ function useScrollReveal() {
   return [ref, isVisible];
 }
 
-function ScrollReveal({ children, className = '', delay = 0 }) {
-  const [ref, isVisible] = useScrollReveal();
+function ScrollReveal({ children, className = '' }) {
   return (
-    <div
-      ref={ref}
-      className={`transition-all duration-700 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'} ${className}`}
-      style={{ transitionDelay: `${delay}ms` }}
-    >
+    <div className={className}>
       {children}
     </div>
   );
@@ -140,136 +135,65 @@ export default function MarketplacePage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
 
-      {/* ══════════════════════════════════════════════════════════
-          HERO — Immersive dark gradient with animated mesh & glass
-         ══════════════════════════════════════════════════════════ */}
-      <section className="relative overflow-hidden pt-10 pb-32 sm:pt-14 sm:pb-36" id="marketplace-hero">
-        {/* Deep layered background */}
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-[#040d1a]" />
-          {/* Animated mesh gradient orbs */}
-          <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-            <div className="absolute -top-[20%] -left-[10%] w-[700px] h-[700px] rounded-full opacity-40 blur-[160px] animate-pulse" style={{ background: 'radial-gradient(circle, #059669 0%, transparent 70%)', animationDuration: '7s' }} />
-            <div className="absolute top-[10%] right-[-5%] w-[600px] h-[600px] rounded-full opacity-30 blur-[140px] animate-pulse" style={{ background: 'radial-gradient(circle, #0d9488 0%, transparent 70%)', animationDuration: '9s', animationDelay: '1s' }} />
-            <div className="absolute bottom-[-10%] left-[30%] w-[500px] h-[500px] rounded-full opacity-25 blur-[120px] animate-pulse" style={{ background: 'radial-gradient(circle, #14b8a6 0%, transparent 70%)', animationDuration: '6s', animationDelay: '3s' }} />
-            <div className="absolute top-[50%] left-[60%] w-[300px] h-[300px] rounded-full opacity-20 blur-[100px] animate-pulse" style={{ background: 'radial-gradient(circle, #6366f1 0%, transparent 70%)', animationDuration: '11s', animationDelay: '2s' }} />
-          </div>
-          {/* Subtle noise/grain texture */}
-          <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\'/%3E%3C/svg%3E")', backgroundRepeat: 'repeat', backgroundSize: '128px 128px' }} />
-          {/* Horizontal accent line */}
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent" />
-        </div>
-
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header text */}
-          <div className="text-center max-w-2xl mx-auto">
-            {/* Live badge */}
-            <div className="inline-flex items-center gap-2.5 px-5 py-2 bg-white/[0.06] border border-white/[0.08] backdrop-blur-2xl rounded-full text-[13px] text-emerald-300/90 mb-8 animate-fade-in fill-mode-both font-medium tracking-wide">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
-              </span>
-              {pagination.total > 0 ? (
-                <span>{pagination.total} fresh crops available now</span>
-              ) : (
-                <span>Farm-fresh produce daily</span>
-              )}
-            </div>
-
-            <h1 className="text-[2.75rem] sm:text-[3.5rem] lg:text-[4rem] font-black text-white leading-[1.05] tracking-[-0.02em] animate-fade-in-up fill-mode-both">
-              The Fresh{' '}
-              <span className="relative inline-block">
-                <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent animate-gradient bg-[length:200%_auto]">
-                  Marketplace
-                </span>
-                <svg className="absolute -bottom-1.5 left-0 w-full" viewBox="0 0 200 6" fill="none">
-                  <path d="M2 4 C 40 1 160 1 198 4" stroke="url(#underline-grad)" strokeWidth="2.5" strokeLinecap="round" opacity="0.7" />
-                  <defs><linearGradient id="underline-grad" x1="0" y1="0" x2="200" y2="0"><stop stopColor="#34d399" /><stop offset="1" stopColor="#22d3ee" /></linearGradient></defs>
-                </svg>
-              </span>
+      {/* ─── Enterprise Header ─── */}
+      <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 py-6 mb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+              Marketplace
             </h1>
-
-            <p className="mt-5 text-[15px] sm:text-base text-gray-400 max-w-lg mx-auto leading-relaxed animate-fade-in-up fill-mode-both" style={{ animationDelay: '120ms' }}>
-              Discover farm-fresh produce from verified farmers across India.{' '}
-              <span className="text-emerald-400/90 font-semibold">Zero middlemen, maximum freshness.</span>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              Direct connection to verified agricultural sellers with zero middlemen markup.
             </p>
-
-            {/* Trust strip — glass pills */}
-            <div className="mt-7 flex items-center justify-center gap-3 sm:gap-4 animate-fade-in fill-mode-both" style={{ animationDelay: '250ms' }}>
-              {[
-                { icon: FiCheckCircle, text: 'Verified Farmers', color: 'text-emerald-400' },
-                { icon: FiZap, text: '48hr Delivery', color: 'text-amber-400' },
-                { icon: FiShoppingBag, text: 'Secure Pay', color: 'text-blue-400' },
-              ].map((item) => (
-                <span key={item.text} className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.04] border border-white/[0.06] backdrop-blur-xl rounded-full text-[11px] sm:text-xs text-gray-400 font-medium">
-                  <item.icon size={12} className={item.color} /> {item.text}
-                </span>
-              ))}
-            </div>
           </div>
+          <div className="flex items-center gap-2 text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/35 px-3 py-1.5 rounded-lg border border-emerald-200/50 dark:border-emerald-900/50 self-start md:self-auto">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            {pagination.total > 0 ? `${pagination.total} fresh crops available now` : 'Farm-fresh produce daily'}
+          </div>
+        </div>
+      </header>
 
-          {/* ─── Premium Search Bar ─── */}
-          <div className="mt-12 max-w-2xl mx-auto animate-fade-in-up fill-mode-both" style={{ animationDelay: '180ms' }}>
-            <div className="relative">
-              {/* Glow behind search */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 via-teal-500/10 to-cyan-500/20 rounded-[20px] blur-xl opacity-60" />
-              <div className="relative bg-white/[0.07] backdrop-blur-2xl rounded-2xl p-1.5 border border-white/[0.1] shadow-[0_20px_60px_-20px_rgba(0,0,0,0.5)]">
-                <div className="flex flex-col sm:flex-row gap-1.5">
-                  <div className="relative flex-1 group">
-                    <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-emerald-400 transition-colors duration-300" size={17} />
-                    <input
-                      type="text"
-                      placeholder="Search crops, vegetables, fruits..."
-                      value={search}
-                      onChange={(e) => { setSearch(e.target.value); resetPage(); }}
-                      className="w-full pl-11 pr-4 py-3.5 bg-white/[0.06] text-white rounded-xl placeholder:text-gray-500 outline-none transition-all duration-300 border border-transparent text-sm font-medium focus:bg-white/[0.1] focus:border-emerald-500/30 focus:ring-1 focus:ring-emerald-500/20"
-                      id="marketplace-search"
-                    />
-                  </div>
-                  <div className="relative sm:w-44 group">
-                    <FiMapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-emerald-400 transition-colors duration-300" size={15} />
-                    <input
-                      type="text"
-                      placeholder="Location..."
-                      value={location}
-                      onChange={(e) => { setLocation(e.target.value); resetPage(); }}
-                      className="w-full pl-11 pr-4 py-3.5 bg-white/[0.06] text-white rounded-xl placeholder:text-gray-500 outline-none transition-all duration-300 border border-transparent text-sm font-medium focus:bg-white/[0.1] focus:border-emerald-500/30 focus:ring-1 focus:ring-emerald-500/20"
-                      id="marketplace-location"
-                    />
-                  </div>
-                  <button
-                    className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-bold py-3.5 px-7 rounded-xl transition-all duration-300 shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 flex items-center justify-center gap-2 hover:-translate-y-0.5 active:translate-y-0 text-sm"
-                    id="marketplace-search-btn"
-                  >
-                    <FiSearch size={16} />
-                    <span className="hidden sm:inline">Search</span>
-                  </button>
-                </div>
-              </div>
+      {/* ─── Main Content Area ─── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+
+        {/* ─── Search & Filters block ─── */}
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200/80 dark:border-gray-800/80 p-5 mb-5 shadow-sm">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={17} />
+              <input
+                type="text"
+                placeholder="Search crops, category, or farmer..."
+                value={search}
+                onChange={(e) => { setSearch(e.target.value); resetPage(); }}
+                className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl placeholder:text-gray-500 outline-none border border-gray-200 dark:border-gray-700 text-sm font-medium focus:bg-white dark:focus:bg-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                id="marketplace-search"
+              />
+            </div>
+            <div className="relative sm:w-56">
+              <FiMapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
+              <input
+                type="text"
+                placeholder="Filter by location..."
+                value={location}
+                onChange={(e) => { setLocation(e.target.value); resetPage(); }}
+                className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl placeholder:text-gray-500 outline-none border border-gray-200 dark:border-gray-700 text-sm font-medium focus:bg-white dark:focus:bg-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                id="marketplace-location"
+              />
             </div>
           </div>
         </div>
-
-        {/* Bottom edge blend */}
-        <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-gray-50 dark:from-gray-950 to-transparent" />
-      </section>
-
-      {/* ══════════════════════════════════════════════════════════
-          MAIN CONTENT AREA
-         ══════════════════════════════════════════════════════════ */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-14 pb-20 relative z-10">
 
         {/* ─── Category Navigation ─── */}
         <ScrollReveal>
-          <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-2xl rounded-2xl border border-gray-200/60 dark:border-gray-800/60 shadow-xl shadow-gray-900/[0.04] dark:shadow-black/40 p-5 sm:p-6 mb-5" id="category-section">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200/80 dark:border-gray-800/80 p-5 mb-5 shadow-sm" id="category-section">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-md shadow-emerald-500/20">
-                  <FiGrid size={14} className="text-white" />
+                <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950 flex items-center justify-center">
+                  <FiGrid size={14} className="text-emerald-500" />
                 </div>
                 <h3 className="text-sm font-bold text-gray-900 dark:text-white tracking-tight">Categories</h3>
               </div>
-              {/* View toggles */}
               <div className="flex items-center gap-0.5 bg-gray-100/80 dark:bg-gray-800/80 rounded-xl p-1 border border-gray-200/50 dark:border-gray-700/50">
                 <button
                   onClick={() => setViewMode('grid')}
