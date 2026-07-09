@@ -100,7 +100,7 @@ If you *must* create an admin user in a controlled environment, `Backend/seed-ad
 - **Environment variables:** copy from `Backend/.env.example` (set `NODE_ENV=production`)
 
 Important:
-- Render offers native PostgreSQL databases! You can create a free PostgreSQL database directly on Render and use its database connection URL for your backend service.
+- You can host your PostgreSQL database on Supabase! Simply create a free project, copy the connection URL from database settings, and add it to Render's environment variables.
 
 ### Vercel (Frontend)
 - **Root directory:** `frontend`
