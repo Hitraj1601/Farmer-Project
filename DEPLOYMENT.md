@@ -1,14 +1,14 @@
 # Deployment Checklist (Frontend + Backend)
 
 This repo is a monorepo:
-- `Backend/` = Node.js/Express API + Prisma (MySQL)
+- `Backend/` = Node.js/Express API + Prisma (PostgreSQL)
 - `frontend/` = React + Vite
 
 ## 1) Credentials / Environment Variables
 
 ### Backend (set these in your hosting provider)
 Required:
-- `DATABASE_URL` (MySQL connection string)
+- `DATABASE_URL` (PostgreSQL connection string)
 - `JWT_SECRET` (long random string)
 
 Optional (but required if you want Razorpay payments):
@@ -28,16 +28,16 @@ Template: `Backend/.env.example`
 
 Template: `frontend/.env.example`
 
-## 2) Database (MySQL) + Prisma
+## 2) Database (PostgreSQL) + Prisma
 
-1. Create a MySQL database (managed service is recommended for production).
+1. Create a PostgreSQL database (managed service is recommended for production).
 2. Set `DATABASE_URL` to the managed DB connection string.
 3. Run migrations:
    - Production: `npm run prisma:migrate:deploy`
-   - Dev/local: `npm run prisma:migrate`
+   - Dev/local: `npx prisma migrate dev` (generates new Postgres migrations)
 
 Notes:
-- Prisma schema is MySQL-based (`provider = "mysql"`). If your host only provides Postgres, you must switch the Prisma provider and run a migration plan.
+- Prisma schema is PostgreSQL-based (`provider = "postgresql"`).
 
 ## 3) Build & Start Commands
 
@@ -100,7 +100,7 @@ If you *must* create an admin user in a controlled environment, `Backend/seed-ad
 - **Environment variables:** copy from `Backend/.env.example` (set `NODE_ENV=production`)
 
 Important:
-- Render does not provide managed MySQL by default; you’ll need an external MySQL provider (or switch Prisma to Postgres).
+- Render offers native PostgreSQL databases! You can create a free PostgreSQL database directly on Render and use its database connection URL for your backend service.
 
 ### Vercel (Frontend)
 - **Root directory:** `frontend`
@@ -114,7 +114,7 @@ Important:
 
 ## 8) Containerized Deployment with Nginx + Docker Compose (Recommended)
 
-To run the complete application stack (MySQL, Node.js API, and Nginx Static Server) inside Docker containers:
+To run the complete application stack (PostgreSQL, Node.js API, and Nginx Static Server) inside Docker containers:
 
 ### Prerequisites
 Make sure **Docker** and **Docker Compose** are installed on the target machine.
@@ -123,11 +123,11 @@ Make sure **Docker** and **Docker Compose** are installed on the target machine.
 
 1. **Environment Setup**:
    Copy and fill environment variables for the database and secrets. In production, edit the environment variables in `docker-compose.yml` to specify secure credentials:
-   - `DATABASE_URL`: Ensure it connects to the `db` service container (default: `mysql://root:root_password_1234@db:3306/farmer_marketplace`).
+   - `DATABASE_URL`: Ensure it connects to the `db` service container (default: `postgresql://postgres:postgres_password_1234@db:5432/farmer_marketplace?schema=public`).
    - `JWT_SECRET`: A long secure key.
 
 2. **Build and Run**:
-   In the project root, run the following command to compile the frontend, package the backend service, stand up the MySQL container, apply database schemas, and start Nginx:
+   In the project root, run the following command to compile the frontend, package the backend service, stand up the PostgreSQL container, apply database schemas, and start Nginx:
    ```bash
    docker-compose up --build -d
    ```

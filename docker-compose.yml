@@ -1,16 +1,17 @@
 services:
   db:
-    image: mysql:8.0
+    image: postgres:15-alpine
     restart: always
     environment:
-      MYSQL_DATABASE: farmer_marketplace
-      MYSQL_ROOT_PASSWORD: root_password_1234
+      POSTGRES_DB: farmer_marketplace
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_password_1234
     ports:
-      - "3307:3306"
+      - "5432:5432"
     volumes:
-      - db-data:/var/lib/mysql
+      - db-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot_password_1234"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d farmer_marketplace"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -23,7 +24,7 @@ services:
     env_file:
       - ./Backend/.env
     environment:
-      DATABASE_URL: "mysql://root:root_password_1234@db:3306/farmer_marketplace"
+      DATABASE_URL: "postgresql://postgres:postgres_password_1234@db:5432/farmer_marketplace?schema=public"
       NODE_ENV: production
     depends_on:
       db:

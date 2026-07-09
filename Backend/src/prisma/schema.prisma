@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -74,7 +74,7 @@ model Crop {
   cartItems           CartItem[]
   orderItems          OrderItem[]
 
-  @@index([farmerId], map: "crops_farmerId_fkey")
+  @@index([farmerId])
   @@map("crops")
 }
 
@@ -94,8 +94,8 @@ model Order {
   payment    Payment?
   items      OrderItem[]
 
-  @@index([buyerId], map: "orders_buyerId_fkey")
-  @@index([cropId], map: "orders_cropId_fkey")
+  @@index([buyerId])
+  @@index([cropId])
   @@map("orders")
 }
 
@@ -127,8 +127,8 @@ model Review {
   farmer    User     @relation("ReviewsReceived", fields: [farmerId], references: [id], onDelete: Cascade)
 
   @@unique([buyerId, farmerId, cropId])
-  @@index([cropId], map: "reviews_cropId_fkey")
-  @@index([farmerId], map: "reviews_farmerId_fkey")
+  @@index([cropId])
+  @@index([farmerId])
   @@map("reviews")
 }
 
@@ -146,8 +146,8 @@ model PriceHistory {
 
   @@index([cropName, recordedAt])
   @@index([category, recordedAt])
-  @@index([cropId], map: "price_history_cropId_fkey")
-  @@index([farmerId], map: "price_history_farmerId_fkey")
+  @@index([cropId])
+  @@index([farmerId])
   @@map("price_history")
 }
 
@@ -174,7 +174,7 @@ model Wishlist {
   crop          Crop     @relation(fields: [cropId], references: [id], onDelete: Cascade)
 
   @@unique([buyerId, cropId])
-  @@index([cropId], map: "wishlists_cropId_fkey")
+  @@index([cropId])
   @@map("wishlists")
 }
 
@@ -193,7 +193,7 @@ model Conversation {
   @@unique([buyerId, farmerId, cropId])
   @@index([buyerId])
   @@index([farmerId])
-  @@index([cropId], map: "conversations_cropId_fkey")
+  @@index([cropId])
   @@map("conversations")
 }
 
@@ -208,7 +208,7 @@ model Message {
   sender         User         @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
 
   @@index([conversationId, createdAt])
-  @@index([senderId], map: "messages_senderId_fkey")
+  @@index([senderId])
   @@map("messages")
 }
 
@@ -253,7 +253,7 @@ model CartItem {
   crop     Crop     @relation(fields: [cropId], references: [id], onDelete: Cascade)
 
   @@unique([cartId, cropId])
-  @@index([cropId], map: "cart_items_cropId_fkey")
+  @@index([cropId])
   @@map("cart_items")
 }
 
@@ -267,7 +267,7 @@ model OrderItem {
   order      Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
   crop       Crop   @relation(fields: [cropId], references: [id], onDelete: Cascade)
 
-  @@index([orderId], map: "order_items_orderId_fkey")
-  @@index([cropId], map: "order_items_cropId_fkey")
+  @@index([orderId])
+  @@index([cropId])
   @@map("order_items")
 }
