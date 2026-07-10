@@ -281,7 +281,7 @@ function CartItemRow({ item, onUpdate, onRemove }) {
   };
 
   return (
-    <div className="px-5 py-4 flex items-center gap-4">
+    <div className="px-4 sm:px-5 py-4 flex flex-wrap sm:flex-nowrap items-center gap-3 sm:gap-4">
       {/* Image */}
       <Link to={`/crops/${item.cropId}`} className="flex-shrink-0">
         <img

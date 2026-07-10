@@ -188,7 +188,7 @@ export default function BulkUpload() {
               <p className="text-sm text-gray-400 dark:text-gray-500 mt-1.5">Upload CSV or Excel with crop data</p>
 
               {/* Inline column reference */}
-              <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 w-full max-w-3xl">
+              <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 gap-3 w-full max-w-3xl">
                 {COLUMNS_INFO.map((col) => (
                   <div key={col.name} className="text-left p-2.5 rounded-xl bg-white dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/50">
                     <div className="flex items-center gap-1 mb-0.5">

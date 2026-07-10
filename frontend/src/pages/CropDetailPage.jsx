@@ -485,7 +485,7 @@ export default function CropDetailPage() {
 
         {/* Reviews Section */}
         <div className="mt-12 animate-fade-in-up fill-mode-both delay-200">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center shadow-md shadow-amber-500/20">
                 <FiStar className="text-white" size={14} />

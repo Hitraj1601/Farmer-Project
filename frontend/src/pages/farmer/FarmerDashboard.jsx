@@ -46,7 +46,7 @@ export default function FarmerDashboard() {
   return (
     <div>
       <div className="mb-8 animate-fade-in-up fill-mode-both">
-        <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">Dashboard</h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white">Dashboard</h1>
         <p className="text-gray-500 mt-1">Overview of your farming business</p>
       </div>
 
@@ -83,21 +83,21 @@ export default function FarmerDashboard() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  <th className="px-6 py-3">Order ID</th>
-                  <th className="px-6 py-3">Crop</th>
-                  <th className="px-6 py-3">Quantity</th>
-                  <th className="px-6 py-3">Total</th>
-                  <th className="px-6 py-3">Status</th>
+                  <th className="px-4 sm:px-6 py-3">Order ID</th>
+                  <th className="px-4 sm:px-6 py-3">Crop</th>
+                  <th className="px-4 sm:px-6 py-3 hidden sm:table-cell">Quantity</th>
+                  <th className="px-4 sm:px-6 py-3">Total</th>
+                  <th className="px-4 sm:px-6 py-3">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
                 {recentOrders.map(o => (
                   <tr key={o.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
-                    <td className="px-6 py-4 font-mono text-xs text-gray-500">#{o.id.slice(0, 8)}</td>
-                    <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{o.crop?.cropName}</td>
-                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{o.quantity} kg</td>
-                    <td className="px-6 py-4 font-semibold text-gray-900 dark:text-white">{formatPrice(o.totalPrice)}</td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 sm:px-6 py-4 font-mono text-xs text-gray-500">#{o.id.slice(0, 8)}</td>
+                    <td className="px-4 sm:px-6 py-4 font-medium text-gray-900 dark:text-white">{o.crop?.cropName}</td>
+                    <td className="px-4 sm:px-6 py-4 text-gray-600 dark:text-gray-400 hidden sm:table-cell">{o.quantity} kg</td>
+                    <td className="px-4 sm:px-6 py-4 font-semibold text-gray-900 dark:text-white">{formatPrice(o.totalPrice)}</td>
+                    <td className="px-4 sm:px-6 py-4">
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold ${statusColor[o.status] || 'bg-gray-50 text-gray-600'}`}>
                         {o.status}
                       </span>

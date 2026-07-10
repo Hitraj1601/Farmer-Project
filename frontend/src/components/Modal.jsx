@@ -21,9 +21,9 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' })
   const sizes = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-2xl', xl: 'max-w-4xl' };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in" ref={overlayRef}>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in" ref={overlayRef}>
       <div className="absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className={`relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl dark:shadow-black/40 ${sizes[size]} w-full max-h-[85vh] flex flex-col animate-scale-in`}>
+      <div className={`relative bg-white dark:bg-gray-900 rounded-t-2xl sm:rounded-2xl shadow-2xl dark:shadow-black/40 ${sizes[size]} w-full max-h-[90vh] sm:max-h-[85vh] flex flex-col animate-scale-in`}>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white">{title}</h3>

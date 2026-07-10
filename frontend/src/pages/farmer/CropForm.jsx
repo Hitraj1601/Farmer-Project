@@ -117,7 +117,7 @@ export default function CropForm() {
   return (
     <div className="max-w-2xl">
       <div className="mb-8 animate-fade-in-up fill-mode-both">
-        <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">{isEdit ? 'Edit Crop' : 'Add New Crop'}</h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white">{isEdit ? 'Edit Crop' : 'Add New Crop'}</h1>
         <p className="text-gray-500 mt-1">{isEdit ? 'Update your crop details' : 'List a new crop on the marketplace'}</p>
       </div>
 
@@ -153,7 +153,7 @@ export default function CropForm() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Quantity (kg)</label>
             <input name="quantity" type="number" className="input-field" placeholder="e.g. 100" value={form.quantity} onChange={handleChange} required min="1" />

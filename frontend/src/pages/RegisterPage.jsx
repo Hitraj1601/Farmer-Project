@@ -92,9 +92,9 @@ export default function RegisterPage() {
   const set = (key) => (e) => setForm({ ...form, [key]: e.target.value });
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Left - Illustration side */}
-      <div className="hidden lg:flex w-1/2 relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
         <img src={farmLandscape} alt="Beautiful Indian farmland" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-br from-gray-950/90 via-emerald-950/80 to-gray-950/70" />
 
@@ -113,7 +113,7 @@ export default function RegisterPage() {
           }}
         />
 
-        <div className="relative flex flex-col justify-center px-16 text-white">
+        <div className="relative flex flex-col justify-center px-8 xl:px-16 text-white">
           <div className="flex items-center gap-2.5 mb-8">
             <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-green-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
               <GiWheat size={24} />
@@ -147,7 +147,7 @@ export default function RegisterPage() {
       </div>
 
       {/* Right - Form */}
-      <div className="flex-1 flex items-center justify-center px-4 sm:px-8 bg-gray-50/50 dark:bg-gray-950 py-8">
+      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-8 sm:py-12 bg-gray-50/50 dark:bg-gray-950">
         <div className="w-full max-w-md animate-fade-in-up fill-mode-both">
           <div className="lg:hidden text-center mb-8">
             <Link to="/" className="inline-flex items-center gap-2.5">

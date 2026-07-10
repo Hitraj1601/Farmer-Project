@@ -309,7 +309,7 @@ export default function HomePage() {
                 Trusted by 500+ farmers across India
               </div>
 
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-white leading-[1.05] tracking-tight font-display">
+              <h1 className="text-3xl sm:text-5xl lg:text-7xl font-black text-white leading-[1.05] tracking-tight font-display">
                 Farm Fresh
                 <br />
                 <span className="relative">
@@ -321,16 +321,16 @@ export default function HomePage() {
                 <span className="text-white/90">Your Table</span>
               </h1>
 
-              <p className="mt-8 text-lg sm:text-xl text-gray-300/90 max-w-lg leading-relaxed">
+              <p className="mt-6 sm:mt-8 text-base sm:text-lg lg:text-xl text-gray-300/90 max-w-lg leading-relaxed">
                 India's most trusted agricultural marketplace connecting farmers directly with conscious buyers.
                 <span className="text-emerald-400 font-semibold"> Zero middlemen. Fresh within 48 hours.</span>
               </p>
 
               {/* CTA buttons */}
-              <div className="mt-10 flex flex-wrap gap-4">
+              <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4">
                 <Link
                   to="/marketplace"
-                  className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-emerald-500 via-emerald-400 to-teal-500 text-white font-bold py-4 px-8 rounded-full transition-all duration-300 shadow-2xl shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:-translate-y-1 hover:scale-[1.02]"
+                  className="group relative inline-flex items-center justify-center gap-3 bg-gradient-to-r from-emerald-500 via-emerald-400 to-teal-500 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-full transition-all duration-300 shadow-2xl shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:-translate-y-1 hover:scale-[1.02] text-sm sm:text-base w-full sm:w-auto"
                 >
                   <span className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <span className="relative flex items-center gap-3">
@@ -341,7 +341,7 @@ export default function HomePage() {
                 {isAuthenticated && user?.role === 'FARMER' ? (
                   <Link
                     to="/dashboard"
-                    className="group inline-flex items-center gap-3 border-2 border-white/20 text-white font-bold py-4 px-8 rounded-full hover:bg-white/10 backdrop-blur-sm transition-all duration-300 hover:border-white/40"
+                    className="group inline-flex items-center justify-center gap-3 border-2 border-white/20 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-full hover:bg-white/10 backdrop-blur-sm transition-all duration-300 hover:border-white/40 text-sm sm:text-base w-full sm:w-auto"
                   >
                     <FiPlay size={16} className="group-hover:scale-110 transition-transform" />
                     Go to Dashboard
@@ -350,7 +350,7 @@ export default function HomePage() {
                   <button
                     type="button"
                     onClick={() => toast.error('You are logged in as a Buyer. Log out and register a Farmer account to sell crops.')}
-                    className="group inline-flex items-center gap-3 border-2 border-white/20 text-white font-bold py-4 px-8 rounded-full hover:bg-white/10 backdrop-blur-sm transition-all duration-300 hover:border-white/40"
+                    className="group inline-flex items-center justify-center gap-3 border-2 border-white/20 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-full hover:bg-white/10 backdrop-blur-sm transition-all duration-300 hover:border-white/40 text-sm sm:text-base w-full sm:w-auto"
                   >
                     <FiPlay size={16} className="group-hover:scale-110 transition-transform" />
                     Start Selling
@@ -358,7 +358,7 @@ export default function HomePage() {
                 ) : (
                   <Link
                     to="/register"
-                    className="group inline-flex items-center gap-3 border-2 border-white/20 text-white font-bold py-4 px-8 rounded-full hover:bg-white/10 backdrop-blur-sm transition-all duration-300 hover:border-white/40"
+                    className="group inline-flex items-center justify-center gap-3 border-2 border-white/20 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-full hover:bg-white/10 backdrop-blur-sm transition-all duration-300 hover:border-white/40 text-sm sm:text-base w-full sm:w-auto"
                   >
                     <FiPlay size={16} className="group-hover:scale-110 transition-transform" />
                     Start Selling
@@ -367,7 +367,7 @@ export default function HomePage() {
               </div>
 
               {/* Trust badges */}
-              <div className="mt-12 flex items-center gap-6">
+              <div className="mt-8 sm:mt-12 flex flex-wrap items-center gap-4 sm:gap-6">
                 <div className="flex -space-x-3">
                   {['R', 'P', 'A', 'S', 'M'].map((letter, i) => (
                     <div
@@ -483,7 +483,7 @@ export default function HomePage() {
             </div>
           </ScrollRevealSection>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {categories.map((cat, i) => (
               <ScrollRevealSection key={cat.name} delay={i * 100}>
                 <Link
@@ -630,7 +630,7 @@ export default function HomePage() {
             </div>
           </ScrollRevealSection>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {testimonials.map((t, i) => (
               <ScrollRevealSection key={t.name} delay={i * 100}>
                 <div className="group bg-white dark:bg-gray-900 rounded-3xl p-7 border border-gray-100 dark:border-gray-800 hover:border-emerald-200/50 dark:hover:border-emerald-800/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-xl h-full flex flex-col">
@@ -686,7 +686,7 @@ export default function HomePage() {
               Join 500+ farmers already on the platform
             </div>
 
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight mb-6">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-white leading-tight mb-6">
               Ready to transform
               <br />
               your farming journey?
@@ -712,7 +712,7 @@ export default function HomePage() {
             </div>
 
             {/* Bottom trust line */}
-            <div className="mt-12 flex items-center justify-center gap-8 text-white/50 text-sm">
+            <div className="mt-12 flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-white/50 text-xs sm:text-sm">
               <span className="flex items-center gap-2"><FiCheckCircle size={14} /> Free to join</span>
               <span className="flex items-center gap-2"><FiShield size={14} /> Secure payments</span>
               <span className="flex items-center gap-2"><FiHeart size={14} /> 24/7 support</span>
@@ -723,7 +723,7 @@ export default function HomePage() {
 
       {/* ─────────── FEATURE DETAIL MODAL ─────────── */}
       {selectedFeature && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4">
           {/* Backdrop */}
           <div 
             className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
@@ -731,7 +731,7 @@ export default function HomePage() {
           />
           
           {/* Modal Content Container */}
-          <div className="relative bg-white dark:bg-gray-900 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-gray-100 dark:border-gray-800 transform transition-all duration-300 animate-in fade-in zoom-in-95 duration-200">
+          <div className="relative bg-white dark:bg-gray-900 rounded-t-3xl sm:rounded-3xl max-w-lg w-full max-h-[90vh] sm:max-h-[85vh] overflow-hidden shadow-2xl border border-gray-100 dark:border-gray-800 transform transition-all duration-300 animate-in fade-in zoom-in-95 duration-200">
             {/* Header pattern banner */}
             <div className={`h-24 bg-gradient-to-br ${selectedFeature.gradient} relative flex items-center justify-between px-6`}>
               <div className="flex items-center gap-4">

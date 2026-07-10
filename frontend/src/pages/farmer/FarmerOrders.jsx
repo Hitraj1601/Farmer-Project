@@ -100,7 +100,7 @@ export default function FarmerOrders() {
                       Payment: <span className={order.payment?.status === 'SUCCESS' ? 'text-emerald-600 font-medium' : 'text-gray-500'}>{order.payment?.status || 'Pending'}</span>
                     </p>
                   </div>
-                  <div className="flex gap-2 flex-shrink-0">
+                  <div className="flex flex-wrap gap-2 flex-shrink-0 w-full sm:w-auto">
                     {order.status !== 'REJECTED' && (
                       <Button variant="secondary" size="sm" onClick={() => setTrackingOrderId(order.id)} className="gap-1.5">
                         <FiMapPin size={14} /> Track

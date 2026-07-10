@@ -112,7 +112,7 @@ export default function Analytics() {
   return (
     <div>
       <div className="mb-8 animate-fade-in-up fill-mode-both">
-        <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">Farm Analytics</h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white">Farm Analytics</h1>
         <p className="text-gray-500 mt-1">Simple view of crops, orders, revenue, and performance</p>
       </div>
 

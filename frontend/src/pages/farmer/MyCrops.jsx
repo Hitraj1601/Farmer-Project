@@ -51,7 +51,7 @@ export default function MyCrops() {
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4 animate-fade-in-up fill-mode-both">
         <div>
-          <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">My Crops</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white">My Crops</h1>
           <p className="text-gray-500 mt-1">{crops.length} crop{crops.length !== 1 ? 's' : ''} listed</p>
         </div>
         <Link to="/dashboard/add-crop">
