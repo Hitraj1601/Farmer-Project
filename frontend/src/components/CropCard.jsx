@@ -152,7 +152,7 @@ export default function CropCard({ crop, index = 0, viewMode = 'grid' }) {
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetails(); } }}
     >
       {/* ── Image Section ── */}
-      <div className="relative h-52 overflow-hidden rounded-t-2xl bg-gray-100 dark:bg-gray-800">
+      <div className="relative h-32 xs:h-36 sm:h-44 md:h-52 overflow-hidden rounded-t-2xl bg-gray-100 dark:bg-gray-800">
         <img
           src={getImageUrl(crop.imageUrl)}
           alt={crop.cropName}
@@ -166,8 +166,8 @@ export default function CropCard({ crop, index = 0, viewMode = 'grid' }) {
 
         {/* Category pill — top left */}
         {crop.category && (
-          <div className="absolute top-3 left-3 z-10">
-            <span className={`${accent.light} ${accent.text} ${accent.border} backdrop-blur-xl text-[10px] font-bold px-2.5 py-1 rounded-lg border inline-flex items-center`}>
+          <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10">
+            <span className={`${accent.light} ${accent.text} ${accent.border} backdrop-blur-xl text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-md sm:rounded-lg border inline-flex items-center`}>
               {crop.category}
             </span>
           </div>
@@ -177,58 +177,58 @@ export default function CropCard({ crop, index = 0, viewMode = 'grid' }) {
         {isBuyer && (
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggle(crop.id); }}
-            className={`absolute top-3 right-3 z-10 w-9 h-9 rounded-xl flex items-center justify-center shadow-lg transition-all duration-300 backdrop-blur-xl border
+            className={`absolute top-2 right-2 sm:top-3 sm:right-3 z-10 w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg transition-all duration-300 backdrop-blur-xl border
               ${wishlisted
                 ? 'bg-red-500/90 text-white border-red-400/30 scale-110 shadow-red-500/30'
-                : 'bg-white/70 dark:bg-gray-900/70 text-gray-500 border-white/20 dark:border-gray-700/30 opacity-0 group-hover:opacity-100 hover:text-red-500 hover:scale-110 hover:bg-red-50/90 dark:hover:bg-red-950/80'
+                : 'bg-white/70 dark:bg-gray-900/70 text-gray-500 border-white/20 dark:border-gray-700/30 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 hover:text-red-500 hover:scale-110 hover:bg-red-50/90 dark:hover:bg-red-950/80'
               }`}
             aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
           >
-            {wishlisted ? <FaHeart size={14} /> : <FiHeart size={14} />}
+            {wishlisted ? <FaHeart size={11} className="sm:w-3.5 sm:h-3.5" /> : <FiHeart size={11} className="sm:w-3.5 sm:h-3.5" />}
           </button>
         )}
 
         {/* Low stock badge */}
         {crop.quantity <= 10 && (
-          <span className="absolute top-3 left-3 z-20 bg-red-500/90 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-lg shadow-red-500/30 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+          <span className="absolute top-2 left-2 sm:top-3 sm:left-3 z-20 bg-red-500/90 backdrop-blur-sm text-white text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-md sm:rounded-lg shadow-lg shadow-red-500/30 flex items-center gap-1">
+            <span className="w-1 h-1 bg-white rounded-full animate-pulse" />
             Low Stock
           </span>
         )}
 
         {/* Price badge — bottom right, floating */}
-        <div className="absolute bottom-3 right-3 z-10 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl rounded-xl px-3 py-1.5 shadow-lg border border-white/20 dark:border-gray-700/30">
-          <span className="text-lg font-black bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400 bg-clip-text text-transparent">{formatPrice(crop.pricePerKg)}</span>
-          <span className="text-[10px] text-gray-400 dark:text-gray-500 ml-0.5 font-medium">/kg</span>
+        <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 z-10 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl rounded-lg sm:rounded-xl px-1.5 sm:px-3 py-0.5 sm:py-1.5 shadow-lg border border-white/20 dark:border-gray-700/30">
+          <span className="text-sm sm:text-lg font-black bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400 bg-clip-text text-transparent">{formatPrice(crop.pricePerKg)}</span>
+          <span className="text-[9px] sm:text-[10px] text-gray-400 dark:text-gray-500 ml-0.5 font-medium">/kg</span>
         </div>
       </div>
 
       {/* ── Content Section ── */}
-      <div className="p-4">
+      <div className="p-3 sm:p-4">
         {/* Crop name */}
-        <h3 className="font-bold text-gray-900 dark:text-white text-[15px] group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300 line-clamp-1 leading-snug">
+        <h3 className="font-bold text-gray-900 dark:text-white text-[13px] sm:text-[15px] group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300 line-clamp-1 leading-snug">
           {crop.cropName}
         </h3>
 
         {/* Meta row: location + stock */}
-        <div className="flex items-center justify-between mt-2.5">
-          <span className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
-            <FiMapPin size={12} className="text-emerald-500 flex-shrink-0" />
-            <span className="truncate max-w-[120px]">{crop.location}</span>
+        <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-1.5 xs:gap-0 mt-2">
+          <span className="flex items-center gap-1 text-[11px] sm:text-sm text-gray-500 dark:text-gray-400 min-w-0">
+            <FiMapPin size={11} className="text-emerald-500 flex-shrink-0" />
+            <span className="truncate max-w-[80px] xs:max-w-[100px] sm:max-w-[120px]">{crop.location}</span>
           </span>
-          <span className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-50/80 dark:bg-gray-800/60 px-2.5 py-1 rounded-lg border border-gray-100/80 dark:border-gray-700/50">
-            <FiBox size={11} />
+          <span className="flex items-center gap-1 text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-50/80 dark:bg-gray-800/60 px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-lg border border-gray-100/80 dark:border-gray-700/50 self-start xs:self-auto">
+            <FiBox size={10} />
             {crop.quantity} kg
           </span>
         </div>
 
         {/* Farmer row */}
         {crop.farmer && (
-          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100/80 dark:border-gray-800/60">
-            <span className="w-6 h-6 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-500 text-white flex items-center justify-center text-[10px] font-bold shadow-sm shadow-emerald-500/20">
+          <div className="flex items-center gap-1.5 mt-2.5 pt-2.5 border-t border-gray-100/80 dark:border-gray-800/60">
+            <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg bg-gradient-to-br from-emerald-400 to-teal-500 text-white flex items-center justify-center text-[9px] sm:text-[10px] font-bold shadow-sm shadow-emerald-500/20">
               {crop.farmer.name?.[0]}
             </span>
-            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium truncate">{crop.farmer.name}</p>
+            <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium truncate">{crop.farmer.name}</p>
           </div>
         )}
 
@@ -237,53 +237,53 @@ export default function CropCard({ crop, index = 0, viewMode = 'grid' }) {
           const areas = crop.farmer.farmerProfile?.serviceableAreas;
           if (areas) {
             const areaList = areas.split(',').map(a => a.trim()).filter(Boolean);
-            const display = areaList.length > 2
-              ? `${areaList.slice(0, 2).join(', ')} +${areaList.length - 2} more`
+            const display = areaList.length > 1
+              ? `${areaList.slice(0, 1).join(', ')} +${areaList.length - 1} more`
               : areaList.join(', ');
             return (
-              <div className="flex items-center gap-1.5 mt-2 text-[11px] text-blue-600 dark:text-blue-400 font-medium">
-                <FiTruck size={10} className="flex-shrink-0" />
-                <span className="truncate">Delivers to: {display}</span>
+              <div className="flex items-center gap-1 mt-1.5 text-[9px] sm:text-[11px] text-blue-600 dark:text-blue-400 font-medium">
+                <FiTruck size={9} className="flex-shrink-0" />
+                <span className="truncate">Delivers: {display}</span>
               </div>
             );
           }
           return (
-            <div className="flex items-center gap-1.5 mt-2 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
-              <FiTruck size={10} className="flex-shrink-0" />
+            <div className="flex items-center gap-1 mt-1.5 text-[9px] sm:text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+              <FiTruck size={9} className="flex-shrink-0" />
               <span>Delivers Everywhere</span>
             </div>
           );
         })()}
 
         {/* CTA Buttons */}
-        <div className="mt-3 flex gap-2">
+        <div className="mt-3 flex gap-1.5">
           <Link
             to={`/crops/${crop.id}`}
             onClick={(e) => e.stopPropagation()}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl
+            className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg sm:rounded-xl
                        bg-gradient-to-r from-emerald-500 to-teal-500
-                       text-white font-semibold text-sm
+                       text-white font-semibold text-xs sm:text-sm
                        shadow-md shadow-emerald-500/15
                        hover:from-emerald-400 hover:to-teal-400
                        hover:shadow-lg hover:shadow-emerald-500/25 hover:-translate-y-0.5
                        transition-all duration-300
                        group/btn"
           >
-            View Details
-            <FiArrowRight size={13} className="group-hover/btn:translate-x-1 transition-transform duration-300" />
+            <span>Details</span>
+            <FiArrowRight size={11} className="group-hover/btn:translate-x-1 transition-transform duration-300" />
           </Link>
           {isBuyer && (
             <button
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (!inCart) addToCart(crop.id, 1); }}
               disabled={inCart}
-              className={`flex items-center justify-center w-10 rounded-xl border transition-all duration-300 flex-shrink-0 ${
+              className={`flex items-center justify-center w-8 sm:w-10 rounded-lg sm:rounded-xl border transition-all duration-300 flex-shrink-0 ${
                 inCart
                   ? 'bg-violet-50/80 dark:bg-violet-950/30 border-violet-200/50 dark:border-violet-800/50 text-violet-500'
                   : 'bg-gray-50/80 dark:bg-gray-800/60 border-gray-200/50 dark:border-gray-700/50 text-gray-400 hover:text-violet-500 hover:bg-violet-50 dark:hover:bg-violet-950/50 hover:border-violet-300/50'
               }`}
               title={inCart ? 'Already in cart' : 'Add to cart'}
             >
-              <FiShoppingCart size={14} />
+              <FiShoppingCart size={12} />
             </button>
           )}
         </div>

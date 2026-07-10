@@ -34,6 +34,7 @@ export default function CropDetailPage() {
   const [canReview, setCanReview] = useState(false);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     const fetchData = async () => {
       try {
         const res = await cropService.getById(id);

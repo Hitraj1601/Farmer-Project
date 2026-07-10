@@ -11,6 +11,7 @@ const MarketplacePage = lazy(() => import('./pages/MarketplacePage'));
 const CropDetailPage = lazy(() => import('./pages/CropDetailPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
 const MyOrdersPage = lazy(() => import('./pages/MyOrdersPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const WishlistPage = lazy(() => import('./pages/WishlistPage'));
@@ -40,6 +41,7 @@ export default function App() {
             <Route path="/crops/:id" element={<CropDetailPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
             <Route element={<ProtectedRoute roles={['BUYER']} />}>
               <Route path="/my-orders" element={<MyOrdersPage />} />

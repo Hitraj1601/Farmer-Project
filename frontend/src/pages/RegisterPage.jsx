@@ -76,6 +76,26 @@ export default function RegisterPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    // Client-side validations
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(form.email)) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+
+    const phoneRegex = /^\+[1-9]\d{6,14}$/;
+    if (!phoneRegex.test(form.phone)) {
+      setError('Phone number must start with a + and include country code, e.g. +919876543210');
+      return;
+    }
+
+    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!strongPasswordRegex.test(form.password)) {
+      setError('Password must be at least 8 characters long, and contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&).');
+      return;
+    }
+
     setLoading(true);
     try {
       const user = await register(form);
@@ -200,7 +220,7 @@ export default function RegisterPage() {
               <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Phone Number</label>
               <div className="relative">
                 <FiPhone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <input className="input-field pl-12 py-3.5 rounded-2xl" placeholder="10-digit mobile number" value={form.phone} onChange={set('phone')} required maxLength={10} pattern="[6-9][0-9]{9}" />
+                <input className="input-field pl-12 py-3.5 rounded-2xl" placeholder="e.g. +919876543210" value={form.phone} onChange={set('phone')} required />
               </div>
             </div>
             <div>
@@ -214,7 +234,7 @@ export default function RegisterPage() {
               <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Password</label>
               <div className="relative">
                 <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <input type="password" className="input-field pl-12 py-3.5 rounded-2xl" placeholder="Min 8 characters" value={form.password} onChange={set('password')} minLength={8} required />
+                <input type="password" className="input-field pl-12 py-3.5 rounded-2xl" placeholder="Min 8 chars, 1 uppercase, 1 symbol" value={form.password} onChange={set('password')} required />
               </div>
             </div>
 

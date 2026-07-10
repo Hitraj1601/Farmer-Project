@@ -7,21 +7,27 @@ const registerSchema = Joi.object({
     "any.required": "Name is required",
   }),
   phone: Joi.string()
-    .pattern(/^[6-9]\d{9}$/)
+    .pattern(/^\+[1-9]\d{6,14}$/)
     .required()
     .messages({
-      "string.pattern.base": "Phone must be a valid 10-digit Indian mobile number",
+      "string.pattern.base": "Phone must start with a + and include country code, e.g. +919876543210",
       "any.required": "Phone is required",
     }),
   email: Joi.string().trim().lowercase().email({ tlds: { allow: false } }).required().messages({
     "string.email": "Must be a valid email address",
     "any.required": "Email is required",
   }),
-  password: Joi.string().min(8).max(128).required().messages({
-    "string.min": "Password must be at least 8 characters",
-    "string.max": "Password must not exceed 128 characters",
-    "any.required": "Password is required",
-  }),
+  password: Joi.string()
+    .min(8)
+    .max(128)
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
+    .required()
+    .messages({
+      "string.min": "Password must be at least 8 characters",
+      "string.max": "Password must not exceed 128 characters",
+      "string.pattern.base": "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)",
+      "any.required": "Password is required",
+    }),
   role: Joi.string().valid("FARMER", "BUYER").default("FARMER").messages({
     "any.only": "Role must be either FARMER or BUYER",
   }),

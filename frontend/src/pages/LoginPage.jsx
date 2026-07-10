@@ -182,7 +182,12 @@ export default function LoginPage() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Password</label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300">Password</label>
+                <Link to="/forgot-password" className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors">
+                  Forgot Password?
+                </Link>
+              </div>
               <div className="relative">
                 <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 <input

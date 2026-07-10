@@ -5,6 +5,8 @@ export const authService = {
   login: (data) => api.post('/auth/login', data),
   googleLogin: (data) => api.post('/auth/google', data),
   getProfile: () => api.get('/auth/profile'),
+  forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
+  resetPassword: (data) => api.post('/auth/reset-password', data),
 };
 
 export const cropService = {

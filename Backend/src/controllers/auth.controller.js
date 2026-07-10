@@ -56,4 +56,30 @@ const googleLogin = async (req, res, next) => {
   }
 };
 
-module.exports = { register, login, getProfile, googleLogin };
+const forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return sendResponse(res, 400, "Email is required.");
+    }
+    const result = await authService.forgotPassword(email);
+    return sendResponse(res, 200, result.message, result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const resetPassword = async (req, res, next) => {
+  try {
+    const { email, code, newPassword } = req.body;
+    if (!email || !code || !newPassword) {
+      return sendResponse(res, 400, "Email, code, and newPassword are required.");
+    }
+    const result = await authService.resetPassword({ email, code, newPassword });
+    return sendResponse(res, 200, result.message, result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { register, login, getProfile, googleLogin, forgotPassword, resetPassword };

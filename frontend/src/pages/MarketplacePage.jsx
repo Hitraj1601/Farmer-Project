@@ -104,6 +104,7 @@ export default function MarketplacePage() {
         const res = await cropService.getAll(params);
         setCrops(res.data.crops);
         setPagination(res.data.pagination);
+        window.scrollTo(0, 0);
       } catch {
         setCrops([]);
       } finally {
@@ -241,9 +242,9 @@ export default function MarketplacePage() {
         {/* ─── Filters Toolbar ─── */}
         <ScrollReveal delay={60}>
           <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-2xl rounded-2xl border border-gray-200/60 dark:border-gray-800/60 shadow-xl shadow-gray-900/[0.04] dark:shadow-black/40 p-4 sm:p-5 mb-6" id="filters-section">
-            <div className="flex flex-col sm:flex-row gap-3 items-center">
+            <div className="flex flex-wrap gap-3 items-center justify-between sm:justify-start">
               {/* Sort dropdown */}
-              <div className="relative w-full sm:w-52">
+              <div className="relative flex-1 sm:flex-initial sm:w-52">
                 <FiSliders className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
                 <select
                   value={sortBy}
@@ -261,7 +262,7 @@ export default function MarketplacePage() {
               {/* Advanced filters toggle */}
               <button
                 onClick={() => setShowAdvanced(v => !v)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all duration-300 whitespace-nowrap
+                className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all duration-300 whitespace-nowrap
                   ${showAdvanced
                     ? 'bg-emerald-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/25'
                     : 'bg-gray-50/80 dark:bg-gray-800/60 text-gray-600 dark:text-gray-400 border-gray-200/60 dark:border-gray-700/50 hover:border-emerald-300 dark:hover:border-emerald-600 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/30'
@@ -277,11 +278,11 @@ export default function MarketplacePage() {
                 )}
               </button>
 
-              <div className="flex-1" />
+              <div className="hidden sm:block flex-1" />
 
               {/* Results count */}
               {!loading && (
-                <div className="flex items-center gap-2 text-sm">
+                <div className="w-full sm:w-auto text-center sm:text-left text-xs sm:text-sm mt-1 sm:mt-0">
                   <span className="text-gray-500 dark:text-gray-400">
                     Showing <span className="font-bold text-gray-900 dark:text-white">{crops.length}</span> of{' '}
                     <span className="font-bold text-gray-900 dark:text-white">{pagination.total}</span> crops
@@ -367,9 +368,9 @@ export default function MarketplacePage() {
             PRODUCTS GRID
            ══════════════════════════════════════════════════════════ */}
         {loading ? (
-          <div className={`grid gap-5 ${
+          <div className={`grid gap-3 sm:gap-5 ${
             viewMode === 'grid'
-              ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+              ? 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
               : 'grid-cols-1 max-w-4xl mx-auto'
           }`}>
             {Array.from({ length: 8 }, (_, i) => (
@@ -410,9 +411,9 @@ export default function MarketplacePage() {
           </ScrollReveal>
         ) : (
           <>
-            <div className={`grid gap-5 ${
+            <div className={`grid gap-3 sm:gap-5 ${
               viewMode === 'grid'
-                ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+                ? 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
                 : 'grid-cols-1 max-w-4xl mx-auto'
             }`}>
               {crops.map((crop, index) => (
