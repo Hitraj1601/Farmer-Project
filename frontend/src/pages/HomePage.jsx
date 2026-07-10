@@ -181,12 +181,12 @@ const testimonials = [
 ];
 
 const categories = [
-  { name: 'Vegetables', icon: GiFruitBowl, count: '800+', color: 'from-green-400 to-emerald-500' },
-  { name: 'Grains', icon: GiWheat, count: '400+', color: 'from-amber-400 to-yellow-500' },
-  { name: 'Fruits', icon: GiCorn, count: '350+', color: 'from-red-400 to-rose-500' },
-  { name: 'Spices', icon: FiSun, count: '200+', color: 'from-orange-400 to-red-500' },
-  { name: 'Organic', icon: FiDroplet, count: '600+', color: 'from-teal-400 to-cyan-500' },
-  { name: 'Regional', icon: FiMapPin, count: '150+', color: 'from-purple-400 to-violet-500' },
+  { name: 'Vegetables', icon: GiFruitBowl, count: '800+', color: 'from-emerald-500 to-teal-600', textLight: 'text-emerald-600 dark:text-emerald-400', bgLight: 'bg-emerald-500/10 dark:bg-emerald-500/20', hoverShadow: 'hover:shadow-emerald-500/30' },
+  { name: 'Grains', icon: GiWheat, count: '400+', color: 'from-amber-500 to-orange-600', textLight: 'text-amber-600 dark:text-amber-400', bgLight: 'bg-amber-500/10 dark:bg-amber-500/20', hoverShadow: 'hover:shadow-amber-500/30' },
+  { name: 'Fruits', icon: GiCorn, count: '350+', color: 'from-rose-500 to-red-600', textLight: 'text-rose-600 dark:text-rose-400', bgLight: 'bg-rose-500/10 dark:bg-rose-500/20', hoverShadow: 'hover:shadow-rose-500/30' },
+  { name: 'Spices', icon: FiSun, count: '200+', color: 'from-orange-500 to-red-600', textLight: 'text-orange-600 dark:text-orange-400', bgLight: 'bg-orange-500/10 dark:bg-orange-500/20', hoverShadow: 'hover:shadow-orange-500/30' },
+  { name: 'Organic', icon: FiDroplet, count: '600+', color: 'from-teal-500 to-cyan-600', textLight: 'text-teal-600 dark:text-teal-400', bgLight: 'bg-teal-500/10 dark:bg-teal-500/20', hoverShadow: 'hover:shadow-teal-500/30' },
+  { name: 'Regional', icon: FiMapPin, count: '150+', color: 'from-purple-500 to-violet-600', textLight: 'text-violet-600 dark:text-violet-400', bgLight: 'bg-purple-500/10 dark:bg-purple-500/20', hoverShadow: 'hover:shadow-purple-500/30' },
 ];
 
 /* ─── Components ─── */
@@ -483,19 +483,30 @@ export default function HomePage() {
             </div>
           </ScrollRevealSection>
 
-          <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
             {categories.map((cat, i) => (
               <ScrollRevealSection key={cat.name} delay={i * 100}>
                 <Link
                   to="/marketplace"
-                  className="group relative bg-white dark:bg-gray-900 rounded-3xl p-6 border border-gray-100 dark:border-gray-800 hover:border-transparent transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl text-center overflow-hidden"
+                  className={`group relative flex flex-col items-center justify-center p-8 bg-white dark:bg-slate-900/80 border border-gray-100 dark:border-slate-800 rounded-[2.5rem] transition-all duration-500 hover:-translate-y-2 ${cat.hoverShadow} text-center shadow-lg shadow-gray-200/40 dark:shadow-none overflow-hidden`}
                 >
-                  <div className={`absolute inset-0 bg-gradient-to-br ${cat.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
-                  <div className={`w-14 h-14 mx-auto bg-gradient-to-br ${cat.color} rounded-2xl flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}>
-                    <cat.icon className="text-white" size={24} />
+                  {/* Dynamic Color-wash Background Overlay */}
+                  <div className={`absolute inset-0 bg-gradient-to-br ${cat.color} opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[2.5rem]`} />
+
+                  {/* Icon Container */}
+                  <div className={`w-16 h-16 ${cat.bgLight} group-hover:bg-white rounded-2xl flex items-center justify-center mb-6 shadow-md transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 relative z-10`}>
+                    <cat.icon className={`${cat.textLight} transition-colors duration-500`} size={28} />
                   </div>
-                  <p className="font-bold text-gray-900 dark:text-white text-sm">{cat.name}</p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{cat.count} items</p>
+
+                  {/* Label */}
+                  <h3 className="font-bold text-gray-800 dark:text-white text-lg tracking-tight transition-colors duration-500 group-hover:text-white relative z-10">
+                    {cat.name}
+                  </h3>
+
+                  {/* Count */}
+                  <p className="text-sm font-medium text-gray-400 dark:text-gray-500 mt-1.5 transition-colors duration-500 group-hover:text-white/80 relative z-10">
+                    {cat.count} items
+                  </p>
                 </Link>
               </ScrollRevealSection>
             ))}
