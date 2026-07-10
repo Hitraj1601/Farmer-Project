@@ -46,7 +46,7 @@ const corsOrigins = !corsOriginEnv
   ? "*"
   : corsOriginEnv
       .split(",")
-      .map((o) => o.trim())
+      .map((o) => o.trim().replace(/\/$/, ""))
       .filter(Boolean);
 
 app.use(
