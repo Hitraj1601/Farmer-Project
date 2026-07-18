@@ -54,6 +54,7 @@ app.use(
     origin: corsOrigins,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
   })
 );
 
@@ -62,6 +63,7 @@ const io = new Server(httpServer, {
   cors: {
     origin: corsOrigins === "*" ? "*" : corsOrigins,
     methods: ["GET", "POST"],
+    credentials: true,
   },
 });
 initSocket(io);
