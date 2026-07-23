@@ -75,6 +75,9 @@ model Crop {
   orderItems          OrderItem[]
 
   @@index([farmerId])
+  @@index([category])
+  @@index([pricePerKg])
+  @@index([createdAt])
   @@map("crops")
 }
 
@@ -96,6 +99,8 @@ model Order {
 
   @@index([buyerId])
   @@index([cropId])
+  @@index([status])
+  @@index([createdAt])
   @@map("orders")
 }
 

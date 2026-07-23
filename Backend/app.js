@@ -5,6 +5,7 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
+const compression = require("compression");
 const path = require("path");
 
 const authRoutes = require("./src/routes/auth.routes");
@@ -87,12 +88,15 @@ const authLimiter = rateLimit({
   message: { success: false, message: "Too many auth attempts, please try again later." },
 });
 
+// Enable response compression
+app.use(compression());
+
 // Body parsing
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-// Serve uploaded images
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// Serve uploaded images with 7-day browser caching
+app.use("/uploads", express.static(path.join(__dirname, "uploads"), { maxAge: "7d" }));
 
 // Health check
 app.get("/", (_req, res) => {
