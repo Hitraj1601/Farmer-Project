@@ -42,8 +42,7 @@ const register = async ({ name, phone, email, password, role }) => {
 };
 
 const login = async ({ email, password }) => {
-  try {
-    const normalizedEmail = normalizeEmail(email);
+  const normalizedEmail = normalizeEmail(email);
   const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
   if (!user) {
     throw new ApiError(401, "Invalid email or password.");
@@ -58,10 +57,6 @@ const login = async ({ email, password }) => {
 
   const { password: _, ...userWithoutPassword } = user;
   return { user: userWithoutPassword, token };
-  } catch (error) {
-    console.error("Error during login:", error);
-    throw new ApiError(500, "An error occurred during login. Please try again later.");
-  }
 };
 
 const getProfile = async (userId) => {
