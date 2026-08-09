@@ -149,3 +149,19 @@ httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`API docs: http://localhost:${PORT}`);
 });
+
+// Graceful shutdown handling for PaaS (Render, Heroku, Docker)
+const handleShutdown = (signal) => {
+  console.log(`Received ${signal}. Shutting down HTTP server cleanly...`);
+  httpServer.close(() => {
+    console.log("HTTP server closed cleanly.");
+    process.exit(0);
+  });
+  setTimeout(() => {
+    console.error("Forcing shutdown after 10s timeout.");
+    process.exit(1);
+  }, 10000);
+};
+
+process.on("SIGTERM", () => handleShutdown("SIGTERM"));
+process.on("SIGINT", () => handleShutdown("SIGINT"));

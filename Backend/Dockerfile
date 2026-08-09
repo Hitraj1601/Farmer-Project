@@ -57,5 +57,5 @@ EXPOSE 5000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD node -e "require('http').get('http://localhost:5000', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})" || exit 1
 
-# Start command: run migrations first, then launch the node server
-CMD ["sh", "-c", "npx prisma migrate deploy --schema=./src/prisma/schema.prisma && npm start"]
+# Start command: sync database schema first, then launch the node server directly
+CMD ["sh", "-c", "npx prisma db push --schema=./src/prisma/schema.prisma --accept-data-loss && node app.js"]
