@@ -75,8 +75,6 @@ app.use(
   })
 );
 
-app.options("*", cors({ origin: corsOriginHandler, credentials: true }));
-
 // Socket.io — shares the same port as Express
 const io = new Server(httpServer, {
   cors: {
