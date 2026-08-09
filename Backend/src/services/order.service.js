@@ -16,7 +16,7 @@ const getBuyerDeliveryAddress = async (buyerId) => {
   return buyerProfile.deliveryAddress;
 };
 
-const createOrder = async ({ buyerId, cropId, quantity }) => {
+const createOrder = async ({ buyerId, cropId, quantity, deliveryAddress: customAddress }) => {
   const crop = await prisma.crop.findUnique({
     where: { id: cropId },
     include: { farmer: { select: { farmerProfile: { select: { serviceableAreas: true } } } } },
@@ -31,7 +31,24 @@ const createOrder = async ({ buyerId, cropId, quantity }) => {
     throw new ApiError(400, `Only ${crop.quantity} kg available.`);
   }
 
-  const deliveryAddress = await getBuyerDeliveryAddress(buyerId);
+  let deliveryAddress = customAddress?.trim();
+  if (deliveryAddress) {
+    const user = await prisma.user.findUnique({ where: { id: buyerId } });
+    await prisma.buyerProfile.upsert({
+      where: { userId: buyerId },
+      create: {
+        userId: buyerId,
+        businessName: user?.name || "Buyer",
+        businessAddress: deliveryAddress,
+        deliveryAddress: deliveryAddress,
+      },
+      update: {
+        deliveryAddress: deliveryAddress,
+      },
+    });
+  } else {
+    deliveryAddress = await getBuyerDeliveryAddress(buyerId);
+  }
   const totalPrice = parseFloat((quantity * crop.pricePerKg).toFixed(2));
 
   // Check delivery feasibility (hard block)

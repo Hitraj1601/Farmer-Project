@@ -93,5 +93,5 @@ export const cartService = {
   updateItem: (cropId, quantity) => api.put(`/cart/items/${cropId}`, { quantity }),
   removeItem: (cropId) => api.delete(`/cart/items/${cropId}`),
   clear: () => api.delete('/cart'),
-  checkout: () => api.post('/cart/checkout'),
+  checkout: (data) => api.post('/cart/checkout', data),
 };

@@ -161,8 +161,26 @@ const clearCart = async (buyerId) => {
 /**
  * Checkout: validate items, group by farmer, create orders with OrderItems.
  */
-const checkout = async (buyerId) => {
-  const deliveryAddress = await getBuyerDeliveryAddress(buyerId);
+const checkout = async (buyerId, customAddress) => {
+  let deliveryAddress = customAddress?.trim();
+
+  if (deliveryAddress) {
+    const user = await prisma.user.findUnique({ where: { id: buyerId } });
+    await prisma.buyerProfile.upsert({
+      where: { userId: buyerId },
+      create: {
+        userId: buyerId,
+        businessName: user?.name || "Buyer",
+        businessAddress: deliveryAddress,
+        deliveryAddress: deliveryAddress,
+      },
+      update: {
+        deliveryAddress: deliveryAddress,
+      },
+    });
+  } else {
+    deliveryAddress = await getBuyerDeliveryAddress(buyerId);
+  }
 
   // 1. Get cart with items
   const cart = await prisma.cart.findUnique({

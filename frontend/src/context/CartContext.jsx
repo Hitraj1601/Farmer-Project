@@ -83,14 +83,16 @@ export function CartProvider({ children }) {
     }
   };
 
-  const checkout = async () => {
+  const checkout = async (deliveryAddress) => {
     setLoading(true);
     try {
-      const res = await cartService.checkout();
+      const payload = deliveryAddress ? { deliveryAddress } : undefined;
+      const res = await cartService.checkout(payload);
       await fetchCart();
       return res.data; // array of created orders
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Checkout failed');
+      const message = err.message || err.response?.data?.message || 'Checkout failed';
+      toast.error(message, { duration: 5000 });
       return null;
     } finally {
       setLoading(false);

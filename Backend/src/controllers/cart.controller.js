@@ -75,7 +75,8 @@ const clearCartHandler = async (req, res, next) => {
 
 const checkout = async (req, res, next) => {
   try {
-    const orders = await cartService.checkout(req.user.id);
+    const { deliveryAddress } = req.body || {};
+    const orders = await cartService.checkout(req.user.id, deliveryAddress);
     return sendResponse(res, 201, "Checkout successful. Orders created.", orders);
   } catch (error) {
     next(error);
