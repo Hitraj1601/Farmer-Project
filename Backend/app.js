@@ -43,26 +43,44 @@ app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 
 // CORS configuration
 const corsOriginEnv = process.env.CORS_ORIGIN;
-const corsOrigins = !corsOriginEnv
-  ? "*"
-  : corsOriginEnv
-      .split(",")
-      .map((o) => o.trim().replace(/\/$/, ""))
-      .filter(Boolean);
+const allowedOrigins = corsOriginEnv
+  ? corsOriginEnv.split(",").map((o) => o.trim().replace(/\/$/, "")).filter(Boolean)
+  : [];
+
+const corsOriginHandler = (origin, callback) => {
+  if (!origin) return callback(null, true);
+
+  if (!corsOriginEnv || corsOriginEnv.trim() === "*") {
+    return callback(null, origin);
+  }
+
+  if (allowedOrigins.includes(origin) || allowedOrigins.includes("*")) {
+    return callback(null, origin);
+  }
+
+  const isVercelOrigin = allowedOrigins.some((o) => o.includes("vercel.app")) && origin.endsWith(".vercel.app");
+  if (isVercelOrigin) {
+    return callback(null, origin);
+  }
+
+  return callback(null, origin);
+};
 
 app.use(
   cors({
-    origin: corsOrigins,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    origin: corsOriginHandler,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
     credentials: true,
   })
 );
 
+app.options("*", cors({ origin: corsOriginHandler, credentials: true }));
+
 // Socket.io — shares the same port as Express
 const io = new Server(httpServer, {
   cors: {
-    origin: corsOrigins === "*" ? "*" : corsOrigins,
+    origin: corsOriginHandler,
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -130,4 +148,4 @@ const PORT = process.env.PORT || 5000;
 httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`API docs: http://localhost:${PORT}`);
-});
+});

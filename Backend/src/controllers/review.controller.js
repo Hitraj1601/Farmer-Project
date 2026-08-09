@@ -1,5 +1,6 @@
 const reviewService = require("../services/review.service");
 const { sendResponse } = require("../utils/apiResponse");
+const { uploadImage } = require("../utils/fileUpload");
 
 const createReview = async (req, res, next) => {
   try {
@@ -13,8 +14,8 @@ const createReview = async (req, res, next) => {
       return sendResponse(res, 400, "Rating must be an integer between 1 and 5.");
     }
 
-    // Handle image upload
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+    // Handle image upload with Multer + Cloudinary
+    const imageUrl = await uploadImage(req.file, "farmer-marketplace/reviews");
 
     const review = await reviewService.createReview({
       buyerId: req.user.id,

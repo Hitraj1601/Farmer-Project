@@ -95,7 +95,7 @@ If you *must* create an admin user in a controlled environment, `Backend/seed-ad
 
 ### Render (Backend Web Service)
 - **Root directory:** `Backend`
-- **Build command:** `npm ci && npm run prisma:generate && npm run prisma:migrate:deploy`
+- **Build command:** `npm ci && npm run prisma:generate && npm run prisma:db:push`
 - **Start command:** `npm start`
 - **Environment variables:** copy from `Backend/.env.example` (set `NODE_ENV=production`)
 

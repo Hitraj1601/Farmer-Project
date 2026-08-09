@@ -1,5 +1,6 @@
 const cropService = require("../services/crop.service");
 const { sendResponse } = require("../utils/apiResponse");
+const { uploadImage } = require("../utils/fileUpload");
 
 const createCrop = async (req, res, next) => {
   try {
@@ -9,7 +10,7 @@ const createCrop = async (req, res, next) => {
       return sendResponse(res, 400, "cropName, quantity, pricePerKg, and location are required.");
     }
 
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+    const imageUrl = await uploadImage(req.file, "farmer-marketplace/crops");
 
     const crop = await cropService.createCrop({
       cropName,
@@ -66,7 +67,9 @@ const updateCrop = async (req, res, next) => {
     if (location) updateData.location = location;
     if (category !== undefined) updateData.category = category || null;
     if (stockAlertThreshold !== undefined) updateData.stockAlertThreshold = parseFloat(stockAlertThreshold);
-    if (req.file) updateData.imageUrl = `/uploads/${req.file.filename}`;
+    if (req.file) {
+      updateData.imageUrl = await uploadImage(req.file, "farmer-marketplace/crops");
+    }
 
     const crop = await cropService.updateCrop(req.params.id, req.user.id, updateData);
     return sendResponse(res, 200, "Crop updated successfully.", crop);
