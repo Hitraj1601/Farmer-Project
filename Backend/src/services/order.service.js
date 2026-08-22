@@ -145,14 +145,14 @@ const getMyOrders = async (userId, role) => {
 const updateOrderStatus = async (orderId, status, userId, role) => {
   const order = await prisma.order.findUnique({
     where: { id: orderId },
-    include: { crop: true },
+    include: { crop: true, items: true },
   });
 
   if (!order) throw new ApiError(404, "Order not found.");
 
   // Farmers can accept/reject their crop orders
   if (role === "FARMER") {
-    if (order.crop.farmerId !== userId) {
+    if (order.crop?.farmerId !== userId) {
       throw new ApiError(403, "You can only manage orders for your own crops.");
     }
     if (!["ACCEPTED", "REJECTED", "SHIPPED", "DELIVERED"].includes(status)) {
@@ -167,13 +167,22 @@ const updateOrderStatus = async (orderId, status, userId, role) => {
 
   // Update crop quantity when order is accepted
   if (status === "ACCEPTED" && order.status === "PENDING") {
-    if (order.quantity > order.crop.quantity) {
-      throw new ApiError(400, "Insufficient crop quantity available.");
+    if (order.items && order.items.length > 0) {
+      for (const item of order.items) {
+        await prisma.crop.update({
+          where: { id: item.cropId },
+          data: { quantity: { decrement: item.quantity } },
+        });
+      }
+    } else if (order.cropId) {
+      if (order.quantity > order.crop.quantity) {
+        throw new ApiError(400, "Insufficient crop quantity available.");
+      }
+      await prisma.crop.update({
+        where: { id: order.cropId },
+        data: { quantity: { decrement: order.quantity } },
+      });
     }
-    await prisma.crop.update({
-      where: { id: order.cropId },
-      data: { quantity: { decrement: order.quantity } },
-    });
   }
 
   const updated = await prisma.order.update({
@@ -198,10 +207,10 @@ const updateOrderStatus = async (orderId, status, userId, role) => {
 
   // Notify the buyer in real-time
   const buyerMessages = {
-    ACCEPTED: { title: "Order Accepted!", message: `Your order for ${order.crop?.cropName} has been accepted by the farmer.`, type: "success" },
-    REJECTED: { title: "Order Rejected", message: `Your order for ${order.crop?.cropName} was rejected by the farmer.`, type: "error" },
-    SHIPPED: { title: "Order Shipped!", message: `Your order for ${order.crop?.cropName} is on its way!`, type: "info" },
-    DELIVERED: { title: "Order Delivered!", message: `Your order for ${order.crop?.cropName} has been delivered successfully.`, type: "success" },
+    ACCEPTED: { title: "Order Accepted!", message: `Your order for ${order.crop?.cropName || 'crop'} has been accepted by the farmer.`, type: "success" },
+    REJECTED: { title: "Order Rejected", message: `Your order for ${order.crop?.cropName || 'crop'} was rejected by the farmer.`, type: "error" },
+    SHIPPED: { title: "Order Shipped!", message: `Your order for ${order.crop?.cropName || 'crop'} is on its way!`, type: "info" },
+    DELIVERED: { title: "Order Delivered!", message: `Your order for ${order.crop?.cropName || 'crop'} has been delivered successfully.`, type: "success" },
   };
   if (buyerMessages[status]) {
     notifyUser(order.buyerId, { ...buyerMessages[status], orderId: updated.id });
@@ -213,7 +222,7 @@ const updateOrderStatus = async (orderId, status, userId, role) => {
 const cancelOrder = async (orderId, userId, reason) => {
   const order = await prisma.order.findUnique({
     where: { id: orderId },
-    include: { crop: true },
+    include: { crop: true, items: true },
   });
 
   if (!order) throw new ApiError(404, "Order not found.");
@@ -221,17 +230,29 @@ const cancelOrder = async (orderId, userId, reason) => {
     throw new ApiError(403, "You can only cancel your own orders.");
   }
 
-  // Cancellation is only allowed for PENDING or ACCEPTED status
+  // Cancellation criteria: Only allowed for PENDING or ACCEPTED status. Blocked once SHIPPED or DELIVERED.
+  if (order.status === "SHIPPED" || order.status === "DELIVERED") {
+    throw new ApiError(400, "Order cannot be cancelled once it has been shipped or delivered.");
+  }
   if (order.status !== "PENDING" && order.status !== "ACCEPTED") {
-    throw new ApiError(400, "You can only cancel orders that are PENDING or ACCEPTED.");
+    throw new ApiError(400, `Order in '${order.status}' status cannot be cancelled.`);
   }
 
   // Restore inventory if status was ACCEPTED (since stock was already decremented)
   if (order.status === "ACCEPTED") {
-    await prisma.crop.update({
-      where: { id: order.cropId },
-      data: { quantity: { increment: order.quantity } },
-    });
+    if (order.items && order.items.length > 0) {
+      for (const item of order.items) {
+        await prisma.crop.update({
+          where: { id: item.cropId },
+          data: { quantity: { increment: item.quantity } },
+        });
+      }
+    } else if (order.cropId) {
+      await prisma.crop.update({
+        where: { id: order.cropId },
+        data: { quantity: { increment: order.quantity } },
+      });
+    }
   }
 
   // Update order status to CANCELLED and store reason
@@ -258,7 +279,7 @@ const cancelOrder = async (orderId, userId, reason) => {
   if (updatedOrder.crop?.farmerId) {
     notifyUser(updatedOrder.crop.farmerId, {
       title: "Order Cancelled",
-      message: `Buyer cancelled order #${order.id.slice(0, 8)} for ${updatedOrder.crop.cropName}. Reason: ${reason}`,
+      message: `Buyer cancelled order #${order.id.slice(0, 8)} for ${updatedOrder.crop?.cropName || 'crop'}. Reason: ${reason}`,
       type: "error",
       orderId: updatedOrder.id,
     });

@@ -34,7 +34,12 @@ export default function MyOrdersPage() {
     }
   };
 
-  useEffect(() => { fetchOrders(); }, []);
+  useEffect(() => {
+    fetchOrders();
+    const handleFocus = () => fetchOrders();
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
 
   const handlePay = async (orderId, cropName) => {
     let publicKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
@@ -55,6 +60,7 @@ export default function MyOrdersPage() {
         fetchOrders();
       } catch (err) {
         toast.error(err.response?.data?.message || 'Could not process payment');
+        fetchOrders();
       }
       return;
     }
@@ -103,6 +109,7 @@ export default function MyOrdersPage() {
             fetchOrders();
           } catch {
             toast.error('Payment verification failed');
+            fetchOrders();
           }
         },
         theme: { color: '#059669' },
@@ -111,6 +118,7 @@ export default function MyOrdersPage() {
       new window.Razorpay(options).open();
     } catch (err) {
       toast.error(err.response?.data?.message || err.message || 'Could not initiate payment');
+      fetchOrders();
     }
   };
 
@@ -307,7 +315,7 @@ export default function MyOrdersPage() {
             <textarea
               value={reviewForm.comment}
               onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
-              className="input-field h-28 resize-none rounded-2xl"
+              className="w-full h-28 p-3.5 bg-gray-50 dark:bg-gray-800/80 text-gray-900 dark:text-white text-sm outline-none border border-gray-300 dark:border-gray-700 rounded-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200 placeholder:text-gray-400"
               placeholder="Share your experience with this crop..."
             />
           </div>
@@ -359,7 +367,7 @@ export default function MyOrdersPage() {
               Why are you cancelling this order?
             </label>
             <textarea
-              className="form-input w-full min-h-[100px] text-sm resize-none rounded-xl"
+              className="w-full min-h-[110px] p-3.5 bg-gray-50 dark:bg-gray-800/80 text-gray-900 dark:text-white text-sm outline-none border border-gray-300 dark:border-gray-700 rounded-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200 placeholder:text-gray-400"
               placeholder="Provide a cancellation reason (at least 3 characters)..."
               value={cancellationReason}
               onChange={(e) => setCancellationReason(e.target.value)}

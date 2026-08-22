@@ -36,7 +36,7 @@ export default function CropCard({ crop, index = 0, viewMode = 'grid' }) {
   if (viewMode === 'list') {
     return (
       <div
-        className="group relative bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-2xl border border-gray-200/60 dark:border-gray-800/60 hover:border-emerald-300/60 dark:hover:border-emerald-700/40 shadow-sm hover:shadow-xl hover:shadow-emerald-500/[0.06] cursor-pointer animate-fade-in-up fill-mode-both transition-all duration-400"
+        className="group relative bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-none border border-gray-200/60 dark:border-gray-800/60 hover:border-emerald-300/60 dark:hover:border-emerald-700/40 shadow-sm hover:shadow-xl hover:shadow-emerald-500/[0.06] cursor-pointer animate-fade-in-up fill-mode-both transition-all duration-400"
         style={{ animationDelay: `${index * 50}ms` }}
         role="link"
         tabIndex={0}
@@ -45,12 +45,16 @@ export default function CropCard({ crop, index = 0, viewMode = 'grid' }) {
       >
         <div className="flex flex-col sm:flex-row">
           {/* Image */}
-          <div className="relative w-full sm:w-52 md:w-60 h-48 sm:h-auto overflow-hidden flex-shrink-0 rounded-l-2xl">
+          <div className="relative w-full sm:w-52 md:w-60 h-48 sm:h-auto overflow-hidden flex-shrink-0 rounded-none">
             <img
               src={getImageUrl(crop.imageUrl)}
               alt={crop.cropName}
               loading="lazy"
               decoding="async"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=600&q=80';
+              }}
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/5" />
@@ -144,7 +148,7 @@ export default function CropCard({ crop, index = 0, viewMode = 'grid' }) {
   /* ═══════════════════ GRID VIEW ═══════════════════ */
   return (
     <div
-      className="group relative bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-2xl border border-gray-200/60 dark:border-gray-800/60 hover:border-emerald-300/50 dark:hover:border-emerald-700/40 shadow-sm hover:shadow-2xl hover:shadow-emerald-500/[0.08] cursor-pointer animate-fade-in-up fill-mode-both transition-all duration-500 hover:-translate-y-1"
+      className="group relative bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-none border border-gray-200/60 dark:border-gray-800/60 hover:border-emerald-300/50 dark:hover:border-emerald-700/40 shadow-sm hover:shadow-2xl hover:shadow-emerald-500/[0.08] cursor-pointer animate-fade-in-up fill-mode-both transition-all duration-500 hover:-translate-y-1"
       style={{ animationDelay: `${index * 60}ms` }}
       role="link"
       tabIndex={0}
@@ -152,12 +156,16 @@ export default function CropCard({ crop, index = 0, viewMode = 'grid' }) {
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetails(); } }}
     >
       {/* ── Image Section ── */}
-      <div className="relative h-32 xs:h-36 sm:h-44 md:h-52 overflow-hidden rounded-t-2xl bg-gray-100 dark:bg-gray-800">
+      <div className="relative h-32 xs:h-36 sm:h-44 md:h-52 overflow-hidden rounded-none bg-gray-100 dark:bg-gray-800">
         <img
           src={getImageUrl(crop.imageUrl)}
           alt={crop.cropName}
           loading="lazy"
           decoding="async"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=600&q=80';
+          }}
           className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
         />
 

@@ -63,6 +63,7 @@ const verifyPayment = async ({ razorpay_order_id, razorpay_payment_id, razorpay_
   if (!process.env.RAZORPAY_KEY_SECRET) {
     throw new ApiError(503, "Payment gateway is not configured. Add RAZORPAY_KEY_SECRET in backend .env.");
   }
+
   // Verify signature
   const body = razorpay_order_id + "|" + razorpay_payment_id;
   const expectedSignature = crypto
@@ -79,19 +80,61 @@ const verifyPayment = async ({ razorpay_order_id, razorpay_payment_id, razorpay_
     throw new ApiError(400, "Payment verification failed. Invalid signature.");
   }
 
-  // Update payment status
-  const payment = await prisma.payment.update({
-    where: { razorpayOrderId: razorpay_order_id },
-    data: {
-      status: "SUCCESS",
-      transactionId: razorpay_payment_id,
-    },
-  });
+  // Execute payment status update and stock decrement inside a database transaction
+  const payment = await prisma.$transaction(async (tx) => {
+    const paymentRecord = await tx.payment.findUnique({
+      where: { razorpayOrderId: razorpay_order_id },
+      include: {
+        order: {
+          include: {
+            items: true,
+            crop: true,
+          },
+        },
+      },
+    });
 
-  // Update order status to ACCEPTED after successful payment
-  await prisma.order.update({
-    where: { id: payment.orderId },
-    data: { status: "ACCEPTED" },
+    if (!paymentRecord) throw new ApiError(404, "Payment record not found.");
+
+    // Idempotency check: if payment already succeeded, return cleanly
+    if (paymentRecord.status === "SUCCESS") {
+      return paymentRecord;
+    }
+
+    // 1. Update payment record status
+    const updatedPayment = await tx.payment.update({
+      where: { id: paymentRecord.id },
+      data: {
+        status: "SUCCESS",
+        transactionId: razorpay_payment_id,
+      },
+    });
+
+    const order = paymentRecord.order;
+    if (order && order.status !== "ACCEPTED") {
+      // 2. Decrement inventory for single or multi-item orders
+      if (order.items && order.items.length > 0) {
+        for (const item of order.items) {
+          await tx.crop.update({
+            where: { id: item.cropId },
+            data: { quantity: { decrement: item.quantity } },
+          });
+        }
+      } else if (order.cropId) {
+        await tx.crop.update({
+          where: { id: order.cropId },
+          data: { quantity: { decrement: order.quantity } },
+        });
+      }
+
+      // 3. Update order status to ACCEPTED
+      await tx.order.update({
+        where: { id: order.id },
+        data: { status: "ACCEPTED" },
+      });
+    }
+
+    return updatedPayment;
   });
 
   return payment;
@@ -101,34 +144,55 @@ const verifyPayment = async ({ razorpay_order_id, razorpay_payment_id, razorpay_
 const processFreePayment = async (orderId, userId) => {
   const order = await prisma.order.findUnique({
     where: { id: orderId },
-    include: { payment: true },
+    include: { payment: true, items: true, crop: true },
   });
 
   if (!order) throw new ApiError(404, "Order not found.");
   if (order.buyerId !== userId) throw new ApiError(403, "You can only pay for your own orders.");
   if (order.payment?.status === "SUCCESS") throw new ApiError(400, "Order is already paid.");
 
-  // Create or update payment record with FREE method
-  const payment = await prisma.payment.upsert({
-    where: { orderId },
-    create: {
-      orderId,
-      amount: order.totalPrice,
-      status: "SUCCESS",
-      method: "FREE",
-      transactionId: `FREE-${orderId}-${Date.now()}`,
-    },
-    update: {
-      status: "SUCCESS",
-      method: "FREE",
-      transactionId: `FREE-${orderId}-${Date.now()}`,
-    },
-  });
+  const payment = await prisma.$transaction(async (tx) => {
+    // Create or update payment record with FREE method
+    const paymentRec = await tx.payment.upsert({
+      where: { orderId },
+      create: {
+        orderId,
+        amount: order.totalPrice,
+        status: "SUCCESS",
+        method: "FREE",
+        transactionId: `FREE-${orderId}-${Date.now()}`,
+      },
+      update: {
+        status: "SUCCESS",
+        method: "FREE",
+        transactionId: `FREE-${orderId}-${Date.now()}`,
+      },
+    });
 
-  // Update order status to ACCEPTED after successful free payment
-  await prisma.order.update({
-    where: { id: orderId },
-    data: { status: "ACCEPTED" },
+    if (order.status !== "ACCEPTED") {
+      // Decrement inventory for single or multi-item orders
+      if (order.items && order.items.length > 0) {
+        for (const item of order.items) {
+          await tx.crop.update({
+            where: { id: item.cropId },
+            data: { quantity: { decrement: item.quantity } },
+          });
+        }
+      } else if (order.cropId) {
+        await tx.crop.update({
+          where: { id: order.cropId },
+          data: { quantity: { decrement: order.quantity } },
+        });
+      }
+
+      // Update order status to ACCEPTED
+      await tx.order.update({
+        where: { id: orderId },
+        data: { status: "ACCEPTED" },
+      });
+    }
+
+    return paymentRec;
   });
 
   return payment;
