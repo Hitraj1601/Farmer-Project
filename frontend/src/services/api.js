@@ -23,7 +23,16 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    const message = error.response?.data?.message || 'Something went wrong';
+    // Log full error details in browser console
+    console.error('[API Error Details]:', error);
+
+    let message = error.response?.data?.message || 'Something went wrong';
+
+    // If message contains raw Prisma invocation or technical stack traces, sanitize for UI display
+    if (typeof message === 'string' && (message.includes('prisma.') || message.includes('FATAL:') || message.includes('ENOTFOUND') || message.includes('invocation in'))) {
+      message = 'Database connection error. Please try again later.';
+    }
+
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
@@ -32,7 +41,7 @@ api.interceptors.response.use(
         window.location.href = '/login';
       }
     }
-    return Promise.reject({ message, status: error.response?.status });
+    return Promise.reject({ message, status: error.response?.status, rawError: error });
   }
 );
 

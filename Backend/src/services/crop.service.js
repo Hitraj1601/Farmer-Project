@@ -1,6 +1,11 @@
 const prisma = require("../config/db");
 const ApiError = require("../utils/apiError");
 const { recordPriceHistory } = require("./analytics.service");
+const {
+  indexCrop,
+  deleteCropIndex,
+  searchCropsElastic,
+} = require("./elasticsearch.service");
 
 const CATEGORY_ALIASES = {
   grains: ["Grain", "Grains"],
@@ -30,7 +35,10 @@ const getCategoryVariants = (category) => {
 };
 
 const createCrop = async (data) => {
-  const crop = await prisma.crop.create({ data });
+  const crop = await prisma.crop.create({
+    data,
+    include: { farmer: { select: { name: true } } },
+  });
 
   // Record price history
   await recordPriceHistory({
@@ -42,6 +50,11 @@ const createCrop = async (data) => {
     farmerId: crop.farmerId,
   });
 
+  // Index in Elasticsearch (async non-blocking)
+  indexCrop(crop).catch((err) =>
+    console.warn("ES indexing warning:", err.message)
+  );
+
   return crop;
 };
 
@@ -49,30 +62,47 @@ const getAllCrops = async (query) => {
   const { page = 1, limit = 20, location, search, category, minPrice, maxPrice, farmerName, sortBy } = query;
   const skip = (parseInt(page) - 1) * parseInt(limit);
 
+  // Try Elasticsearch search first if available
+  const esCropIds = await searchCropsElastic(query);
+
   const where = {};
-  if (location) {
-    where.OR = [
-      { location: { contains: location } },
-      { farmer: { farmerProfile: { serviceableAreas: { contains: location } } } }
-    ];
-  }
-  if (search) where.cropName = { contains: search };
 
-  // Price range filter
-  if (minPrice || maxPrice) {
-    where.pricePerKg = {};
-    if (minPrice) where.pricePerKg.gte = parseFloat(minPrice);
-    if (maxPrice) where.pricePerKg.lte = parseFloat(maxPrice);
-  }
+  if (esCropIds !== null) {
+    // Elasticsearch responded with matching crop IDs
+    where.id = { in: esCropIds };
+  } else {
+    // Fallback to case-insensitive Prisma database query
+    if (location) {
+      where.OR = [
+        { location: { contains: location, mode: "insensitive" } },
+        { farmer: { farmerProfile: { serviceableAreas: { contains: location, mode: "insensitive" } } } },
+      ];
+    }
+    if (search) {
+      where.OR = [
+        { cropName: { contains: search, mode: "insensitive" } },
+        { category: { contains: search, mode: "insensitive" } },
+        { location: { contains: search, mode: "insensitive" } },
+        { farmer: { name: { contains: search, mode: "insensitive" } } },
+      ];
+    }
 
-  // Farmer name filter (search via relation)
-  if (farmerName) {
-    where.farmer = { name: { contains: farmerName } };
-  }
+    // Price range filter
+    if (minPrice || maxPrice) {
+      where.pricePerKg = {};
+      if (minPrice) where.pricePerKg.gte = parseFloat(minPrice);
+      if (maxPrice) where.pricePerKg.lte = parseFloat(maxPrice);
+    }
 
-  const categoryVariants = getCategoryVariants(category);
-  if (categoryVariants.length > 0) {
-    where.category = { in: categoryVariants };
+    // Farmer name filter (search via relation, case-insensitive)
+    if (farmerName) {
+      where.farmer = { name: { contains: farmerName, mode: "insensitive" } };
+    }
+
+    const categoryVariants = getCategoryVariants(category);
+    if (categoryVariants.length > 0) {
+      where.category = { in: categoryVariants };
+    }
   }
 
   // Sort order
@@ -142,7 +172,11 @@ const updateCrop = async (id, farmerId, data) => {
   if (!crop) throw new ApiError(404, "Crop not found.");
   if (crop.farmerId !== farmerId) throw new ApiError(403, "You can only update your own crops.");
 
-  const updated = await prisma.crop.update({ where: { id }, data });
+  const updated = await prisma.crop.update({
+    where: { id },
+    data,
+    include: { farmer: { select: { name: true } } },
+  });
 
   // Record price history if price changed
   if (data.pricePerKg && data.pricePerKg !== crop.pricePerKg) {
@@ -156,6 +190,11 @@ const updateCrop = async (id, farmerId, data) => {
     });
   }
 
+  // Update in Elasticsearch
+  indexCrop(updated).catch((err) =>
+    console.warn("ES update indexing warning:", err.message)
+  );
+
   return updated;
 };
 
@@ -165,6 +204,12 @@ const deleteCrop = async (id, farmerId) => {
   if (crop.farmerId !== farmerId) throw new ApiError(403, "You can only delete your own crops.");
 
   await prisma.crop.delete({ where: { id } });
+
+  // Delete from Elasticsearch
+  deleteCropIndex(id).catch((err) =>
+    console.warn("ES delete indexing warning:", err.message)
+  );
+
   return true;
 };
 
@@ -181,3 +226,4 @@ const getStockAlerts = async (farmerId) => {
 };
 
 module.exports = { createCrop, getAllCrops, getMyCrops, getCropById, updateCrop, deleteCrop, getStockAlerts };
+

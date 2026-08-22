@@ -143,9 +143,14 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-httpServer.listen(PORT, () => {
+const { initCropIndex } = require("./src/services/elasticsearch.service");
+
+httpServer.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`API docs: http://localhost:${PORT}`);
+  await initCropIndex().catch((err) =>
+    console.warn("Elasticsearch index initialization info:", err.message)
+  );
 });
 
 // Graceful shutdown handling for PaaS (Render, Heroku, Docker)

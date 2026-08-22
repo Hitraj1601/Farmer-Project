@@ -13,9 +13,9 @@ const getPriceTrend = async (query) => {
   const { cropName, category, location, days = 90 } = query;
 
   const where = {};
-  if (cropName) where.cropName = { contains: cropName };
+  if (cropName) where.cropName = { contains: cropName, mode: "insensitive" };
   if (category) where.category = category;
-  if (location) where.location = { contains: location };
+  if (location) where.location = { contains: location, mode: "insensitive" };
 
   const since = new Date();
   since.setDate(since.getDate() - parseInt(days));
@@ -66,7 +66,7 @@ const getDemandForecast = async (query) => {
   since.setDate(since.getDate() - parseInt(days));
 
   const orderWhere = { createdAt: { gte: since } };
-  if (cropName) orderWhere.crop = { cropName: { contains: cropName } };
+  if (cropName) orderWhere.crop = { cropName: { contains: cropName, mode: "insensitive" } };
   if (category) orderWhere.crop = { ...orderWhere.crop, category };
 
   // Get orders with price info
@@ -78,7 +78,7 @@ const getDemandForecast = async (query) => {
 
   // Get price history
   const priceWhere = { recordedAt: { gte: since } };
-  if (cropName) priceWhere.cropName = { contains: cropName };
+  if (cropName) priceWhere.cropName = { contains: cropName, mode: "insensitive" };
   if (category) priceWhere.category = category;
 
   const priceRecords = await prisma.priceHistory.findMany({
@@ -179,7 +179,7 @@ const getSuggestedPrice = async (query) => {
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
   const priceWhere = {
-    cropName: { contains: cropName },
+    cropName: { contains: cropName, mode: "insensitive" },
     recordedAt: { gte: thirtyDaysAgo },
   };
   if (category) priceWhere.category = category;
@@ -192,7 +192,7 @@ const getSuggestedPrice = async (query) => {
 
   // Get current live prices from crops
   const liveCrops = await prisma.crop.findMany({
-    where: { cropName: { contains: cropName } },
+    where: { cropName: { contains: cropName, mode: "insensitive" } },
     select: { pricePerKg: true, quantity: true, location: true },
   });
 
@@ -237,7 +237,7 @@ const getSuggestedPrice = async (query) => {
   // Calculate demand factor from recent orders
   const recentOrders = await prisma.order.findMany({
     where: {
-      crop: { cropName: { contains: cropName } },
+      crop: { cropName: { contains: cropName, mode: "insensitive" } },
       createdAt: { gte: thirtyDaysAgo },
     },
     select: { quantity: true, createdAt: true },

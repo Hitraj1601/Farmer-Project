@@ -1,7 +1,8 @@
 const { sendResponse } = require("../utils/apiResponse");
 
 const errorHandler = (err, _req, res, _next) => {
-  console.error("Error handler caught:", err);
+  // Always log full error details to the server console
+  console.error("Error handler caught error:", err);
 
   if (err.isOperational) {
     return sendResponse(res, err.statusCode, err.message);
@@ -17,18 +18,27 @@ const errorHandler = (err, _req, res, _next) => {
   }
 
   if (err.code === "P2021" || err.code === "P2022") {
-    return sendResponse(res, 500, `Database schema is out of sync (${err.meta?.column ? `missing column ${err.meta.column}` : "missing tables"}). Please run database migrations (npx prisma migrate deploy).`);
+    return sendResponse(res, 500, "Database schema is out of sync. Please contact administrator.");
   }
 
-  if (err.code === "P1001") {
-    return sendResponse(res, 500, "Cannot connect to database. Please check your DATABASE_URL and database connectivity.");
+  if (
+    err.name === "PrismaClientInitializationError" ||
+    err.code === "P1001" ||
+    err.code === "P1002" ||
+    err.code === "P1003" ||
+    err.code === "P1017" ||
+    (err.message && (err.message.includes("prisma.") || err.message.includes("FATAL:") || err.message.includes("ENOTFOUND")))
+  ) {
+    return sendResponse(res, 500, "Database connection error. Please try again later.");
   }
 
   if (err.message && err.message.includes("Only JPEG")) {
     return sendResponse(res, 400, err.message);
   }
 
-  return sendResponse(res, 500, err.message || "Internal server error.");
+  // Fallback for non-operational / internal server errors
+  return sendResponse(res, 500, "Internal server error. Please try again later.");
 };
 
 module.exports = errorHandler;
+

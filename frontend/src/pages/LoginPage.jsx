@@ -80,6 +80,7 @@ export default function LoginPage() {
       else if (user.role === 'FARMER') navigate('/dashboard');
       else navigate('/marketplace');
     } catch (err) {
+      console.error('Login submit error:', err);
       setError(err.message || 'Login failed');
     } finally {
       setLoading(false);

@@ -103,6 +103,7 @@ export default function RegisterPage() {
       if (user.role === 'FARMER') navigate('/dashboard');
       else navigate('/marketplace');
     } catch (err) {
+      console.error('Registration error:', err);
       setError(err.message || 'Registration failed');
     } finally {
       setLoading(false);
