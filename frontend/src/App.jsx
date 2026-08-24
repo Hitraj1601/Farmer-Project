@@ -6,7 +6,8 @@ import AdminLayout from './layouts/AdminLayout';
 import ProtectedRoute from './layouts/ProtectedRoute';
 import Loader from './components/Loader';
 
-const HomePage = lazy(() => import('./pages/HomePage'));
+import HomePage from './pages/HomePage';
+
 const MarketplacePage = lazy(() => import('./pages/MarketplacePage'));
 const CropDetailPage = lazy(() => import('./pages/CropDetailPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));

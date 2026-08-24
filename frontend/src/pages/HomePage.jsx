@@ -9,9 +9,9 @@ import {
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
-import heroFarmer from '../assets/hero-farmer.png';
-import freshVegetables from '../assets/fresh-vegetables.png';
-import farmLandscape from '../assets/farm-landscape.png';
+import heroFarmer from '../assets/hero-farmer.jpg';
+import freshVegetables from '../assets/fresh-vegetables.jpg';
+import farmLandscape from '../assets/farm-landscape.jpg';
 
 /* ─── Animated Counter Hook ─── */
 function useCountUp(target, duration = 2000) {
@@ -252,6 +252,8 @@ export default function HomePage() {
           <img
             src={heroFarmer}
             alt="Indian farmer in green field"
+            fetchPriority="high"
+            decoding="async"
             className="absolute inset-0 w-full h-full object-cover"
           />
           {/* Gradient overlays */}
