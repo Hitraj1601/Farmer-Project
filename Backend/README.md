@@ -5,7 +5,8 @@ A production-ready backend for a farmer marketplace platform where farmers can l
 ## Tech Stack
 
 - **Runtime:** Node.js + Express.js
-- **Database:** MySQL
+- **Database:** PostgreSQL
+- **Search Engine:** Elasticsearch 9
 - **ORM:** Prisma
 - **Auth:** JWT + bcrypt
 - **Payments:** Razorpay
@@ -92,17 +93,17 @@ cp .env.example .env
 ```
 
 Update these values in `.env`:
-- `DATABASE_URL` — your MySQL connection string
+- `DATABASE_URL` — your PostgreSQL connection string (e.g., `postgresql://postgres:password@localhost:5432/farmer_db?schema=public`)
 - `JWT_SECRET` — a strong secret key for JWT signing
 - `RAZORPAY_KEY_ID` — your Razorpay key ID
 - `RAZORPAY_KEY_SECRET` — your Razorpay key secret
 
 ### 3. Setup Database
 
-Make sure MySQL is running, then create the database:
+Make sure PostgreSQL is running, then create the database:
 
 ```sql
-CREATE DATABASE farmer_marketplace;
+CREATE DATABASE farmer_db;
 ```
 
 ### 4. Run Prisma Migrations

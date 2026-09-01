@@ -3,15 +3,17 @@ import {
   FiSearch, FiMapPin, FiPackage, FiFilter, FiX, FiUser,
   FiSliders, FiChevronDown, FiChevronLeft, FiChevronRight, FiGrid, FiList, FiStar,
   FiTrendingUp, FiShoppingBag, FiRefreshCw,
-  FiZap, FiCheckCircle, FiBox, FiArrowRight
+  FiZap, FiCheckCircle, FiBox, FiArrowRight, FiCompass, FiNavigation
 } from 'react-icons/fi';
 import { GiWheat, GiFruitBowl, GiFarmer } from 'react-icons/gi';
 import { cropService } from '../services';
 import { CROP_CATEGORIES } from '../utils/constants';
 import CropCard from '../components/CropCard';
 import Pagination from '../components/Pagination';
+import { useAuth } from '../context/AuthContext';
 
 const SORT_OPTIONS = [
+  { value: 'nearby', label: '📍 Nearby Produce First', icon: '📍' },
   { value: 'newest', label: 'Newest First', icon: '🆕' },
   { value: 'priceAsc', label: 'Price: Low → High', icon: '💰' },
   { value: 'priceDesc', label: 'Price: High → Low', icon: '💎' },
@@ -296,10 +298,13 @@ function CategoryBar({ category, setCategory, resetPage, viewMode, setViewMode }
 }
 
 export default function MarketplacePage() {
+  const { user } = useAuth();
   const [crops, setCrops] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [location, setLocation] = useState('');
+  const [buyerLocation, setBuyerLocation] = useState('');
+  const [detectingGps, setDetectingGps] = useState(false);
   const [category, setCategory] = useState('All');
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ totalPages: 1, total: 0 });
@@ -308,11 +313,106 @@ export default function MarketplacePage() {
   const [viewMode, setViewMode] = useState('grid');
 
   // Advanced filters
-  const [sortBy, setSortBy] = useState('newest');
+  const [sortBy, setSortBy] = useState('nearby');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [farmerName, setFarmerName] = useState('');
   const [debouncedFarmerName, setDebouncedFarmerName] = useState('');
+
+const extractCityOnly = (address) => {
+  if (!address || typeof address !== 'string') return '';
+  let cleaned = address.replace(/\b\d{5,6}\b/g, '').trim();
+  const parts = cleaned.split(',').map((p) => p.trim()).filter(Boolean);
+
+  if (parts.length === 0) return '';
+  if (parts.length === 1) return parts[0];
+
+  const statesAndUTs = new Set([
+    'andhra pradesh', 'arunachal pradesh', 'assam', 'bihar', 'chhattisgarh',
+    'goa', 'gujarat', 'haryana', 'himachal pradesh', 'jharkhand', 'karnataka',
+    'kerala', 'madhya pradesh', 'maharashtra', 'manipur', 'meghalaya', 'mizoram',
+    'nagaland', 'odisha', 'punjab', 'rajasthan', 'sikkim', 'tamil nadu',
+    'telangana', 'tripura', 'uttar pradesh', 'uttarakhand', 'west bengal',
+    'delhi', 'j&k', 'jammu and kashmir', 'ladakh', 'chandigarh', 'puducherry', 'india'
+  ]);
+
+  const filteredParts = parts.filter((part) => !statesAndUTs.has(part.toLowerCase()));
+
+  if (filteredParts.length === 0) return parts[0];
+  return filteredParts[filteredParts.length - 1];
+};
+
+const getUserCityFromProfile = (user) => {
+  if (!user) return '';
+
+  const deliveryAddress = user.buyerProfile?.deliveryAddress;
+  if (deliveryAddress) {
+    try {
+      const parsed = JSON.parse(deliveryAddress);
+      if (parsed && typeof parsed === 'object' && parsed.city) {
+        return parsed.city.trim();
+      }
+    } catch {
+      return extractCityOnly(deliveryAddress);
+    }
+  }
+
+  const businessAddress = user.buyerProfile?.businessAddress;
+  if (businessAddress) {
+    return extractCityOnly(businessAddress);
+  }
+
+  const farmLocation = user.farmerProfile?.farmLocation;
+  if (farmLocation) {
+    return extractCityOnly(farmLocation);
+  }
+
+  return '';
+};
+
+// Auto-fill user city location from profile on mount
+  useEffect(() => {
+    if (user) {
+      const city = getUserCityFromProfile(user);
+      if (city) {
+        setBuyerLocation(city);
+        setLocation(city);
+      }
+    }
+  }, [user]);
+
+  // Handle GPS location detection
+  const handleDetectGpsLocation = () => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser.');
+      return;
+    }
+    setDetectingGps(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+          const data = await res.json();
+          const cityOrState = data.address?.city || data.address?.town || data.address?.state_district || data.address?.state || '';
+          if (cityOrState) {
+            setBuyerLocation(cityOrState);
+            setLocation(cityOrState);
+            setSortBy('nearby');
+            setPage(1);
+          }
+        } catch {
+          alert('Could not detect location name automatically.');
+        } finally {
+          setDetectingGps(false);
+        }
+      },
+      () => {
+        setDetectingGps(false);
+        alert('Unable to retrieve your location. Please check browser permissions.');
+      }
+    );
+  };
 
   // Debounce search inputs
   useEffect(() => {
@@ -333,8 +433,9 @@ export default function MarketplacePage() {
         const params = { page, limit: 15 };
         if (debouncedSearch) params.search = debouncedSearch;
         if (location) params.location = location;
+        if (buyerLocation) params.buyerLocation = buyerLocation;
         if (category && category !== 'All') params.category = category;
-        if (sortBy && sortBy !== 'newest') params.sortBy = sortBy;
+        if (sortBy) params.sortBy = sortBy;
         if (minPrice) params.minPrice = minPrice;
         if (maxPrice) params.maxPrice = maxPrice;
         if (debouncedFarmerName) params.farmerName = debouncedFarmerName;
@@ -349,13 +450,14 @@ export default function MarketplacePage() {
       }
     };
     fetchCrops();
-  }, [page, debouncedSearch, location, category, sortBy, minPrice, maxPrice, debouncedFarmerName]);
+  }, [page, debouncedSearch, location, buyerLocation, category, sortBy, minPrice, maxPrice, debouncedFarmerName]);
 
   const resetPage = () => setPage(1);
 
   const clearAllFilters = useCallback(() => {
     setSearch('');
     setLocation('');
+    setBuyerLocation('');
     setCategory('All');
     setSortBy('newest');
     setMinPrice('');
@@ -365,8 +467,8 @@ export default function MarketplacePage() {
   }, []);
 
   const activeFilterCount = [
-    search, location, category !== 'All' ? category : '',
-    sortBy !== 'newest' ? sortBy : '',
+    search, location, buyerLocation, category !== 'All' ? category : '',
+    sortBy !== 'nearby' ? sortBy : '',
     minPrice, maxPrice, farmerName,
   ].filter(Boolean).length;
 
@@ -384,15 +486,41 @@ export default function MarketplacePage() {
               Direct connection to verified agricultural sellers with zero middlemen markup.
             </p>
           </div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/35 px-3.5 py-2 rounded-xl border border-emerald-200/50 dark:border-emerald-900/50 self-start md:self-auto shadow-sm">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            {pagination.total > 0 ? `${pagination.total} fresh crops available now` : 'Farm-fresh produce daily'}
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={handleDetectGpsLocation}
+              disabled={detectingGps}
+              className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-3.5 py-2 rounded-xl border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 transition-colors shadow-sm cursor-pointer"
+            >
+              <FiNavigation size={13} className={detectingGps ? 'animate-spin' : ''} />
+              {detectingGps ? 'Detecting Location...' : '📍 Near Me (GPS)'}
+            </button>
+            <div className="flex items-center gap-2 text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/35 px-3.5 py-2 rounded-xl border border-emerald-200/50 dark:border-emerald-900/50 shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              {pagination.total > 0 ? `${pagination.total} fresh crops available now` : 'Farm-fresh produce daily'}
+            </div>
           </div>
         </div>
       </header>
 
       {/* ─── Main Content Area ─── */}
       <div className="max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+
+        {/* 📍 Active Buyer Location Banner */}
+        {buyerLocation && (
+          <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-3 text-xs text-emerald-900 dark:text-emerald-200 font-semibold shadow-sm gap-2">
+            <span className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
+              Showing fresh farm produce prioritized near <strong className="font-bold underline text-emerald-700 dark:text-emerald-300">{buyerLocation}</strong>
+            </span>
+            <button
+              onClick={() => { setBuyerLocation(''); setSortBy('newest'); resetPage(); }}
+              className="text-xs text-emerald-700 dark:text-emerald-400 hover:underline flex items-center gap-1 font-bold self-start sm:self-auto"
+            >
+              <FiX size={13} /> Reset Location Context
+            </button>
+          </div>
+        )}
 
         {/* ─── Search & Filters block ─── */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200/80 dark:border-gray-800/80 p-5 mb-5 shadow-sm">
@@ -423,13 +551,13 @@ export default function MarketplacePage() {
                 type="text"
                 placeholder="Filter by location..."
                 value={location}
-                onChange={(e) => { setLocation(e.target.value); resetPage(); }}
+                onChange={(e) => { setLocation(e.target.value); setBuyerLocation(e.target.value); resetPage(); }}
                 className="w-full pl-11 pr-10 py-3 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl placeholder:text-gray-500 outline-none border border-gray-200 dark:border-gray-700 text-sm font-medium focus:bg-white dark:focus:bg-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                 id="marketplace-location"
               />
               {location && (
                 <button
-                  onClick={() => { setLocation(''); resetPage(); }}
+                  onClick={() => { setLocation(''); setBuyerLocation(''); resetPage(); }}
                   className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded-lg hover:bg-gray-200/50 dark:hover:bg-gray-700/50 transition-colors"
                   title="Clear location"
                 >

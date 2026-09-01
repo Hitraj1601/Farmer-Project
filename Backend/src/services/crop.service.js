@@ -58,9 +58,40 @@ const createCrop = async (data) => {
   return crop;
 };
 
+const getLocationScore = (cropLocation, buyerLoc, serviceableAreas) => {
+  if (!buyerLoc || typeof buyerLoc !== "string") return 0;
+  const normBuyer = buyerLoc.toLowerCase().trim();
+  if (!normBuyer) return 0;
+
+  const buyerTokens = normBuyer.split(/[\s,]+/).filter((t) => t.length > 2);
+
+  // 1. Direct Physical Crop Location Match (Tier 1 = Score 100)
+  if (cropLocation && typeof cropLocation === "string") {
+    const normCrop = cropLocation.toLowerCase().trim();
+    if (normCrop === normBuyer || normCrop.includes(normBuyer) || normBuyer.includes(normCrop)) {
+      return 100;
+    }
+    for (const token of buyerTokens) {
+      if (normCrop.includes(token)) return 100;
+    }
+  }
+
+  // 2. Farmer Serviceable Area Match (Tier 2 = Score 50)
+  if (serviceableAreas && typeof serviceableAreas === "string") {
+    const normAreas = serviceableAreas.toLowerCase().trim();
+    if (normAreas.includes(normBuyer)) return 50;
+    for (const token of buyerTokens) {
+      if (normAreas.includes(token)) return 50;
+    }
+  }
+
+  return 0;
+};
+
 const getAllCrops = async (query) => {
-  const { page = 1, limit = 20, location, search, category, minPrice, maxPrice, farmerName, sortBy } = query;
+  const { page = 1, limit = 20, location, search, category, minPrice, maxPrice, farmerName, sortBy, buyerLocation } = query;
   const skip = (parseInt(page) - 1) * parseInt(limit);
+  const parsedLimit = parseInt(limit);
 
   // Try Elasticsearch search first if available
   const esCropIds = await searchCropsElastic(query);
@@ -72,7 +103,7 @@ const getAllCrops = async (query) => {
     where.id = { in: esCropIds };
   } else {
     // Fallback to case-insensitive Prisma database query
-    if (location) {
+    if (location && sortBy !== "nearby") {
       where.OR = [
         { location: { contains: location, mode: "insensitive" } },
         { farmer: { farmerProfile: { serviceableAreas: { contains: location, mode: "insensitive" } } } },
@@ -111,24 +142,71 @@ const getAllCrops = async (query) => {
   else if (sortBy === "priceDesc") orderBy = { pricePerKg: "desc" };
   else if (sortBy === "quantityDesc") orderBy = { quantity: "desc" };
 
+  const effectiveBuyerLoc = buyerLocation || location;
+
+  if (sortBy === "nearby" && effectiveBuyerLoc) {
+    const allMatchingCrops = await prisma.crop.findMany({
+      where,
+      include: { farmer: { select: { id: true, name: true, phone: true, email: true, farmerProfile: { select: { serviceableAreas: true } } } } },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const annotated = allMatchingCrops.map((c) => {
+      const score = getLocationScore(c.location, effectiveBuyerLoc, c.farmer?.farmerProfile?.serviceableAreas);
+      return {
+        ...c,
+        locationScore: score,
+        isNearby: score >= 50,
+        isDirectLocal: score === 100,
+      };
+    });
+
+    // Tiered sort: Score 100 first (direct city match), then score 50 (serviceable), then score 0 (others).
+    // Within each tier, preserve exact createdAt DESC order.
+    annotated.sort((a, b) => {
+      if (b.locationScore !== a.locationScore) {
+        return b.locationScore - a.locationScore;
+      }
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+
+    const total = annotated.length;
+    const paginatedCrops = annotated.slice(skip, skip + parsedLimit);
+
+    return {
+      crops: paginatedCrops,
+      pagination: {
+        total,
+        page: parseInt(page),
+        limit: parsedLimit,
+        totalPages: Math.ceil(total / parsedLimit),
+      },
+    };
+  }
+
   const [crops, total] = await Promise.all([
     prisma.crop.findMany({
       where,
       skip,
-      take: parseInt(limit),
+      take: parsedLimit,
       include: { farmer: { select: { id: true, name: true, phone: true, email: true, farmerProfile: { select: { serviceableAreas: true } } } } },
       orderBy,
     }),
     prisma.crop.count({ where }),
   ]);
 
+  const annotatedCrops = crops.map((c) => ({
+    ...c,
+    isNearby: effectiveBuyerLoc ? checkIsNearby(c.location, effectiveBuyerLoc, c.farmer?.farmerProfile?.serviceableAreas) : false,
+  }));
+
   return {
-    crops,
+    crops: annotatedCrops,
     pagination: {
       total,
       page: parseInt(page),
-      limit: parseInt(limit),
-      totalPages: Math.ceil(total / parseInt(limit)),
+      limit: parsedLimit,
+      totalPages: Math.ceil(total / parsedLimit),
     },
   };
 };

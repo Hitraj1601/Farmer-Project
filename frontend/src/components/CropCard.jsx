@@ -64,6 +64,12 @@ export default function CropCard({ crop, index = 0, viewMode = 'grid' }) {
                 Low Stock
               </span>
             )}
+            {crop.isNearby && (
+              <span className="absolute top-3 right-3 bg-emerald-600/90 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg shadow-emerald-500/30 flex items-center gap-1">
+                <FiMapPin size={11} />
+                Nearby
+              </span>
+            )}
             {crop.category && (
               <span className={`absolute bottom-3 left-3 ${accent.light} ${accent.text} ${accent.border} backdrop-blur-xl text-[10px] font-bold px-2.5 py-1 rounded-lg border`}>
                 {crop.category}
@@ -84,6 +90,11 @@ export default function CropCard({ crop, index = 0, viewMode = 'grid' }) {
                       <FiMapPin size={13} className="text-emerald-500" />
                       {crop.location}
                     </span>
+                    {crop.isNearby && (
+                      <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-200/60 dark:border-emerald-800/60">
+                        📍 Local Harvest
+                      </span>
+                    )}
                     <span className="flex items-center gap-1.5">
                       <FiBox size={13} className="text-blue-500" />
                       {crop.quantity} kg
@@ -174,10 +185,15 @@ export default function CropCard({ crop, index = 0, viewMode = 'grid' }) {
 
         {/* Category pill — top left */}
         {crop.category && (
-          <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10">
+          <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10 flex flex-col gap-1">
             <span className={`${accent.light} ${accent.text} ${accent.border} backdrop-blur-xl text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-md sm:rounded-lg border inline-flex items-center`}>
               {crop.category}
             </span>
+            {crop.isNearby && (
+              <span className="bg-emerald-600/90 text-white backdrop-blur-xl text-[8px] sm:text-[9px] font-bold px-1.5 sm:px-2 py-0.5 rounded-md inline-flex items-center gap-0.5 shadow-md">
+                <FiMapPin size={9} /> Nearby
+              </span>
+            )}
           </div>
         )}
 
